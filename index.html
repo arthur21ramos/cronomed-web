@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CronoMed — Cronograma para Residência Médica</title>
+  <meta name="description" content="O cronograma inteligente para quem quer passar na residência estudando por conta própria. Por apenas R$29,90." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  
+  <style>
+    :root {
+      --green:#00c27a; --green-d:#009f64; --dark:#0a0f0d; --dark2:#111a15;
+      --mid:#1e2e25; --text:#e8f0eb; --muted:#7a9e8a; --white:#ffffff; --red:#ff4d4d;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);overflow-x:hidden}
+    body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0}
+    h1,h2,h3{font-family:'Fraunces',Georgia,serif;line-height:1.1}
+
+    /* NAV */
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.2rem 5vw;background:rgba(10,15,13,0.85);backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,194,122,0.1)}
+    .logo{font-family:'Fraunces',serif;font-size:1.5rem;font-weight:900;color:var(--white);letter-spacing:-.03em}
+    .logo span{color:var(--green)}
+    .nav-right{display:flex;align-items:center;gap:1rem}
+    .nav-login{background:transparent;border:1px solid rgba(255,255,255,0.15);color:var(--text);font-size:.85rem;font-weight:500;padding:.55rem 1.2rem;border-radius:100px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+    .nav-login:hover{border-color:var(--green);color:var(--green)}
+    .nav-cta{background:var(--green);color:var(--dark);font-weight:600;font-size:.85rem;padding:.6rem 1.4rem;border-radius:100px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+    .nav-cta:hover{background:var(--green-d);transform:translateY(-1px)}
+
+    /* HERO */
+    .hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8rem 5vw 5rem;overflow:hidden}
+    .hero-glow{position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(0,194,122,0.18) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
+    .hero-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(0,194,122,0.12);border:1px solid rgba(0,194,122,0.3);color:var(--green);font-size:.78rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:.4rem 1rem;border-radius:100px;margin-bottom:2rem;animation:fadeUp .6s ease both}
+    .hero h1{font-size:clamp(2.8rem,7vw,5.5rem);font-weight:900;color:var(--white);max-width:900px;margin-bottom:1.5rem;animation:fadeUp .6s .1s ease both}
+    .hero h1 em{font-style:italic;color:var(--green)}
+    .hero-sub{font-size:clamp(1rem,2vw,1.2rem);color:var(--muted);max-width:580px;line-height:1.7;margin-bottom:3rem;font-weight:300;animation:fadeUp .6s .2s ease both}
+    .hero-actions{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;animation:fadeUp .6s .3s ease both}
+    .btn-primary{display:inline-flex;align-items:center;gap:.5rem;background:var(--green);color:var(--dark);font-weight:700;font-size:1rem;padding:1rem 2.2rem;border-radius:100px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .25s;box-shadow:0 0 40px rgba(0,194,122,0.3);text-decoration:none}
+    .btn-primary:hover{background:var(--green-d);transform:translateY(-2px);box-shadow:0 0 60px rgba(0,194,122,0.45)}
+    .btn-secondary{display:inline-flex;align-items:center;background:transparent;color:var(--text);font-weight:500;font-size:1rem;padding:1rem 2rem;border-radius:100px;border:1px solid rgba(255,255,255,0.15);text-decoration:none;transition:all .25s}
+    .btn-secondary:hover{border-color:var(--green);color:var(--green)}
+    .hero-stats{display:flex;gap:3rem;margin-top:4rem;flex-wrap:wrap;justify-content:center;animation:fadeUp .6s .4s ease both}
+    .hero-stat span{display:block;font-family:'Fraunces',serif;font-size:2.2rem;font-weight:900;color:var(--white)}
+    .hero-stat p{font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+
+    /* MOCKUP */
+    .preview-section{position:relative;padding:2rem 5vw 6rem;display:flex;justify-content:center}
+    .mockup-frame{width:100%;max-width:1000px;background:var(--mid);border-radius:20px;border:1px solid rgba(0,194,122,0.2);overflow:hidden;box-shadow:0 60px 120px rgba(0,0,0,0.6),0 0 80px rgba(0,194,122,0.08)}
+    .mockup-bar{background:var(--dark2);padding:.8rem 1.2rem;display:flex;align-items:center;gap:.5rem;border-bottom:1px solid rgba(255,255,255,0.06)}
+    .mockup-dot{width:10px;height:10px;border-radius:50%}
+    .mockup-dot:nth-child(1){background:#ff5f57}.mockup-dot:nth-child(2){background:#febc2e}.mockup-dot:nth-child(3){background:#28c840}
+    .mockup-url{flex:1;background:rgba(255,255,255,0.05);border-radius:6px;padding:.3rem .8rem;font-size:.72rem;color:var(--muted);margin:0 1rem}
+    .mockup-inner{padding:2rem;display:grid;grid-template-columns:200px 1fr;gap:1.5rem;min-height:340px}
+    .mock-sidebar{background:var(--dark2);border-radius:12px;padding:1rem;display:flex;flex-direction:column;gap:.5rem}
+    .mock-nav-item{padding:.6rem .8rem;border-radius:8px;font-size:.72rem;color:var(--muted);display:flex;align-items:center;gap:.5rem}
+    .mock-nav-item.active{background:rgba(0,194,122,0.15);color:var(--green);font-weight:600}
+    .mock-content{display:flex;flex-direction:column;gap:1rem}
+    .mock-header{font-family:'Fraunces',serif;font-size:1.1rem;color:var(--white);font-weight:700}
+    .mock-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem}
+    .mock-card{background:var(--dark2);border-radius:10px;padding:1rem;border:1px solid rgba(255,255,255,0.06)}
+    .mock-card-label{font-size:.62rem;text-transform:uppercase;color:var(--muted);letter-spacing:.06em;margin-bottom:.4rem}
+    .mock-card-val{font-family:'Fraunces',serif;font-size:1.6rem;font-weight:900;color:var(--white)}
+    .mock-card-val.green{color:var(--green)}
+    .mock-tasks{display:flex;flex-direction:column;gap:.5rem}
+    .mock-task{background:var(--dark2);border-radius:8px;padding:.8rem 1rem;display:flex;align-items:center;gap:.8rem;font-size:.75rem;border:1px solid rgba(255,255,255,0.05)}
+    .mock-check{width:16px;height:16px;border-radius:4px;border:2px solid rgba(255,255,255,0.2);flex-shrink:0}
+    .mock-check.done{background:var(--green);border-color:var(--green)}
+    .mock-tag{margin-left:auto;background:rgba(0,194,122,0.12);color:var(--green);font-size:.6rem;font-weight:700;padding:.2rem .5rem;border-radius:4px;text-transform:uppercase}
+    .mock-tag.red{background:rgba(255,80,80,0.12);color:#ff6b6b}
+
+    /* SECTIONS */
+    section{position:relative;z-index:1}
+    .section-label{display:inline-block;font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:1rem}
+
+    /* HOW */
+    .how{padding:6rem 5vw;max-width:1100px;margin:0 auto}
+    .how h2{font-size:clamp(2rem,4vw,3rem);color:var(--white);margin-bottom:1rem}
+    .how-sub{color:var(--muted);font-size:1.05rem;max-width:520px;line-height:1.7;margin-bottom:4rem}
+    .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2rem}
+    .step{padding:2rem;background:var(--dark2);border-radius:16px;border:1px solid rgba(255,255,255,0.06);transition:border-color .3s,transform .3s}
+    .step:hover{border-color:rgba(0,194,122,0.3);transform:translateY(-4px)}
+    .step-num{font-family:'Fraunces',serif;font-size:3rem;font-weight:900;color:rgba(0,194,122,0.15);line-height:1;margin-bottom:1rem}
+    .step h3{font-size:1.1rem;color:var(--white);margin-bottom:.5rem}
+    .step p{font-size:.88rem;color:var(--muted);line-height:1.7}
+
+    /* FEATURES */
+    .features{padding:6rem 5vw;background:var(--dark2);border-top:1px solid rgba(255,255,255,0.05);border-bottom:1px solid rgba(255,255,255,0.05)}
+    .features-inner{max-width:1100px;margin:0 auto}
+    .features h2{font-size:clamp(2rem,4vw,3rem);color:var(--white);margin-bottom:.8rem}
+    .features-sub{color:var(--muted);font-size:1.05rem;margin-bottom:3.5rem}
+    .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
+    .feature-card{padding:1.8rem;background:var(--mid);border-radius:16px;border:1px solid rgba(255,255,255,0.06);transition:border-color .3s,transform .3s}
+    .feature-card:hover{border-color:rgba(0,194,122,0.25);transform:translateY(-3px)}
+    .feature-icon{font-size:2rem;margin-bottom:1rem;display:block}
+    .feature-card h3{font-size:1rem;color:var(--white);margin-bottom:.5rem}
+    .feature-card p{font-size:.85rem;color:var(--muted);line-height:1.7}
+
+    /* TESTIMONIAL */
+    .testimonial-section{padding:7rem 5vw;max-width:900px;margin:0 auto;text-align:center}
+    .quote-mark{font-family:'Fraunces',serif;font-size:6rem;color:var(--green);line-height:.5;opacity:.4;margin-bottom:1.5rem}
+    .testimonial-text{font-family:'Fraunces',serif;font-size:clamp(1.3rem,3vw,2rem);font-weight:300;font-style:italic;color:var(--white);line-height:1.6;margin-bottom:2.5rem}
+    .testimonial-text strong{font-style:normal;font-weight:700;color:var(--green)}
+    .author-block{display:flex;align-items:center;justify-content:center;gap:1rem}
+    .author-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--green-d));display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:1.4rem;font-weight:900;color:var(--dark);border:2px solid rgba(0,194,122,0.4)}
+    .author-name{font-weight:700;color:var(--white);font-size:.95rem}
+    .author-role{font-size:.8rem;color:var(--muted)}
+
+    /* PRICING */
+    .pricing{padding:6rem 5vw;background:var(--dark2);border-top:1px solid rgba(255,255,255,0.05)}
+    .pricing-inner{max-width:500px;margin:0 auto;text-align:center}
+    .pricing h2{font-size:clamp(2rem,4vw,3rem);color:var(--white);margin-bottom:.8rem}
+    .pricing-sub{color:var(--muted);font-size:1rem;margin-bottom:3rem}
+    .pricing-card{background:var(--mid);border-radius:24px;border:1px solid rgba(0,194,122,0.3);padding:3rem 2.5rem;box-shadow:0 0 80px rgba(0,194,122,0.08);position:relative;overflow:hidden}
+    .pricing-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--green),var(--green-d))}
+    .pricing-badge{display:inline-block;background:rgba(0,194,122,0.15);color:var(--green);font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.35rem .9rem;border-radius:100px;margin-bottom:1.5rem;border:1px solid rgba(0,194,122,0.25)}
+    .price-display{display:flex;align-items:flex-start;justify-content:center;gap:.2rem;margin-bottom:.5rem}
+    .price-currency{font-family:'Fraunces',serif;font-size:1.5rem;color:var(--muted);margin-top:.5rem}
+    .price-amount{font-family:'Fraunces',serif;font-size:5rem;font-weight:900;color:var(--white);line-height:1}
+    .price-desc{color:var(--muted);font-size:.85rem;margin-bottom:2.5rem}
+    .price-includes{list-style:none;margin-bottom:2.5rem;display:flex;flex-direction:column;gap:.8rem;text-align:left}
+    .price-includes li{display:flex;align-items:center;gap:.75rem;font-size:.9rem;color:var(--text)}
+    .price-includes li::before{content:'✓';width:20px;height:20px;background:rgba(0,194,122,0.15);color:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;flex-shrink:0}
+    .btn-buy{display:block;width:100%;background:var(--green);color:var(--dark);font-weight:700;font-size:1.05rem;padding:1.1rem;border-radius:100px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .25s;box-shadow:0 0 40px rgba(0,194,122,0.3)}
+    .btn-buy:hover{background:var(--green-d);transform:translateY(-2px)}
+    .guarantee{margin-top:1.5rem;font-size:.78rem;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:.4rem}
+
+    /* FAQ */
+    .faq{padding:6rem 5vw;max-width:720px;margin:0 auto}
+    .faq h2{font-size:clamp(1.8rem,3.5vw,2.5rem);color:var(--white);margin-bottom:3rem;text-align:center}
+    .faq-item{border-bottom:1px solid rgba(255,255,255,0.07);padding:1.5rem 0}
+    .faq-q{font-weight:600;color:var(--white);font-size:.95rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:1rem;user-select:none}
+    .faq-icon{color:var(--green);font-size:1.2rem;transition:transform .3s;flex-shrink:0}
+    .faq-a{color:var(--muted);font-size:.88rem;line-height:1.8;max-height:0;overflow:hidden;transition:max-height .35s ease,padding .3s}
+    .faq-item.open .faq-a{max-height:300px;padding-top:1rem}
+    .faq-item.open .faq-icon{transform:rotate(45deg)}
+
+    /* FOOTER */
+    footer{padding:3rem 5vw;border-top:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+    .footer-logo{font-family:'Fraunces',serif;font-size:1.2rem;font-weight:900;color:var(--white)}
+    .footer-logo span{color:var(--green)}
+    .footer-copy{font-size:.78rem;color:var(--muted)}
+
+    /* MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem}
+    .modal-overlay.open{display:flex}
+    .modal{background:var(--dark2);border:1px solid rgba(0,194,122,0.25);border-radius:24px;padding:2.5rem;width:100%;max-width:440px;position:relative;box-shadow:0 40px 80px rgba(0,0,0,0.6);animation:scaleIn .25s ease;max-height:90vh;overflow-y:auto}
+    .modal-close{position:absolute;top:1.2rem;right:1.2rem;background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;line-height:1;transition:color .2s}
+    .modal-close:hover{color:var(--white)}
+    .modal h3{font-size:1.5rem;color:var(--white);margin-bottom:.4rem}
+    .modal-sub{font-size:.85rem;color:var(--muted);margin-bottom:2rem;line-height:1.6}
+    .form-group{margin-bottom:1rem}
+    .form-group label{display:block;font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem}
+    .form-group input{width:100%;background:var(--mid);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:.85rem 1rem;color:var(--white);font-size:.95rem;font-family:'DM Sans',sans-serif;transition:border-color .2s;outline:none}
+    .form-group input:focus{border-color:var(--green)}
+    .btn-form-submit{width:100%;background:var(--green);color:var(--dark);font-weight:700;font-size:1rem;padding:.9rem;border-radius:10px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:.5rem;transition:all .2s}
+    .btn-form-submit:hover{background:var(--green-d);transform:translateY(-1px)}
+    .btn-form-submit:disabled{opacity:.6;cursor:not-allowed;transform:none}
+    .auth-toggle{text-align:center;margin-top:1.2rem;font-size:.83rem;color:var(--muted)}
+    .auth-toggle a{color:var(--green);cursor:pointer;font-weight:600}
+    .msg-error{background:rgba(255,77,77,0.1);border:1px solid rgba(255,77,77,0.3);color:#ff8080;border-radius:8px;padding:.7rem 1rem;font-size:.82rem;margin-bottom:1rem;display:none}
+    .msg-error.show{display:block}
+
+    /* PIX */
+    .pix-amount{text-align:center;margin-bottom:1.5rem}
+    .pix-amount .val{font-family:'Fraunces',serif;font-size:3rem;font-weight:900;color:var(--white)}
+    .pix-amount .label{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+    .pix-qr{width:180px;height:180px;background:var(--white);border-radius:12px;margin:0 auto 1.5rem;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .pix-key-box{background:var(--mid);border-radius:10px;padding:.9rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:1.5rem;border:1px solid rgba(255,255,255,0.07)}
+    .pix-key-text{font-size:.82rem;color:var(--text);font-family:monospace;word-break:break-all}
+    .copy-btn{background:var(--green);color:var(--dark);border:none;border-radius:6px;padding:.4rem .8rem;font-size:.72rem;font-weight:700;cursor:pointer;flex-shrink:0;font-family:'DM Sans',sans-serif;transition:background .2s}
+    .copy-btn:hover{background:var(--green-d)}
+    .pix-instructions{font-size:.82rem;color:var(--muted);line-height:1.7;text-align:center;background:rgba(0,194,122,0.06);border-radius:10px;padding:1rem;border:1px solid rgba(0,194,122,0.12)}
+    .pix-instructions strong{color:var(--green)}
+    .step-indicators{display:flex;align-items:center;justify-content:center;gap:.5rem;margin-bottom:2rem}
+    .step-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.15);transition:all .3s}
+    .step-dot.active{background:var(--green);width:24px;border-radius:4px}
+
+    /* PENDING */
+    .pending-screen{text-align:center;padding:1rem 0}
+    .pending-icon{font-size:3.5rem;margin-bottom:1rem;display:block}
+    .pending-screen h3{font-size:1.4rem;color:var(--white);margin-bottom:.8rem}
+    .pending-screen p{font-size:.88rem;color:var(--muted);line-height:1.8;margin-bottom:1.5rem}
+    .pending-screen .hl{color:var(--green);font-weight:700}
+    .btn-outline{background:transparent;border:1px solid rgba(255,255,255,0.15);color:var(--muted);font-size:.82rem;padding:.6rem 1.2rem;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;margin-top:.8rem;display:inline-block}
+    .btn-outline:hover{border-color:var(--red);color:var(--red)}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes scaleIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+    .reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}
+    .reveal.visible{opacity:1;transform:translateY(0)}
+
+    @media(max-width:640px){
+      .mockup-inner{grid-template-columns:1fr}
+      .mock-sidebar{display:none}
+      .mock-cards{grid-template-columns:repeat(2,1fr)}
+      footer{flex-direction:column;text-align:center}
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Crono<span>Med</span></div>
+  <div class="nav-right">
+    <button class="nav-login" onclick="window.openModal('login')">Entrar</button>
+    <button class="nav-cta" onclick="window.openModal('register')">Começar agora →</button>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-badge">🩺 Exclusivo para medicina · Residência 2026</div>
+  <h1>Estude para a residência<br />com um cronograma <em>feito para você</em></h1>
+  <p class="hero-sub">Sem cursinho caro. Sem planilha genérica. Um sistema inteligente que organiza suas semanas, acompanha seu progresso e te mantém no caminho certo — por uma fração do preço de qualquer alternativa.</p>
+  <div class="hero-actions">
+    <button class="btn-primary" onclick="window.openModal('register')">Quero meu cronograma &nbsp;→</button>
+    <a href="#como-funciona" class="btn-secondary">Ver como funciona</a>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat"><span>43</span><p>semanas estruturadas</p></div>
+    <div class="hero-stat"><span>R$29</span><p>acesso vitalício</p></div>
+    <div class="hero-stat"><span>100%</span><p>personalizável</p></div>
+  </div>
+</section>
+
+<div class="preview-section">
+  <div class="mockup-frame reveal">
+    <div class="mockup-bar">
+      <div class="mockup-dot"></div><div class="mockup-dot"></div><div class="mockup-dot"></div>
+      <div class="mockup-url">cronomed.app/cronograma</div>
+    </div>
+    <div class="mockup-inner">
+      <div class="mock-sidebar">
+        <div style="font-size:.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:.4rem .8rem;margin-bottom:.5rem">Navegação</div>
+        <div class="mock-nav-item active">📊 Dashboard</div>
+        <div class="mock-nav-item">🏠 Página Inicial</div>
+        <div class="mock-nav-item">🔍 Buscar Tarefas</div>
+        <div class="mock-nav-item">✨ Remanejamento</div>
+        <div style="margin-top:auto;padding:.6rem .8rem;font-size:.65rem;color:var(--muted)">Semana 12 de 43</div>
+      </div>
+      <div class="mock-content">
+        <div class="mock-header">Dashboard &amp; Metas — Semana 12</div>
+        <div class="mock-cards">
+          <div class="mock-card"><div class="mock-card-label">Progresso</div><div class="mock-card-val green">68%</div></div>
+          <div class="mock-card"><div class="mock-card-label">Questões hoje</div><div class="mock-card-val">124</div></div>
+          <div class="mock-card"><div class="mock-card-label">Acerto médio</div><div class="mock-card-val green">74%</div></div>
+        </div>
+        <div class="mock-tasks">
+          <div class="mock-task"><div class="mock-check done"></div><span>Insuficiência Cardíaca — Diagnóstico</span><div class="mock-tag">Clínica</div></div>
+          <div class="mock-task"><div class="mock-check done"></div><span>Trauma: ATLS Avaliação Inicial</span><div class="mock-tag">Cirurgia</div></div>
+          <div class="mock-task"><div class="mock-check"></div><span>🔥 Pré-Natal de Baixo Risco</span><div class="mock-tag red">Pendente</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="how" id="como-funciona">
+  <div class="reveal">
+    <div class="section-label">Como funciona</div>
+    <h2>Da compra ao estudo<br />em menos de 5 minutos</h2>
+    <p class="how-sub">Você não precisa montar nada do zero. O sistema já vem estruturado com 43 semanas de conteúdo médico e você ajusta o que quiser.</p>
+  </div>
+  <div class="steps">
+    <div class="step reveal" style="transition-delay:.1s"><div class="step-num">01</div><h3>Compre o acesso</h3><p>Pagamento via PIX. Acesso liberado em até 2 horas após confirmação.</p></div>
+    <div class="step reveal" style="transition-delay:.2s"><div class="step-num">02</div><h3>Crie sua conta</h3><p>Cadastro rápido com e-mail e senha. Seus dados ficam salvos com segurança.</p></div>
+    <div class="step reveal" style="transition-delay:.3s"><div class="step-num">03</div><h3>Personalize</h3><p>Defina datas, internatos e provas. O cronograma se adapta ao seu ritmo.</p></div>
+    <div class="step reveal" style="transition-delay:.4s"><div class="step-num">04</div><h3>Estude e evolua</h3><p>Acompanhe questões, aproveitamento e revisões espaçadas — tudo em um lugar.</p></div>
+  </div>
+</section>
+
+<section class="features" id="funcionalidades">
+  <div class="features-inner">
+    <div class="reveal">
+      <div class="section-label">Funcionalidades</div>
+      <h2>Tudo que você precisa,<br />nada que não precisa</h2>
+      <p class="features-sub">Desenvolvido por quem estuda para residência, para quem estuda para residência.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card reveal"><span class="feature-icon">📅</span><h3>Cronograma semana a semana</h3><p>43 semanas organizadas por internato com temas, horários e tarefas. Arraste e solte para reorganizar.</p></div>
+      <div class="feature-card reveal"><span class="feature-icon">🔥</span><h3>Temas mais prevalentes</h3><p>Marque os temas mais cobrados com o foguinho. Eles aparecem em destaque no painel de prevalência.</p></div>
+      <div class="feature-card reveal"><span class="feature-icon">📊</span><h3>Dashboard completo</h3><p>Veja questões feitas, acerto médio e progresso por área. Gráficos de evolução dos últimos 14 dias.</p></div>
+      <div class="feature-card reveal"><span class="feature-icon">🔁</span><h3>Revisão espaçada</h3><p>Ao concluir um tema, agende revisões em 10, 15 ou 20 dias conforme sua dificuldade.</p></div>
+      <div class="feature-card reveal"><span class="feature-icon">✨</span><h3>Remanejamento inteligente</h3><p>Ficou para trás? O sistema sugere redistribuição das tarefas atrasadas para semanas futuras.</p></div>
+      <div class="feature-card reveal"><span class="feature-icon">🌙</span><h3>Modo noturno + lembretes</h3><p>Interface adaptada para longas sessões com lembretes do dia, semana e datas futuras.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="testimonial-section">
+  <div class="quote-mark reveal">"</div>
+  <p class="testimonial-text reveal">
+    Não tinha condições de assinar um cursinho de residência que custa R$3.000 por ano.
+    Então <strong>construí meu próprio cronograma</strong> — e funcionou tão bem que decidi
+    compartilhar com quem, assim como eu, quer passar na residência
+    <strong>estudando por conta própria</strong>, com inteligência e sem gastar uma fortuna.
+  </p>
+  <div class="author-block reveal">
+    <div class="author-avatar">A</div>
+    <div class="author-info">
+      <div class="author-name">Arthur</div>
+      <div class="author-role">Criador do CronoMed · Estudante de Medicina</div>
+    </div>
+  </div>
+</section>
+
+<section class="pricing" id="pricing">
+  <div class="pricing-inner">
+    <div class="reveal">
+      <div class="section-label">Investimento</div>
+      <h2>Um preço justo.<br />Para sempre.</h2>
+      <p class="pricing-sub">Sem mensalidade. Sem renovação. Você paga uma vez e usa para sempre.</p>
+    </div>
+    <div class="pricing-card reveal">
+      <div class="pricing-badge">✦ Acesso Vitalício</div>
+      <div class="price-display">
+        <span class="price-currency">R$</span>
+        <span class="price-amount">29</span>
+        <span class="price-currency" style="align-self:flex-end;margin-bottom:.8rem">,90</span>
+      </div>
+      <p class="price-desc">pagamento único via PIX · acesso liberado em até 2h</p>
+      <ul class="price-includes">
+        <li>Cronograma completo de 43 semanas</li>
+        <li>Dashboard com métricas e gráficos</li>
+        <li>Sistema de revisão espaçada</li>
+        <li>Temas mais prevalentes com 🔥</li>
+        <li>Remanejamento inteligente de tarefas</li>
+        <li>Modo noturno + sistema de lembretes</li>
+        <li>Atualizações futuras inclusas</li>
+      </ul>
+      <button class="btn-buy" onclick="window.openModal('register')">Quero meu acesso por R$29,90</button>
+      <p class="guarantee">🔒 Pagamento seguro via PIX · Acesso liberado em até 2 horas</p>
+    </div>
+  </div>
+</section>
+
+<section class="faq">
+  <h2 class="reveal">Perguntas frequentes</h2>
+  <div class="faq-item reveal"><div class="faq-q" onclick="window.toggleFaq(this)">Como funciona o pagamento?<span class="faq-icon">+</span></div><div class="faq-a">O pagamento é feito via PIX. Após o cadastro, você verá a chave PIX e o valor de R$29,90. Depois de pagar, envie o comprovante pelo WhatsApp ou e-mail indicado. O acesso é liberado manualmente em até 2 horas.</div></div>
+  <div class="faq-item reveal"><div class="faq-q" onclick="window.toggleFaq(this)">Preciso instalar algum programa?<span class="faq-icon">+</span></div><div class="faq-a">Não! O CronoMed funciona 100% no navegador — computador, celular ou tablet. Basta ter internet e fazer login.</div></div>
+  <div class="faq-item reveal"><div class="faq-q" onclick="window.toggleFaq(this)">Posso personalizar o cronograma?<span class="faq-icon">+</span></div><div class="faq-a">Sim! Você pode adicionar, remover e reorganizar qualquer tarefa. Defina suas próprias datas de início, internatos e provas. O sistema é 100% editável.</div></div>
+  <div class="faq-item reveal"><div class="faq-q" onclick="window.toggleFaq(this)">O acesso é realmente vitalício?<span class="faq-icon">+</span></div><div class="faq-a">Sim. Você paga R$29,90 uma única vez e tem acesso para sempre, incluindo todas as atualizações futuras.</div></div>
+  <div class="faq-item reveal"><div class="faq-q" onclick="window.toggleFaq(this)">E se eu não me adaptar?<span class="faq-icon">+</span></div><div class="faq-a">Entre em contato pelo WhatsApp em até 7 dias após a compra. Se por qualquer motivo não funcionar para você, devolvemos o valor integral.</div></div>
+</section>
+
+<footer>
+  <div class="footer-logo">Crono<span>Med</span></div>
+  <p class="footer-copy">© 2026 CronoMed · Feito com ❤️ por um estudante de medicina, para estudantes de medicina.</p>
+</footer>
+
+<!-- MODAL: CADASTRO -->
+<div class="modal-overlay" id="modal-register">
+  <div class="modal">
+    <button class="modal-close" onclick="window.closeModal('register')">✕</button>
+    <div class="step-indicators"><div class="step-dot active"></div><div class="step-dot"></div></div>
+    <h3>Criar sua conta</h3>
+    <p class="modal-sub">Crie sua conta gratuitamente. Depois você verá os dados do PIX para liberar o acesso.</p>
+    <div class="msg-error" id="reg-error"></div>
+    <div class="form-group"><label>Nome completo</label><input type="text" id="reg-name" placeholder="Seu nome completo" /></div>
+    <div class="form-group"><label>E-mail</label><input type="email" id="reg-email" placeholder="seu@email.com" /></div>
+    <div class="form-group"><label>Senha</label><input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres" /></div>
+    <button class="btn-form-submit" id="reg-btn" onclick="window.handleRegister()">Criar conta e ver dados do PIX →</button>
+    <div class="auth-toggle">Já tem conta? <a onclick="window.switchToLogin()">Entrar aqui</a></div>
+  </div>
+</div>
+
+<!-- MODAL: LOGIN -->
+<div class="modal-overlay" id="modal-login">
+  <div class="modal">
+    <button class="modal-close" onclick="window.closeModal('login')">✕</button>
+    <h3>Entrar na sua conta</h3>
+    <p class="modal-sub">Bem-vindo de volta!</p>
+    <div class="msg-error" id="login-error"></div>
+    <div class="form-group"><label>E-mail</label><input type="email" id="login-email" placeholder="seu@email.com" /></div>
+    <div class="form-group"><label>Senha</label><input type="password" id="login-pass" placeholder="Sua senha" /></div>
+    <button class="btn-form-submit" id="login-btn" onclick="window.handleLogin()">Entrar →</button>
+    <div class="auth-toggle">Não tem conta? <a onclick="window.switchToRegister()">Criar agora</a></div>
+  </div>
+</div>
+
+<!-- MODAL: PIX -->
+<div class="modal-overlay" id="modal-pix">
+  <div class="modal">
+    <button class="modal-close" onclick="window.closeModal('pix')">✕</button>
+    <div class="step-indicators"><div class="step-dot"></div><div class="step-dot active"></div></div>
+    <h3>Pagamento via PIX</h3>
+    <p class="modal-sub">Sua conta foi criada! Faça o PIX de R$29,90 para liberar o acesso.</p>
+    <div class="pix-amount"><div class="label">Valor a pagar</div><div class="val">R$ 29,90</div></div>
+    <!-- ⚠️ SUBSTITUA o SVG abaixo pela imagem real do QR Code do seu banco -->
+    <div class="pix-qr">
+      <svg viewBox="0 0 100 100" width="160" height="160" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="10" width="30" height="30" rx="3" fill="#000"/><rect x="14" y="14" width="22" height="22" rx="2" fill="white"/><rect x="18" y="18" width="14" height="14" rx="1" fill="#000"/>
+        <rect x="60" y="10" width="30" height="30" rx="3" fill="#000"/><rect x="64" y="14" width="22" height="22" rx="2" fill="white"/><rect x="68" y="18" width="14" height="14" rx="1" fill="#000"/>
+        <rect x="10" y="60" width="30" height="30" rx="3" fill="#000"/><rect x="14" y="64" width="22" height="22" rx="2" fill="white"/><rect x="18" y="68" width="14" height="14" rx="1" fill="#000"/>
+        <rect x="45" y="10" width="8" height="8" fill="#000"/><rect x="45" y="22" width="8" height="8" fill="#000"/>
+        <rect x="10" y="45" width="8" height="8" fill="#000"/><rect x="22" y="45" width="8" height="8" fill="#000"/>
+        <rect x="45" y="45" width="8" height="8" fill="#000"/><rect x="57" y="45" width="8" height="8" fill="#000"/>
+        <rect x="45" y="57" width="8" height="8" fill="#000"/><rect x="57" y="57" width="8" height="8" fill="#000"/>
+        <rect x="69" y="45" width="8" height="8" fill="#000"/><rect x="81" y="45" width="8" height="8" fill="#000"/>
+        <rect x="69" y="69" width="8" height="8" fill="#000"/><rect x="81" y="69" width="8" height="8" fill="#000"/>
+        <rect x="69" y="81" width="8" height="8" fill="#000"/><rect x="81" y="81" width="8" height="8" fill="#000"/>
+        <text x="50" y="54" text-anchor="middle" font-size="6" fill="#666" font-family="sans-serif">Substitua pelo</text>
+        <text x="50" y="62" text-anchor="middle" font-size="6" fill="#666" font-family="sans-serif">QR Code do</text>
+        <text x="50" y="70" text-anchor="middle" font-size="6" fill="#666" font-family="sans-serif">seu banco</text>
+      </svg>
+    </div>
+    <div class="pix-key-box">
+      <!-- ⚠️ SUBSTITUA pelo seu CPF, email ou telefone cadastrado como chave PIX -->
+      <span class="pix-key-text" id="pix-key">SEU-CPF-OU-EMAIL-PIX</span>
+      <button class="copy-btn" onclick="window.copyPix()">Copiar</button>
+    </div>
+    <div class="pix-instructions">
+      Após o pagamento, envie o comprovante para<br />
+      <!-- ⚠️ SUBSTITUA pelo seu WhatsApp e e-mail reais -->
+      <strong>WhatsApp: (XX) XXXXX-XXXX</strong><br />
+      ou <strong>seuemail@gmail.com</strong><br /><br />
+      ⏱ Acesso liberado em até <strong>2 horas</strong>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: AGUARDANDO -->
+<div class="modal-overlay" id="modal-pending">
+  <div class="modal">
+    <div class="pending-screen">
+      <span class="pending-icon">⏳</span>
+      <h3>Aguardando confirmação</h3>
+      <p>
+        Sua conta está criada! Assim que recebermos o comprovante do PIX,
+        liberaremos seu acesso em até <span class="hl">2 horas</span>.<br /><br />
+        Já enviou o comprovante? Clique abaixo para verificar se seu acesso já foi liberado.
+      </p>
+      <button class="btn-form-submit" onclick="window.checkAccess()">Verificar meu acesso</button>
+      <br />
+      <button class="btn-outline" onclick="window.handleLogout()">Sair da conta</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================================================
+     INTEGRAÇÃO COM FIREBASE (APAGA O SUPABASE)
+     =================================================================================== -->
+<script type="module">
+  // Importações oficias do Google Firebase (V11 Modular)
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+  // ⚠️ ATENÇÃO: SUBSTITUA OS VALORES ABAIXO PELAS SUAS CHAVES DO FIREBASE
+  const firebaseConfig = {
+    apiKey: "AIzaSyAwQrhAoma0iuofm_MMghCbBnPPtLbrn0E",
+    authDomain: "cronomed-4b880.firebaseapp.com",
+    projectId: "cronomed-4b880",
+    storageBucket: "cronomed-4b880.firebasestorage.app",
+    messagingSenderId: "853512629124",
+    appId: "1:853512629124:web:42bb7b6808ca5487060bd1"
+  };
+
+  // Inicializa o Firebase
+  let app, auth, db;
+  try {
+      app = initializeApp(firebaseConfig);
+      auth = getAuth(app);
+      db = getFirestore(app);
+  } catch(e) {
+      console.warn("Lembre-se de colar as suas chaves do Firebase acima!");
+  }
+
+  // --- Funções de UI Modais ---
+  window.openModal = function(id) { document.getElementById('modal-'+id).classList.add('open'); document.body.style.overflow='hidden'; }
+  window.closeModal = function(id) { document.getElementById('modal-'+id).classList.remove('open'); document.body.style.overflow=''; }
+  window.closeAllModals = function() { document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('open')); document.body.style.overflow=''; }
+  window.switchToLogin = function() { window.closeModal('register'); window.openModal('login'); }
+  window.switchToRegister = function() { window.closeModal('login'); window.openModal('register'); }
+  
+  // Fechar clicando fora da caixa
+  document.querySelectorAll('.modal-overlay').forEach(o => {
+    o.addEventListener('click', e => { if(e.target===o){o.classList.remove('open');document.body.style.overflow='';} });
+  });
+
+  window.showError = function(id, msg) { const el=document.getElementById(id); el.textContent=msg; el.classList.add('show'); }
+  window.hideError = function(id) { document.getElementById(id).classList.remove('show'); }
+
+  // Variável para impedir que o redirecionamento automático interfira enquanto criamos a conta
+  let isRegistering = false; 
+
+  // --- Lógica de Banco de Dados (Firebase) ---
+
+  // Roteador: Decide para onde a pessoa vai dependendo se já pagou ou fez onboarding
+  window.routeUser = async function(user) {
+    try {
+        const docRef = doc(db, "profiles", user.uid);
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+            const profile = docSnap.data();
+            if (profile.acesso_liberado === true) {
+                if (profile.has_onboarded === true) {
+                    window.location.href = 'cronograma.html';
+                } else {
+                    window.location.href = 'onboarding.html';
+                }
+            } else {
+                window.openModal('pending');
+            }
+        } else {
+            // Se não encontrou dados, mostra que está pendente (não pagou ainda)
+            window.openModal('pending');
+        }
+    } catch (error) {
+        console.error("Erro ao verificar status do usuário:", error);
+    }
+  }
+
+  // 1. Criar Conta
+  window.handleRegister = async function() {
+    window.hideError('reg-error');
+    const name  = document.getElementById('reg-name').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const pass  = document.getElementById('reg-pass').value.trim();
+    
+    if (!name||!email||!pass) { window.showError('reg-error','Preencha todos os campos.'); return; }
+    if (pass.length<6) { window.showError('reg-error','A senha precisa ter pelo menos 6 caracteres.'); return; }
+    
+    const btn = document.getElementById('reg-btn');
+    btn.disabled=true; btn.textContent='Criando conta...';
+    
+    isRegistering = true; 
+
+    try {
+        // Cria a pessoa na Autenticação do Firebase
+        const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+        const user = userCredential.user;
+
+        // Salva os dados dela na tabela (coleção) 'profiles' no Firestore
+        await setDoc(doc(db, "profiles", user.uid), {
+            nome: name,
+            email: email,
+            acesso_liberado: false,
+            has_onboarded: false,
+            criado_em: new Date()
+        });
+
+        btn.disabled=false; btn.textContent='Criar conta e ver dados do PIX →';
+        
+        // Esconde o registo e mostra o PIX
+        window.closeModal('register');
+        window.openModal('pix');
+        
+    } catch (error) {
+        btn.disabled=false; btn.textContent='Criar conta e ver dados do PIX →';
+        isRegistering = false;
+        
+        let msg = 'Erro ao criar conta.';
+        if(error.code === 'auth/email-already-in-use') msg = 'Este e-mail já está cadastrado. Faça login.';
+        if(error.code === 'auth/weak-password') msg = 'A senha é muito fraca.';
+        window.showError('reg-error', msg);
+    }
+  }
+
+  // 2. Fazer Login
+  window.handleLogin = async function() {
+    window.hideError('login-error');
+    const email = document.getElementById('login-email').value.trim();
+    const pass  = document.getElementById('login-pass').value.trim();
+    
+    if (!email||!pass) { window.showError('login-error','Preencha e-mail e senha.'); return; }
+    
+    const btn = document.getElementById('login-btn');
+    btn.disabled=true; btn.textContent='Entrando...';
+    
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+        btn.disabled=false; btn.textContent='Entrar →';
+        
+        window.closeModal('login');
+        await window.routeUser(userCredential.user);
+    } catch (error) {
+        btn.disabled=false; btn.textContent='Entrar →';
+        window.showError('login-error','E-mail ou senha incorretos.');
+    }
+  }
+
+  // 3. Checar Acesso (Botão da tela 'Aguardando')
+  window.checkAccess = async function() {
+    const user = auth.currentUser;
+    if (!user) return;
+    
+    const docRef = doc(db, "profiles", user.uid);
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists() && docSnap.data().acesso_liberado === true) {
+        if (docSnap.data().has_onboarded === true) {
+            window.location.href = 'cronograma.html';
+        } else {
+            window.location.href = 'onboarding.html';
+        }
+    } else {
+        alert('O seu pagamento ainda não foi confirmado. Assim que recebermos o seu comprovante, liberaremos o acesso! 😊');
+    }
+  }
+
+  // 4. Sair
+  window.handleLogout = async function() { 
+      await signOut(auth); 
+      window.closeAllModals(); 
+  }
+
+  // --- Funções Visuais Extras ---
+  window.copyPix = function() {
+    navigator.clipboard.writeText(document.getElementById('pix-key').textContent).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent='✓ Copiado!';
+      setTimeout(()=>btn.textContent='Copiar', 2000);
+    });
+  }
+
+  window.toggleFaq = function(el) {
+    const item = el.closest('.faq-item');
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  }
+
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);} });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+  // Monitor de Estado (Auto-Login se a pessoa voltar ao site)
+  if (auth) {
+      onAuthStateChanged(auth, async (user) => {
+          if (user && !isRegistering) {
+              await window.routeUser(user);
+          }
+      });
+  }
+
+</script>
+</body>
+</html>
