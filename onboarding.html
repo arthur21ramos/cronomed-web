@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CronoMed — Configuração Inicial</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --green: #00c27a; --green-d: #009f64; --dark: #0a0f0d; --dark2: #111a15;
+      --mid: #1e2e25; --text: #e8f0eb; --muted: #7a9e8a;
+    }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: var(--dark);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0;
+    }
+    h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; }
+
+    .step-container { display: none; animation: slideUp 0.5s ease forwards; }
+    .step-container.active { display: block; }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cards e Inputs */
+    .option-card {
+      background: var(--dark2); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px;
+      padding: 1.5rem; cursor: pointer; transition: all 0.2s;
+    }
+    .option-card:hover { border-color: rgba(0,194,122,0.4); background: var(--mid); }
+    .option-card.selected { border-color: var(--green); background: rgba(0,194,122,0.1); box-shadow: 0 0 20px rgba(0,194,122,0.15); }
+    
+    .input-field {
+      width: 100%; background: var(--dark2); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px; padding: 1rem 1.2rem; color: white; font-family: 'DM Sans', sans-serif;
+      font-size: 1rem; outline: none; transition: border-color 0.2s;
+    }
+    .input-field:focus { border-color: var(--green); }
+    
+    /* Estilização bonita para o input de data */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(1); cursor: pointer; opacity: 0.6; transition: 0.2s;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; color: var(--green); }
+
+    /* Chips (Tags de Prova) */
+    .chip {
+      background: var(--dark2); border: 1px solid rgba(255,255,255,0.15); border-radius: 100px;
+      padding: 0.6rem 1.2rem; font-size: 0.9rem; font-weight: 600; color: var(--muted);
+      cursor: pointer; transition: all 0.2s; user-select: none; display: inline-flex; align-items: center; gap: 0.5rem;
+    }
+    .chip:hover { border-color: var(--green); color: white; }
+    .chip.active { background: var(--green); color: var(--dark); border-color: var(--green); font-weight: 700; box-shadow: 0 0 15px rgba(0,194,122,0.3); }
+
+    /* Botões */
+    .btn-next {
+      background: var(--green); color: var(--dark); font-weight: 700; font-size: 1.1rem;
+      padding: 1rem 2rem; border-radius: 100px; border: none; cursor: pointer; transition: all 0.2s;
+      display: inline-flex; align-items: center; gap: 0.5rem;
+    }
+    .btn-next:hover { background: var(--green-d); transform: translateY(-2px); }
+    .btn-next:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .btn-back {
+      background: transparent; color: var(--muted); font-weight: 600; font-size: 1rem;
+      padding: 1rem; border: none; cursor: pointer; transition: color 0.2s;
+    }
+    .btn-back:hover { color: white; }
+
+    /* Progress Bar */
+    .progress-bar-container { width: 100%; height: 6px; background: var(--dark2); border-radius: 10px; overflow: hidden; margin-bottom: 3rem; }
+    .progress-bar { height: 100%; background: var(--green); width: 25%; transition: width 0.4s ease; }
+
+    .internato-block { background: var(--dark2); border: 1px solid rgba(255,255,255,0.08); padding: 1.5rem; border-radius: 16px; margin-bottom: 1rem; transition: opacity 0.3s; }
+    .internato-block.disabled { opacity: 0.5; border-color: rgba(255,255,255,0.02); }
+    
+    /* Checkbox customizado */
+    .custom-checkbox { width: 1.2rem; height: 1.2rem; border-radius: 4px; border: 2px solid var(--muted); appearance: none; background-color: transparent; cursor: pointer; position: relative; transition: all 0.2s; }
+    .custom-checkbox:checked { background-color: var(--green); border-color: var(--green); }
+    .custom-checkbox:checked::after { content: '✓'; position: absolute; color: var(--dark); font-size: 0.8rem; font-weight: 900; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+  </style>
+</head>
+<body class="relative">
+
+  <nav class="p-6 relative z-10 flex justify-between items-center">
+    <div class="logo font-black text-2xl text-white" style="font-family: 'Fraunces', serif;">Crono<span style="color: var(--green);">Med</span></div>
+    <button onclick="window.handleLogout()" class="text-sm font-bold text-gray-500 hover:text-red-500 transition">Sair</button>
+  </nav>
+
+  <main class="flex-1 flex flex-col items-center justify-center p-6 relative z-10 w-full max-w-3xl mx-auto pb-20">
+    
+    <div class="w-full">
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+
+      <!-- PASSO 1: O Alvo -->
+      <div id="step-1" class="step-container active">
+        <div class="text-sm font-bold tracking-widest uppercase mb-2" style="color: var(--green);">Passo 1 de 4</div>
+        <h2 class="text-3xl md:text-4xl font-black text-white mb-3">Qual é o seu alvo?</h2>
+        <p class="text-gray-400 mb-8 text-lg">Selecione as provas que vai prestar. O sistema irá priorizar os temas mais prevalentes baseados na sua escolha.</p>
+        
+        <!-- Chips de Prova -->
+        <div class="flex flex-wrap gap-3 mb-4" id="provas-container">
+            <div class="chip" onclick="toggleChip(this, 'ENARE')">ENARE</div>
+            <div class="chip" onclick="toggleChip(this, 'SUS-SP')">SUS-SP</div>
+            <div class="chip" onclick="toggleChip(this, 'USP-SP')">USP-SP</div>
+            <div class="chip" onclick="toggleChip(this, 'UNICAMP')">UNICAMP</div>
+            <div class="chip" onclick="toggleChip(this, 'PSU-MG')">PSU-MG</div>
+            <div class="chip" onclick="toggleChip(this, 'SCMMG')">SCMMG</div>
+            <div class="chip" onclick="toggleChip(this, 'SURCE')">SURCE</div>
+            <div class="chip" onclick="toggleChip(this, 'AMRIGS')">AMRIGS</div>
+            <div class="chip" onclick="toggleChip(this, 'SES-RJ')">SES-RJ</div>
+            <div class="chip" onclick="toggleOutraProva(this)" id="chip-outras"><i class="fas fa-pen"></i> Outra prova</div>
+        </div>
+
+        <!-- Campo escondido para outras provas -->
+        <div id="outras-provas-container" class="hidden mb-10 animation-fade">
+            <input type="text" id="outras-provas-input" class="input-field" placeholder="Ex: UERJ, AMRIGS, HIAE...">
+        </div>
+
+        <div class="h-px w-full bg-white/10 my-8"></div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+            <div>
+                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-3"><i class="far fa-calendar-alt text-green-500 mr-2"></i> Início dos estudos</h3>
+                <input type="date" id="ans-data-inicio" class="input-field cursor-pointer">
+            </div>
+            <div>
+                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-3"><i class="fas fa-flag-checkered text-green-500 mr-2"></i> Data da Prova (Foco)</h3>
+                <input type="date" id="ans-data-prova" class="input-field cursor-pointer">
+            </div>
+        </div>
+
+        <div class="flex justify-end">
+          <button class="btn-next" onclick="nextStep(2)">Continuar <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- PASSO 2: O Tempo -->
+      <div id="step-2" class="step-container">
+        <div class="text-sm font-bold tracking-widest uppercase mb-2" style="color: var(--green);">Passo 2 de 4</div>
+        <h2 class="text-3xl md:text-4xl font-black text-white mb-3">Como é a sua rotina?</h2>
+        <p class="text-gray-400 mb-8 text-lg">Quantas horas reais de estudo consegue garantir por dia?</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+          <div class="option-card" onclick="selectOption('horas', '2h', this)">
+            <div class="text-2xl mb-2">🏃‍♂️</div>
+            <h3 class="text-white font-bold text-lg mb-1">Até 2 horas</h3>
+            <p class="text-xs text-gray-400">Rotina apertada. Foco em teoria essencial e questões guiadas.</p>
+          </div>
+          <div class="option-card" onclick="selectOption('horas', '4h', this)">
+            <div class="text-2xl mb-2">🚶‍♂️</div>
+            <h3 class="text-white font-bold text-lg mb-1">3 a 4 horas</h3>
+            <p class="text-xs text-gray-400">Tempo moderado. Permite revisões espaçadas de alta prioridade.</p>
+          </div>
+          <div class="option-card" onclick="selectOption('horas', '6h', this)">
+            <div class="text-2xl mb-2">🧘‍♂️</div>
+            <h3 class="text-white font-bold text-lg mb-1">5+ horas</h3>
+            <p class="text-xs text-gray-400">Tempo integral. Cronograma denso e revisões profundas ativadas.</p>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-center">
+          <button class="btn-back" onclick="prevStep(1)"><i class="fas fa-arrow-left"></i> Voltar</button>
+          <button class="btn-next" onclick="nextStep(3)" id="btn-next-2" disabled>Continuar <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- PASSO 3: Internato -->
+      <div id="step-3" class="step-container">
+        <div class="text-sm font-bold tracking-widest uppercase mb-2" style="color: var(--green);">Passo 3 de 4</div>
+        <h2 class="text-3xl md:text-4xl font-black text-white mb-3">Vai estar no Internato?</h2>
+        <p class="text-gray-400 mb-8 text-lg">Podemos sincronizar as tarefas de estudo exatamente com as datas dos seus rodízios práticos.</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+          <div class="option-card" onclick="selectOption('internato', 'sim', this)">
+            <div class="text-3xl mb-3 text-green-400"><i class="fas fa-hospital"></i></div>
+            <h3 class="text-white font-bold text-xl mb-2">Sim, terei rodízios</h3>
+            <p class="text-sm text-gray-400">Quero estudar Clínica Médica enquanto estiver a rodar na Clínica, etc.</p>
+          </div>
+          <div class="option-card" onclick="selectOption('internato', 'nao', this)">
+            <div class="text-3xl mb-3 text-blue-400"><i class="fas fa-home"></i></div>
+            <h3 class="text-white font-bold text-xl mb-2">Não / Estudo Livre</h3>
+            <p class="text-sm text-gray-400">Já me formei ou quero seguir uma ordem linear, independente do hospital.</p>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-center">
+          <button class="btn-back" onclick="prevStep(2)"><i class="fas fa-arrow-left"></i> Voltar</button>
+          <button class="btn-next" onclick="handleStep3To4()" id="btn-next-3" disabled>Continuar <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- PASSO 4: Datas dos Rodízios -->
+      <div id="step-4" class="step-container">
+        <div class="text-sm font-bold tracking-widest uppercase mb-2" style="color: var(--green);">Passo 4 de 4</div>
+        <h2 class="text-3xl md:text-4xl font-black text-white mb-3">Defina as Datas</h2>
+        
+        <div id="internato-config" class="mb-10">
+          <p class="text-gray-400 mb-6 text-lg">Selecione o início e o fim de cada grande bloco. Se já passou por algum, marque como concluído.</p>
+          
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <!-- Cirurgia -->
+            <div class="internato-block" id="block-cirurgia">
+                <div class="flex justify-between items-center mb-4">
+                    <h4 class="text-white font-bold text-lg flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-red-500/20 text-red-400 flex items-center justify-center"><i class="fas fa-scalpel"></i></div> Cirurgia</h4>
+                    <label class="flex items-center gap-2 text-xs text-gray-400 cursor-pointer hover:text-white transition">
+                        <input type="checkbox" class="custom-checkbox" id="check-cirurgia" onchange="toggleRodizioAtivo('cirurgia', this.checked)"> Já concluí
+                    </label>
+                </div>
+                <div id="dates-cirurgia" class="flex flex-col sm:flex-row gap-3">
+                    <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Início</label><input type="date" id="rod-cirurgia-inicio" class="input-field px-3 py-2 text-sm"></div>
+                    <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Fim</label><input type="date" id="rod-cirurgia-fim" class="input-field px-3 py-2 text-sm"></div>
+                </div>
+            </div>
+
+            <!-- Clínica -->
+            <div class="internato-block" id="block-clinica">
+                <div class="flex justify-between items-center mb-4">
+                    <h4 class="text-white font-bold text-lg flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center"><i class="fas fa-stethoscope"></i></div> Clínica Médica</h4>
+                    <label class="flex items-center gap-2 text-xs text-gray-400 cursor-pointer hover:text-white transition">
+                        <input type="checkbox" class="custom-checkbox" id="check-clinica" onchange="toggleRodizioAtivo('clinica', this.checked)"> Já concluí
+                    </label>
+                </div>
+                <div id="dates-clinica" class="flex flex-col sm:flex-row gap-3">
+                    <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Início</label><input type="date" id="rod-clinica-inicio" class="input-field px-3 py-2 text-sm"></div>
+                    <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Fim</label><input type="date" id="rod-clinica-fim" class="input-field px-3 py-2 text-sm"></div>
+                </div>
+            </div>
+
+            <!-- GO -->
+            <div class="internato-block" id="block-go">
+                <div class="flex justify-between items-center mb-4">
+                    <h4 class="text-white font-bold text-lg flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-pink-500/20 text-pink-400 flex items-center justify-center"><i class="fas fa-baby"></i></div> Gineco/Obstetrícia</h4>
+                    <label class="flex items-center gap-2 text-xs text-gray-400 cursor-pointer hover:text-white transition">
+                        <input type="checkbox" class="custom-checkbox" id="check-go" onchange="toggleRodizioAtivo('go', this.checked)"> Já concluí
+                    </label>
+                </div>
+                <div id="dates-go" class="flex flex-col sm:flex-row gap-3">
+                    <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Início</label><input type="date" id="rod-go-inicio" class="input-field px-3 py-2 text-sm"></div>
+                    <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Fim</label><input type="date" id="rod-go-fim" class="input-field px-3 py-2 text-sm"></div>
+                </div>
+            </div>
+
+            <!-- Pediatria -->
+            <div class="internato-block" id="block-ped">
+                <div class="flex justify-between items-center mb-4">
+                    <h4 class="text-white font-bold text-lg flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-yellow-500/20 text-yellow-400 flex items-center justify-center"><i class="fas fa-child"></i></div> Pediatria</h4>
+                    <label class="flex items-center gap-2 text-xs text-gray-400 cursor-pointer hover:text-white transition">
+                        <input type="checkbox" class="custom-checkbox" id="check-ped" onchange="toggleRodizioAtivo('ped', this.checked)"> Já concluí
+                    </label>
+                </div>
+                <div id="dates-ped" class="flex flex-col sm:flex-row gap-3">
+                    <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Início</label><input type="date" id="rod-ped-inicio" class="input-field px-3 py-2 text-sm"></div>
+                    <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Fim</label><input type="date" id="rod-ped-fim" class="input-field px-3 py-2 text-sm"></div>
+                </div>
+            </div>
+          </div>
+          <div class="text-xs text-gray-500 italic mt-4"><i class="fas fa-info-circle text-green-500"></i> O conteúdo de Medicina Preventiva será distribuído estrategicamente de forma contínua para não sobrecarregar as grandes áreas.</div>
+        </div>
+
+        <div id="livre-config" class="mb-10 hidden text-center py-12">
+          <div class="text-5xl text-green-500 mb-6"><i class="fas fa-check-circle"></i></div>
+          <h3 class="text-3xl font-black text-white mb-3" style="font-family: 'Fraunces', serif;">Tudo pronto!</h3>
+          <p class="text-gray-400 text-lg max-w-md mx-auto">Com base no seu tempo disponível e datas, vamos gerar o plano ideal de estudos de forma progressiva, inteligente e equilibrada.</p>
+        </div>
+
+        <div class="flex justify-between items-center mt-8">
+          <button class="btn-back" onclick="prevStep(3)"><i class="fas fa-arrow-left"></i> Voltar</button>
+          <button class="btn-next" id="btn-finish" onclick="finishOnboarding()">Concluir e Gerar <i class="fas fa-magic"></i></button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[2000] hidden flex-col items-center justify-center text-center px-4">
+    <div class="w-20 h-20 border-4 border-green-500 border-t-transparent rounded-full animate-spin mb-8"></div>
+    <h2 class="text-3xl md:text-4xl font-black text-white font-serif mb-3" style="font-family: 'Fraunces', serif;">A calcular rotas...</h2>
+    <p class="text-gray-400 text-lg max-w-md">O nosso algoritmo está a analisar as prevalências, alocar tarefas e a construir a sua jornada rumo à aprovação.</p>
+  </div>
+
+  <!-- FIREBASE INTEGRATION -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // ⚠️ SUBSTITUA PELAS SUAS CHAVES DO FIREBASE AQUI
+    const firebaseConfig = {
+      apiKey: "AIzaSyAwQrhAoma0iuofm_MMghCbBnPPtLbrn0E",
+      authDomain: "cronomed-4b880.firebaseapp.com",
+      projectId: "cronomed-4b880",
+      storageBucket: "cronomed-4b880.firebasestorage.app",
+      messagingSenderId: "853512629124",
+      appId: "1:853512629124:web:42bb7b6808ca5487060bd1"
+    };
+
+    let app, auth, db, currentUser;
+    try {
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+        
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                // Proteção para garantir que só quem pagou está aqui
+                const docSnap = await getDoc(doc(db, "profiles", user.uid));
+                if(docSnap.exists() && !docSnap.data().acesso_liberado) {
+                    window.location.href = "index.html";
+                }
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+    } catch(e) {
+        console.warn("Configuração do Firebase ausente.");
+    }
+
+    window.handleLogout = async function() { 
+        if(auth) await signOut(auth); 
+        window.location.href = "index.html";
+    }
+
+    // --- LÓGICA DE UI DO FORMULÁRIO ---
+    let currentStep = 1;
+    const answers = { 
+        provasTarget: [], 
+        outraProva: "", 
+        dataInicio: "", 
+        dataProva: "", 
+        horas: "", 
+        internato: "", 
+        datasRodizios: {} 
+    };
+
+    // Chips (Provas)
+    window.toggleChip = function(element, provaName) {
+        element.classList.toggle('active');
+        if (element.classList.contains('active')) {
+            answers.provasTarget.push(provaName);
+        } else {
+            answers.provasTarget = answers.provasTarget.filter(p => p !== provaName);
+        }
+    }
+
+    window.toggleOutraProva = function(element) {
+        element.classList.toggle('active');
+        const container = document.getElementById('outras-provas-container');
+        if (element.classList.contains('active')) {
+            container.classList.remove('hidden');
+        } else {
+            container.classList.add('hidden');
+            document.getElementById('outras-provas-input').value = "";
+            answers.outraProva = "";
+        }
+    }
+
+    window.nextStep = function(step) {
+      if(currentStep === 1) {
+        answers.dataInicio = document.getElementById('ans-data-inicio').value;
+        answers.dataProva = document.getElementById('ans-data-prova').value;
+        answers.outraProva = document.getElementById('outras-provas-input').value.trim();
+
+        if(answers.provasTarget.length === 0 && !answers.outraProva) {
+            alert("Por favor, selecione pelo menos uma prova ou escreva o nome de outra."); return;
+        }
+        if(!answers.dataInicio || !answers.dataProva) {
+            alert("Por favor, preencha a Data de Início e a Data da Prova."); return;
+        }
+        
+        const d1 = new Date(answers.dataInicio);
+        const d2 = new Date(answers.dataProva);
+        if(d1 >= d2) {
+            alert("A Data da Prova deve ser posterior à Data de Início."); return;
+        }
+      }
+
+      document.getElementById(`step-${currentStep}`).classList.remove('active');
+      currentStep = step;
+      document.getElementById(`step-${currentStep}`).classList.add('active');
+      document.getElementById('progress-bar').style.width = `${(currentStep / 4) * 100}%`;
+    }
+
+    window.prevStep = function(step) {
+      document.getElementById(`step-${currentStep}`).classList.remove('active');
+      currentStep = step;
+      document.getElementById(`step-${currentStep}`).classList.add('active');
+      document.getElementById('progress-bar').style.width = `${(currentStep / 4) * 100}%`;
+    }
+
+    window.selectOption = function(category, value, element) {
+      answers[category] = value;
+      const siblings = element.parentElement.children;
+      for(let el of siblings) { el.classList.remove('selected'); }
+      element.classList.add('selected');
+
+      if(category === 'horas') document.getElementById('btn-next-2').disabled = false;
+      if(category === 'internato') document.getElementById('btn-next-3').disabled = false;
+    }
+
+    window.handleStep3To4 = function() {
+        if (answers.internato === 'sim') {
+            document.getElementById('internato-config').classList.remove('hidden');
+            document.getElementById('livre-config').classList.add('hidden');
+        } else {
+            document.getElementById('internato-config').classList.add('hidden');
+            document.getElementById('livre-config').classList.remove('hidden');
+        }
+        window.nextStep(4);
+    }
+
+    // Toggle Rodízio "Já Concluído"
+    window.toggleRodizioAtivo = function(rodizio, isConcluido) {
+        const container = document.getElementById(`dates-${rodizio}`);
+        const block = document.getElementById(`block-${rodizio}`);
+        
+        if (isConcluido) {
+            container.style.display = 'none';
+            block.classList.add('disabled');
+            // Limpa os campos para evitar envio de dados de algo que já concluiu
+            document.getElementById(`rod-${rodizio}-inicio`).value = '';
+            document.getElementById(`rod-${rodizio}-fim`).value = '';
+        } else {
+            container.style.display = 'flex';
+            block.classList.remove('disabled');
+        }
+    }
+
+    // --- SUBMISSÃO E GERAÇÃO ---
+    window.finishOnboarding = async function() {
+      if(answers.internato === 'sim') {
+        const rodiziosList = ['cirurgia', 'clinica', 'go', 'ped'];
+        answers.datasRodizios = {};
+        let tudoPreenchido = true;
+
+        rodiziosList.forEach(rod => {
+            const isConcluido = document.getElementById(`check-${rod}`).checked;
+            if (isConcluido) {
+                answers.datasRodizios[rod] = { concluido: true };
+            } else {
+                const dtIn = document.getElementById(`rod-${rod}-inicio`).value;
+                const dtFim = document.getElementById(`rod-${rod}-fim`).value;
+                if(!dtIn || !dtFim) tudoPreenchido = false;
+                answers.datasRodizios[rod] = { concluido: false, in: dtIn, fim: dtFim };
+            }
+        });
+
+        if(!tudoPreenchido) {
+            alert("Por favor, preencha as Datas para os rodízios que ainda vai cursar.");
+            return;
+        }
+      }
+
+      const btn = document.getElementById('btn-finish');
+      btn.disabled = true;
+      document.getElementById('loading-overlay').classList.remove('hidden');
+      document.getElementById('loading-overlay').classList.add('flex');
+
+      if(currentUser) {
+        try {
+          await updateDoc(doc(db, "profiles", currentUser.uid), {
+            has_onboarded: true,
+            onboarding_data: answers
+          });
+          setTimeout(() => { window.location.href = "cronograma.html"; }, 2500);
+
+        } catch (error) {
+          console.error("Erro ao salvar:", error);
+          alert("Ocorreu um erro a guardar os seus dados. Tente novamente.");
+          document.getElementById('loading-overlay').classList.add('hidden');
+          document.getElementById('loading-overlay').classList.remove('flex');
+          btn.disabled = false;
+        }
+      } else {
+        console.log("Respostas prontas para gerar:", answers);
+        setTimeout(() => { window.location.href = "cronograma.html"; }, 2500);
+      }
+    }
+  </script>
+</body>
+</html>
