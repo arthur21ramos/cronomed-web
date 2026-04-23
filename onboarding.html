@@ -95,6 +95,8 @@
     .custom-checkbox { width: 1.2rem; height: 1.2rem; border-radius: 4px; border: 2px solid var(--muted); appearance: none; background-color: transparent; cursor: pointer; position: relative; transition: all 0.2s; }
     .custom-checkbox:checked { background-color: var(--green); border-color: var(--green); }
     .custom-checkbox:checked::after { content: '✓'; position: absolute; color: var(--dark); font-size: 0.8rem; font-weight: 900; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+    
+    .warning-msg { animation: slideUp 0.3s ease; }
   </style>
 </head>
 <body class="relative">
@@ -164,17 +166,17 @@
           <div class="option-card" onclick="selectOption('horas', '2h', this)">
             <div class="text-2xl mb-2">🏃‍♂️</div>
             <h3 class="text-white font-bold text-lg mb-1">Até 2 horas</h3>
-            <p class="text-xs text-gray-400">Rotina apertada. Foco em teoria essencial e questões guiadas.</p>
+            <p class="text-xs text-gray-400">Foco total em tarefas novas para cobrir o edital. Sem agendamento de revisões automáticas.</p>
           </div>
           <div class="option-card" onclick="selectOption('horas', '4h', this)">
             <div class="text-2xl mb-2">🚶‍♂️</div>
             <h3 class="text-white font-bold text-lg mb-1">3 a 4 horas</h3>
-            <p class="text-xs text-gray-400">Tempo moderado. Permite revisões espaçadas de alta prioridade.</p>
+            <p class="text-xs text-gray-400">Tarefas do dia + blocos de revisões programadas estrategicamente.</p>
           </div>
           <div class="option-card" onclick="selectOption('horas', '6h', this)">
             <div class="text-2xl mb-2">🧘‍♂️</div>
             <h3 class="text-white font-bold text-lg mb-1">5+ horas</h3>
-            <p class="text-xs text-gray-400">Tempo integral. Cronograma denso e revisões profundas ativadas.</p>
+            <p class="text-xs text-gray-400">Carga máxima: Tarefas, muitas revisões espaçadas e blocos para simulados na íntegra.</p>
           </div>
         </div>
 
@@ -199,7 +201,7 @@
           <div class="option-card" onclick="selectOption('internato', 'nao', this)">
             <div class="text-3xl mb-3 text-blue-400"><i class="fas fa-home"></i></div>
             <h3 class="text-white font-bold text-xl mb-2">Não / Estudo Livre</h3>
-            <p class="text-sm text-gray-400">Já me formei ou quero seguir uma ordem linear, independente do hospital.</p>
+            <p class="text-sm text-gray-400">Estudo misto e dinâmico, mesclando diferentes matérias na mesma semana para não ficar maçante.</p>
           </div>
         </div>
 
@@ -230,6 +232,9 @@
                     <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Início</label><input type="date" id="rod-cirurgia-inicio" class="input-field px-3 py-2 text-sm"></div>
                     <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Fim</label><input type="date" id="rod-cirurgia-fim" class="input-field px-3 py-2 text-sm"></div>
                 </div>
+                <div id="msg-cirurgia" class="hidden warning-msg text-xs text-yellow-500 mt-4 bg-yellow-500/10 p-2.5 rounded-lg border border-yellow-500/20">
+                    <i class="fas fa-info-circle mr-1"></i> As tarefas cruciais de Cirurgia serão distribuídas como revisões ao longo do ano.
+                </div>
             </div>
 
             <!-- Clínica -->
@@ -243,6 +248,9 @@
                 <div id="dates-clinica" class="flex flex-col sm:flex-row gap-3">
                     <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Início</label><input type="date" id="rod-clinica-inicio" class="input-field px-3 py-2 text-sm"></div>
                     <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Fim</label><input type="date" id="rod-clinica-fim" class="input-field px-3 py-2 text-sm"></div>
+                </div>
+                <div id="msg-clinica" class="hidden warning-msg text-xs text-yellow-500 mt-4 bg-yellow-500/10 p-2.5 rounded-lg border border-yellow-500/20">
+                    <i class="fas fa-info-circle mr-1"></i> As tarefas cruciais de Clínica serão distribuídas como revisões ao longo do ano.
                 </div>
             </div>
 
@@ -258,6 +266,9 @@
                     <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Início</label><input type="date" id="rod-go-inicio" class="input-field px-3 py-2 text-sm"></div>
                     <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Fim</label><input type="date" id="rod-go-fim" class="input-field px-3 py-2 text-sm"></div>
                 </div>
+                <div id="msg-go" class="hidden warning-msg text-xs text-yellow-500 mt-4 bg-yellow-500/10 p-2.5 rounded-lg border border-yellow-500/20">
+                    <i class="fas fa-info-circle mr-1"></i> As tarefas cruciais de GO serão distribuídas como revisões ao longo do ano.
+                </div>
             </div>
 
             <!-- Pediatria -->
@@ -272,6 +283,9 @@
                     <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Início</label><input type="date" id="rod-ped-inicio" class="input-field px-3 py-2 text-sm"></div>
                     <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Fim</label><input type="date" id="rod-ped-fim" class="input-field px-3 py-2 text-sm"></div>
                 </div>
+                <div id="msg-ped" class="hidden warning-msg text-xs text-yellow-500 mt-4 bg-yellow-500/10 p-2.5 rounded-lg border border-yellow-500/20">
+                    <i class="fas fa-info-circle mr-1"></i> As tarefas cruciais de Pediatria serão distribuídas como revisões ao longo do ano.
+                </div>
             </div>
           </div>
           <div class="text-xs text-gray-500 italic mt-4"><i class="fas fa-info-circle text-green-500"></i> O conteúdo de Medicina Preventiva será distribuído estrategicamente de forma contínua para não sobrecarregar as grandes áreas.</div>
@@ -280,7 +294,7 @@
         <div id="livre-config" class="mb-10 hidden text-center py-12">
           <div class="text-5xl text-green-500 mb-6"><i class="fas fa-check-circle"></i></div>
           <h3 class="text-3xl font-black text-white mb-3" style="font-family: 'Fraunces', serif;">Tudo pronto!</h3>
-          <p class="text-gray-400 text-lg max-w-md mx-auto">Com base no seu tempo disponível e datas, vamos gerar o plano ideal de estudos de forma progressiva, inteligente e equilibrada.</p>
+          <p class="text-gray-400 text-lg max-w-md mx-auto">Com base no seu tempo disponível e datas, vamos gerar o plano ideal de estudos com um currículo espiralado, para você não esquecer a matéria ao longo dos meses.</p>
         </div>
 
         <div class="flex justify-between items-center mt-8">
@@ -430,20 +444,23 @@
         window.nextStep(4);
     }
 
-    // Toggle Rodízio "Já Concluído"
+    // Toggle Rodízio "Já Concluído" com Aviso Inteligente
     window.toggleRodizioAtivo = function(rodizio, isConcluido) {
         const container = document.getElementById(`dates-${rodizio}`);
         const block = document.getElementById(`block-${rodizio}`);
+        const msg = document.getElementById(`msg-${rodizio}`);
         
         if (isConcluido) {
             container.style.display = 'none';
             block.classList.add('disabled');
+            msg.classList.remove('hidden');
             // Limpa os campos para evitar envio de dados de algo que já concluiu
             document.getElementById(`rod-${rodizio}-inicio`).value = '';
             document.getElementById(`rod-${rodizio}-fim`).value = '';
         } else {
             container.style.display = 'flex';
             block.classList.remove('disabled');
+            msg.classList.add('hidden');
         }
     }
 
