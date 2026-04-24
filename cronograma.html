@@ -29,7 +29,7 @@
     </script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
         /* Layout Fixes */
         html, body { height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -45,8 +45,8 @@
         body.dark-mode ::-webkit-scrollbar-thumb { background: #334155; }
 
         /* General UI & High Contrast */
-        .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); transition: box-shadow 0.2s, transform 0.2s; }
-        .card-shadow:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); transform: translateY(-2px); }
+        .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); transition: box-shadow 0.2s, transform 0.2s; }
+        .card-shadow:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04); transform: translateY(-2px); }
         
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         [contenteditable]:empty:before { content: attr(placeholder); color: #9ca3af; display: block; }
@@ -61,26 +61,14 @@
         .row-controls { position: absolute; right: 0; top: 0; bottom: 0; width: 20px; display: flex; flex-direction: column; justify-content: center; gap: 2px; opacity: 0; transition: opacity 0.2s; pointer-events: none; background: rgba(255,255,255,0.9); border-left: 1px solid #e2e8f0; }
         tr:hover .row-controls { opacity: 1; pointer-events: auto; }
 
-        /* DASHBOARD ITEM STYLE */
-        .dash-item { border-left: 3px solid transparent; background-color: white; padding: 10px 14px; margin-bottom: 8px; border-radius: 6px; border: 1px solid #e2e8f0; transition: all 0.2s ease; display: flex; align-items: center; justify-content: space-between; }
-        .dash-item.done .subject-text { text-decoration: line-through; color: #94a3b8; }
-        .dash-item.done { background-color: #f8fafc; border-color: #e2e8f0; opacity: 0.75; }
-        .dash-item.crucial { border-left-color: #ef4444; background-color: #fff1f2; }
-        
-        .hy-card { padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 11px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; background: white; justify-content: space-between; color: #334155; }
-        .hy-card:hover { border-color: #10b981; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1); }
-        .hy-card.completed { background-color: #f0fdf4; border-color: #86efac; color: #166534; font-weight: 600; }
-        .hy-circle { width: 10px; height: 10px; border-radius: 50%; border: 2px solid #cbd5e1; background: white; flex-shrink: 0; }
-        .hy-card.completed .hy-circle { background: #166534; border-color: #166534; }
-
         /* DRAG AND DROP */
         .draggable-item { cursor: grab; }
         .draggable-item:active { cursor: grabbing; opacity: 0.6; }
         .drop-target-week { background-color: rgba(16, 185, 129, 0.1) !important; border-color: #10b981 !important; transform: scale(1.02); }
 
-        /* MODAIS E TRANSIÇÕES */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 1rem; }
-        .modal-overlay.open { display: flex; }
+        /* MODAIS E TRANSIÇÕES - CENTRALIZADOS */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 1rem; }
+        .modal-overlay.flex { display: flex; }
         .modal-content { animation: scaleIn 0.2s ease; max-height: 90vh; overflow-y: auto; }
         @keyframes scaleIn { from { opacity: 0; transform: scale(.95); } to { opacity: 1; transform: scale(1); } }
         .fade-enter { animation: fadeIn 0.4s ease-out forwards; }
@@ -90,12 +78,12 @@
         .fire-btn.active { filter: grayscale(0%); opacity: 1; transform: scale(1.15); }
         .fire-btn:hover { opacity: 0.7; filter: grayscale(30%); }
 
-        /* CALENDAR STYLES */
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; width: 100%; }
-        .calendar-day { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; font-size: 12px; cursor: pointer; position: relative; background: white; border: 1px solid transparent; color: #334155; transition: all 0.2s; overflow: hidden; min-width: 0; }
-        .calendar-day:hover { background: #f1f5f9; color: #0f172a; font-weight: 600; }
-        .calendar-day.today { background: #0f172a; color: white; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .calendar-day.has-activity::after { content: ''; width: 4px; height: 4px; background: #22c55e; border-radius: 50%; position: absolute; bottom: 4px; }
+        /* FILTROS (SEARCH) */
+        .filter-chip { padding: 6px 14px; border-radius: 100px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid #e2e8f0; background: white; color: #475569; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+        .filter-chip:hover { background: #f8fafc; border-color: #cbd5e1; }
+        .filter-chip.active { background: #0f172a; color: white; border-color: #0f172a; }
+        .filter-badge { background: #f1f5f9; color: #64748b; border-radius: 100px; padding: 2px 6px; font-size: 9px; font-weight: 800; }
+        .filter-chip.active .filter-badge { background: rgba(255,255,255,0.2); color: white; }
 
         /* SETTINGS SIDEBAR */
         .settings-sidebar { position: fixed; top: 0; right: -22rem; width: 22rem; height: 100vh; background: white; border-left: 1px solid #e2e8f0; z-index: 1001; transition: right 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow: -4px 0 24px rgba(0,0,0,0.08); overflow-y: auto; }
@@ -113,17 +101,14 @@
         
         body.dark-mode .border-gray-200, body.dark-mode .border-gray-100, body.dark-mode .border-slate-200, body.dark-mode .border-slate-100 { border-color: #334155 !important; }
         
-        /* Correção das fontes no modo noturno para impedir que desapareçam */
         body.dark-mode .text-slate-900, body.dark-mode .text-slate-800, body.dark-mode .text-gray-900, body.dark-mode .text-gray-800, body.dark-mode .text-black { color: #f8fafc !important; }
         body.dark-mode .text-slate-700, body.dark-mode .text-gray-700 { color: #e2e8f0 !important; }
         body.dark-mode .text-slate-600, body.dark-mode .text-gray-600 { color: #cbd5e1 !important; }
         body.dark-mode .text-slate-500, body.dark-mode .text-gray-500 { color: #94a3b8 !important; }
         
-        /* Modais e Paineis em Dark Mode */
         body.dark-mode .dash-item, body.dark-mode .hy-card, body.dark-mode .settings-sidebar, body.dark-mode .reminder-panel, body.dark-mode .remanejo-card { background: #1e293b !important; border-color: #334155 !important; color: #f8fafc !important; }
         body.dark-mode .modal-content { background: #1e293b !important; border-color: #334155 !important; color: #f8fafc !important; }
         
-        /* Tabela e Células em Dark Mode */
         body.dark-mode .agenda-table { border-color: #334155; }
         body.dark-mode .agenda-table td { border-color: #334155; }
         body.dark-mode .time-col { background-color: #0f172a !important; color: #94a3b8 !important; border-right-color: #334155 !important;}
@@ -163,13 +148,13 @@
         .prio-rev { border-left: 4px dashed #10b981 !important; }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800 overflow-hidden" onkeydown="window.handleGlobalKeydown(event)">
+<body class="bg-slate-50 text-slate-800 overflow-hidden" onkeydown="window.handleGlobalKeydown(event)">
 
     <!-- OVERLAY DE CARREGAMENTO -->
     <div id="loader-overlay">
-        <i class="fas fa-circle-notch fa-spin text-5xl text-green-500 mb-4"></i>
-        <h2 class="text-2xl font-bold text-slate-800 dark:text-white font-serif">A carregar o seu Cronograma...</h2>
-        <p class="text-gray-500 mt-2" id="loader-text">A sincronizar inteligência com o banco de dados...</p>
+        <i class="fas fa-circle-notch fa-spin text-5xl text-emerald-500 mb-4"></i>
+        <h2 class="text-2xl font-black text-slate-800 dark:text-white font-serif">A carregar o seu Cronograma...</h2>
+        <p class="text-slate-500 mt-2 font-medium" id="loader-text">A sincronizar inteligência com o banco de dados...</p>
     </div>
 
     <!-- TOAST -->
@@ -180,26 +165,26 @@
         <!-- HEADER -->
         <header class="bg-black text-white p-4 shadow-lg sticky-header z-50 flex-shrink-0 flex justify-between items-center transition-colors duration-300">
             <div class="flex items-center gap-6">
-                <button onclick="window.toggleSidebar()" class="text-gray-400 hover:text-white focus:outline-none transition-colors">
+                <button onclick="window.toggleSidebar()" class="text-slate-400 hover:text-white focus:outline-none transition-colors">
                     <i class="fas fa-bars text-xl"></i>
                 </button>
                 <div>
                     <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2 font-serif">
-                        <i class="fas fa-heartbeat text-green-500"></i> CronoMED
+                        <i class="fas fa-heartbeat text-emerald-500"></i> CronoMED
                     </h1>
                 </div>
             </div>
             <div class="text-right flex items-center gap-4">
                 <div class="flex flex-col items-end hidden sm:flex">
-                    <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Progresso Geral</div>
-                    <div class="w-40 bg-gray-800 rounded-full h-2 mt-1 border border-gray-700 relative overflow-hidden">
-                        <div id="global-progress" class="bg-green-500 h-2 rounded-full transition-all duration-700 shadow-[0_0_10px_rgba(34,197,94,0.5)] absolute top-0 left-0" style="width: 0%"></div>
+                    <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Progresso Geral</div>
+                    <div class="w-40 bg-slate-800 rounded-full h-2 mt-1 border border-slate-700 relative overflow-hidden">
+                        <div id="global-progress" class="bg-emerald-500 h-2 rounded-full transition-all duration-700 shadow-[0_0_10px_rgba(16,185,129,0.5)] absolute top-0 left-0" style="width: 0%"></div>
                     </div>
                 </div>
                 <div class="text-xl font-black text-white w-12 text-right hidden sm:block" id="global-percent-text">0%</div>
                 <!-- Botão de Avatar do Usuário -->
-                <div id="user-avatar" class="hidden w-8 h-8 rounded-full bg-green-500 text-white font-bold items-center justify-center uppercase">U</div>
-                <button onclick="window.openSettingsSidebar()" class="text-gray-400 hover:text-white transition-colors ml-2 bg-gray-800 p-2 rounded-full" title="Configurações">
+                <div id="user-avatar" class="hidden w-8 h-8 rounded-full bg-emerald-500 text-white font-bold items-center justify-center uppercase">U</div>
+                <button onclick="window.openSettingsSidebar()" class="text-slate-400 hover:text-white transition-colors ml-2 bg-slate-800 p-2 rounded-full" title="Configurações">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
@@ -209,35 +194,35 @@
             <!-- SIDEBAR -->
             <aside id="main-sidebar" class="w-80 bg-white border-r border-slate-200 sidebar flex flex-col z-40 shadow-xl hidden md:flex transition-colors duration-300">
                 <div class="p-6 border-b border-slate-100 bg-slate-50/50 space-y-3 shrink-0">
-                    <button onclick="window.switchView('homepage')" id="nav-homepage" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 text-left">
+                    <button onclick="window.switchView('homepage')" id="nav-homepage" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-left">
                         <i class="fas fa-home text-lg w-5 text-center"></i><span>Página Inicial</span>
                     </button>
-                    <button onclick="window.switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-black text-white hover:bg-gray-800 text-left border border-transparent">
+                    <button onclick="window.switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-black text-white hover:bg-slate-800 text-left border border-transparent">
                         <i class="fas fa-chart-line text-lg w-5 text-center"></i><span>Dashboard &amp; Metas</span>
                     </button>
-                    <button onclick="window.switchView('search')" id="nav-search" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 text-left">
+                    <button onclick="window.switchView('search')" id="nav-search" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-left">
                         <i class="fas fa-search text-lg w-5 text-center"></i><span>Busca de Tarefas</span>
                     </button>
                     <button onclick="window.openRemanejoModal()" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-purple-50 border border-purple-200 text-purple-700 hover:bg-purple-100 text-left">
                         <i class="fas fa-wand-magic-sparkles text-lg w-5 text-center"></i><span>Remanejamento IA</span>
                     </button>
                 </div>
-                <nav class="p-3 space-y-1 sidebar-content" id="week-nav"></nav>
+                <nav class="p-4 space-y-2 sidebar-content" id="week-nav"></nav>
             </aside>
 
             <!-- MAIN CONTENT -->
-            <main class="flex-1 p-4 md:p-8 overflow-y-auto bg-slate-100 relative w-full transition-colors duration-300" id="main-scroll">
+            <main class="flex-1 p-4 md:p-8 overflow-y-auto bg-slate-50 relative w-full transition-colors duration-300" id="main-scroll">
                 <button onclick="window.toggleFocusMode()" class="focus-exit-btn fixed top-6 right-6 z-[999] bg-red-600 text-white px-5 py-2.5 rounded-full font-black shadow-xl hover:bg-red-700 transition items-center gap-2"><i class="fas fa-compress-arrows-alt"></i> Sair do Foco</button>
-                <div id="content-area" class="container mx-auto max-w-7xl pb-24"></div>
+                <div id="content-area" class="container mx-auto max-w-6xl pb-24"></div>
             </main>
         </div>
 
         <!-- MOBILE NAV -->
         <nav class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 flex justify-around p-3 z-50 dark:bg-slate-900 dark:border-slate-800">
-            <button onclick="window.switchView('homepage')" class="flex flex-col items-center text-slate-500 hover:text-green-600 transition-colors"><i class="fas fa-home text-lg mb-1"></i><span class="text-[9px] font-bold">Início</span></button>
-            <button onclick="window.switchView('week')" class="flex flex-col items-center text-slate-500 hover:text-green-600 transition-colors"><i class="fas fa-calendar-alt text-lg mb-1"></i><span class="text-[9px] font-bold">Semana</span></button>
-            <button onclick="window.switchView('dashboard')" class="flex flex-col items-center text-slate-500 hover:text-green-600 transition-colors"><i class="fas fa-chart-pie text-lg mb-1"></i><span class="text-[9px] font-bold">Resumo</span></button>
-            <button onclick="window.switchView('search')" class="flex flex-col items-center text-slate-500 hover:text-green-600 transition-colors"><i class="fas fa-search text-lg mb-1"></i><span class="text-[9px] font-bold">Buscar</span></button>
+            <button onclick="window.switchView('homepage')" class="flex flex-col items-center text-slate-500 hover:text-emerald-600 transition-colors"><i class="fas fa-home text-lg mb-1"></i><span class="text-[9px] font-bold">Início</span></button>
+            <button onclick="window.switchView('week')" class="flex flex-col items-center text-slate-500 hover:text-emerald-600 transition-colors"><i class="fas fa-calendar-alt text-lg mb-1"></i><span class="text-[9px] font-bold">Semana</span></button>
+            <button onclick="window.switchView('dashboard')" class="flex flex-col items-center text-slate-500 hover:text-emerald-600 transition-colors"><i class="fas fa-chart-pie text-lg mb-1"></i><span class="text-[9px] font-bold">Resumo</span></button>
+            <button onclick="window.switchView('search')" class="flex flex-col items-center text-slate-500 hover:text-emerald-600 transition-colors"><i class="fas fa-search text-lg mb-1"></i><span class="text-[9px] font-bold">Buscar</span></button>
         </nav>
     </div>
 
@@ -248,7 +233,7 @@
     <div id="settings-sidebar" class="settings-sidebar bg-white">
         <div class="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-900 text-white">
             <h3 class="font-black text-lg flex items-center gap-2"><i class="fas fa-cog"></i> Configurações</h3>
-            <button onclick="window.closeSettingsSidebar()" class="text-gray-300 hover:text-white transition"><i class="fas fa-times text-xl"></i></button>
+            <button onclick="window.closeSettingsSidebar()" class="text-slate-300 hover:text-white transition"><i class="fas fa-times text-xl"></i></button>
         </div>
         <div class="p-6 space-y-6">
             <div>
@@ -278,20 +263,20 @@
 
     <!-- MODAL: ADD TAREFA AVULSA -->
     <div class="modal-overlay" id="modal-add-task">
-        <div class="modal-content bg-white">
+        <div class="modal-content bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 border border-slate-200">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-xl font-black text-slate-900">Nova Tarefa</h3>
-                <button onclick="window.closeModal('add-task')" class="text-slate-400 hover:text-black"><i class="fas fa-times text-lg"></i></button>
+                <button onclick="window.closeModal('add-task')" class="text-slate-400 hover:text-black w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition"><i class="fas fa-times text-lg"></i></button>
             </div>
-            <div class="space-y-4 mb-6">
+            <div class="space-y-4 mb-6 text-left">
                 <div>
                     <label class="block text-xs font-bold uppercase text-slate-500 tracking-widest mb-1.5">Nome do Tema</label>
-                    <input type="text" id="add-nome" placeholder="Ex: Aula da Faculdade" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:border-green-500">
+                    <input type="text" id="add-nome" placeholder="Ex: Aula da Faculdade" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:border-emerald-500">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold uppercase text-slate-500 tracking-widest mb-1.5">Área</label>
-                        <select id="add-area" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:border-green-500 cursor-pointer">
+                        <select id="add-area" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:border-emerald-500 cursor-pointer">
                             <option value="Cirurgia">Cirurgia</option>
                             <option value="Clínica Médica">Clínica Médica</option>
                             <option value="Ginecologia e Obstetrícia">Gineco e Obstetrícia</option>
@@ -302,7 +287,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold uppercase text-slate-500 tracking-widest mb-1.5">Prioridade</label>
-                        <select id="add-prio" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:border-green-500 cursor-pointer">
+                        <select id="add-prio" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:border-emerald-500 cursor-pointer">
                             <option value="1">Alta (1)</option>
                             <option value="2" selected>Média (2)</option>
                             <option value="3">Baixa (3)</option>
@@ -311,16 +296,16 @@
                     </div>
                 </div>
             </div>
-            <button onclick="window.saveCustomTask()" class="w-full bg-green-600 text-white py-3.5 rounded-xl font-bold hover:bg-green-700 transition">Adicionar à Semana</button>
+            <button onclick="window.saveCustomTask()" class="w-full bg-emerald-600 text-white py-3.5 rounded-xl font-bold hover:bg-emerald-700 transition">Adicionar à Semana</button>
         </div>
     </div>
 
     <!-- MODAL: REPLICAR AGENDA -->
     <div class="modal-overlay" id="modal-replica-agenda">
-        <div class="modal-content bg-white text-center">
+        <div class="modal-content bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 border border-slate-200 text-center">
             <div class="flex justify-between items-center mb-2">
                 <h3 class="text-xl font-black text-slate-900 mx-auto">Replicar Grade Horária</h3>
-                <button onclick="window.closeModal('replica-agenda')" class="text-slate-400 hover:text-black absolute right-6 top-6"><i class="fas fa-times"></i></button>
+                <button onclick="window.closeModal('replica-agenda')" class="text-slate-400 hover:text-black absolute right-6 top-6 w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition"><i class="fas fa-times"></i></button>
             </div>
             <div class="mb-5 text-blue-500 bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mt-4"><i class="fas fa-copy text-2xl"></i></div>
             <p class="text-sm text-slate-500 mb-6">Quantas semanas à frente deseja manter esta mesma rotina de horários?</p>
@@ -333,13 +318,13 @@
 
     <!-- MODAL: CADERNO DE ANOTAÇÕES -->
     <div id="notes-modal" class="modal-overlay">
-        <div class="modal-content bg-white flex flex-col">
+        <div class="modal-content bg-white rounded-3xl shadow-2xl w-full max-w-lg p-8 border border-slate-200 flex flex-col text-left">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-black text-slate-900 flex items-center gap-2"><i class="fas fa-book-medical text-green-600"></i> Caderno de Anotações</h3>
+                <h3 class="text-xl font-black text-slate-900 flex items-center gap-2"><i class="fas fa-book-medical text-emerald-600"></i> Caderno de Anotações</h3>
                 <button onclick="window.closeNotesModal()" class="text-slate-400 hover:text-black w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition"><i class="fas fa-times"></i></button>
             </div>
             <p class="text-xs text-slate-500 mb-4">Guarde os seus links do Anki, videoaulas ou resumos para este tema.</p>
-            <textarea id="notes-textarea" rows="6" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition resize-none custom-scrollbar" placeholder="Cole aqui o link do seu deck do Anki, Drive ou resumo..." oninput="window.parseNotesLinks()"></textarea>
+            <textarea id="notes-textarea" rows="6" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition resize-none custom-scrollbar" placeholder="Cole aqui o link do seu deck do Anki, Drive ou resumo..." oninput="window.parseNotesLinks()"></textarea>
             <div id="notes-links-container" class="hidden mt-4 w-full"></div>
             <div class="flex gap-3 mt-6 pt-4 border-t border-slate-100">
                 <button onclick="window.closeNotesModal()" class="flex-1 py-3 rounded-xl font-bold text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Fechar</button>
@@ -350,7 +335,7 @@
 
     <!-- MODAL: DELETE -->
     <div id="modal-delete" class="modal-overlay">
-        <div class="modal-content bg-white text-center max-w-sm">
+        <div class="modal-content bg-white rounded-3xl shadow-2xl w-full max-w-sm p-8 border border-slate-200 text-center">
             <div class="mb-5 text-red-500 bg-red-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto"><i class="fas fa-trash-alt text-2xl"></i></div>
             <h3 class="text-xl font-black text-slate-900 mb-2">Excluir Item?</h3>
             <p class="text-sm text-slate-500 mb-8">Esta ação removerá a tarefa. Pode desfazer usando Ctrl+Z.</p>
@@ -363,10 +348,10 @@
 
     <!-- MODAL: REMANEJO -->
     <div id="modal-remanejo" class="modal-overlay">
-        <div class="modal-content bg-white">
+        <div class="modal-content bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 border border-slate-200 text-left">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-black text-slate-900 flex items-center gap-2"><i class="fas fa-magic text-purple-600"></i> Remanejamento IA</h3>
-                <button onclick="window.closeModal('remanejo')" class="text-slate-400 hover:text-black"><i class="fas fa-times"></i></button>
+                <button onclick="window.closeModal('remanejo')" class="text-slate-400 hover:text-black w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition"><i class="fas fa-times"></i></button>
             </div>
             <p class="text-sm text-slate-500 mb-6">O sistema detectou tarefas atrasadas de semanas anteriores. Como quer reorganizar o seu estudo?</p>
             
@@ -382,7 +367,7 @@
             </div>
             
             <div id="remanejo-empty" class="hidden text-center py-8">
-                <i class="fas fa-check-circle text-4xl text-green-500 mb-3"></i>
+                <i class="fas fa-check-circle text-4xl text-emerald-500 mb-3"></i>
                 <div class="font-bold text-slate-800">Não há atrasos!</div>
                 <div class="text-sm text-slate-500">O seu cronograma está em dia.</div>
             </div>
@@ -391,7 +376,7 @@
 
     <!-- MODAL: REVISÃO -->
     <div id="modal-review" class="modal-overlay">
-        <div class="modal-content bg-white text-center max-w-sm">
+        <div class="modal-content bg-white rounded-3xl shadow-2xl w-full max-w-sm p-8 border border-slate-200 text-center">
             <div class="mb-5 text-blue-600 bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto"><i class="fas fa-calendar-check text-2xl"></i></div>
             <h3 class="text-xl font-black text-slate-900 mb-2">Tarefa Concluída!</h3>
             <p class="text-sm text-slate-500 mb-6">Deseja agendar uma revisão espaçada?</p>
@@ -408,15 +393,15 @@
     <div class="reminder-balloon z-[150]">
         <div id="reminder-panel" class="reminder-panel bg-white">
             <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
-                <h4 class="font-black text-sm text-slate-800 flex items-center gap-2"><i class="fas fa-bell text-yellow-500"></i> Seus Lembretes</h4>
-                <button onclick="window.toggleReminderPanel()" class="text-slate-400 hover:text-slate-800 transition"><i class="fas fa-times"></i></button>
+                <h4 class="font-black text-sm text-slate-800 flex items-center gap-2"><i class="fas fa-bell text-amber-500"></i> Seus Lembretes</h4>
+                <button onclick="window.toggleReminderPanel()" class="text-slate-400 hover:text-slate-800 transition w-6 h-6 rounded-full hover:bg-slate-100 flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
             <div id="reminder-list" class="mb-4 max-h-48 overflow-y-auto custom-scrollbar"></div>
             <div class="space-y-3 pt-4 border-t border-slate-100">
-                <input type="text" id="reminder-text" placeholder="O que não pode esquecer?" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs outline-none focus:border-green-500 transition">
+                <input type="text" id="reminder-text" placeholder="O que não pode esquecer?" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs outline-none focus:border-emerald-500 transition">
                 <div class="flex gap-2">
-                    <input type="date" id="reminder-date" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-2 py-2.5 text-xs outline-none focus:border-green-500">
-                    <select id="reminder-type" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-2 py-2.5 text-[10px] font-bold uppercase outline-none focus:border-green-500">
+                    <input type="date" id="reminder-date" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-2 py-2.5 text-xs outline-none focus:border-emerald-500">
+                    <select id="reminder-type" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-2 py-2.5 text-[10px] font-bold uppercase outline-none focus:border-emerald-500">
                         <option value="day">Para Hoje</option><option value="week">Esta Semana</option><option value="future">Outra Data</option>
                     </select>
                 </div>
@@ -426,22 +411,37 @@
         <button class="reminder-fab bg-black" onclick="window.toggleReminderPanel()" title="Lembretes" style="position:relative"><i class="fas fa-bell"></i><span id="reminder-badge" class="hidden absolute -top-1 -right-1 w-5 h-5 bg-red-500 border-2 border-white rounded-full text-white text-[9px] font-bold flex items-center justify-center"></span></button>
     </div>
 
+    <!-- MINI PLAYER POMODORO FLUTUANTE -->
+    <div id="mini-player" class="mini-player">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-cm-mid flex items-center justify-center text-emerald-600 animate-pulse"><i class="fas fa-clock"></i></div>
+            <div class="flex flex-col">
+                <span class="text-[10px] font-bold uppercase text-slate-500 tracking-widest leading-none mb-1" id="mp-phase">Foco: Aula</span>
+                <span class="font-mono font-black text-lg text-slate-800 dark:text-white leading-none" id="mp-time">50:00</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 border-l border-slate-200 dark:border-gray-700 pl-3">
+            <button onclick="window.togglePomo()" class="w-10 h-10 rounded-full bg-slate-900 text-white dark:bg-emerald-600 dark:text-cm-dark flex items-center justify-center hover:scale-105 transition shadow-md" id="mp-play-btn"><i class="fas fa-pause"></i></button>
+            <button onclick="window.stopPomo()" class="w-8 h-8 rounded-full text-slate-400 hover:text-red-500 hover:bg-slate-100 dark:hover:bg-cm-mid transition flex items-center justify-center"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+
     <!-- ======================================================================
-         LÓGICA, INTEGRAÇÃO COM BANCO E FIREBASE
+         LÓGICA E FIREBASE
          ====================================================================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // EMBEDDED BANCO DE MATÉRIAS (~240 tarefas para Busca e Cronograma)
+        // EMBEDDED BANCO DE MATÉRIAS (~240 tarefas)
         const bancoDeMaterias = [
             { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Hipertensão Arterial Sistêmica", "peso_prova": 10, "frequencia_prova": 95, "score": 36.5, "prioridade": 1 },
             { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Síndrome Coronariana Aguda", "peso_prova": 10, "frequencia_prova": 95, "score": 36.5, "prioridade": 1 },
             { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Insuficiência Cardíaca", "peso_prova": 10, "frequencia_prova": 90, "score": 35, "prioridade": 1 },
             { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Arritmias Cardíacas", "peso_prova": 9, "frequencia_prova": 85, "score": 32.5, "prioridade": 1 },
             { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Parada Cardiorrespiratória", "peso_prova": 9, "frequencia_prova": 85, "score": 32.5, "prioridade": 1 },
-            { "area": "Clínica Médica", "subarea": "Endocrinologia", "tema": "Diabetes Mellitus (diagnóstico, tratamento e complicações)", "peso_prova": 10, "frequencia_prova": 95, "score": 36.5, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Endocrinologia", "tema": "Diabetes Mellitus", "peso_prova": 10, "frequencia_prova": 95, "score": 36.5, "prioridade": 1 },
             { "area": "Clínica Médica", "subarea": "Endocrinologia", "tema": "Doenças da Tireoide", "peso_prova": 9, "frequencia_prova": 90, "score": 33.3, "prioridade": 1 },
             { "area": "Clínica Médica", "subarea": "Endocrinologia", "tema": "Dislipidemia", "peso_prova": 9, "frequencia_prova": 85, "score": 32.5, "prioridade": 1 },
             { "area": "Clínica Médica", "subarea": "Pneumologia", "tema": "Pneumonia", "peso_prova": 10, "frequencia_prova": 95, "score": 36.5, "prioridade": 1 },
@@ -686,8 +686,13 @@
         const areaMapping = { "Cirurgia": "Cirurgia", "Urologia": "Cirurgia", "Ortopedia": "Cirurgia", "Trauma": "Cirurgia", "Cirurgia Pediátrica": "Cirurgia", "Cirurgia Plástica": "Cirurgia", "Cirurgia Vascular": "Cirurgia", "Cirurgia Torácica": "Cirurgia", "Clínica": "Clínica Médica", "Clínica Médica": "Clínica Médica", "Cardiologia": "Clínica Médica", "Endocrino": "Clínica Médica", "Gastro": "Clínica Médica", "Hemato": "Clínica Médica", "Infecto": "Clínica Médica", "Nefrologia": "Clínica Médica", "Neuro": "Clínica Médica", "Pneumo": "Clínica Médica", "Psiquiatria": "Clínica Médica", "Reumato": "Clínica Médica", "Dermato": "Clínica Médica", "Hepato": "Clínica Médica", "Oftalmo": "Clínica Médica", "Otorrino": "Clínica Médica", "Ginecologia": "Ginecologia e Obstetrícia", "Obstetrícia": "Ginecologia e Obstetrícia", "Ginecologia e Obstetrícia": "Ginecologia e Obstetrícia", "Pediatria": "Pediatria", "Preventiva": "Preventiva" };
         const mainCategories = ["Cirurgia", "Clínica Médica", "Ginecologia e Obstetrícia", "Pediatria", "Preventiva"];
         
-        window.pendingDeleteAction = null; window.pendingReviewTaskId = null; window.activeNotesTaskId = null; window.currentCalendarDate = new Date(); window.searchFilterArea = 'Todas'; window.activeView = 'homepage'; window.activeWeek = 1; window.undoStack = []; window.redoStack = [];
+        window.pendingDeleteAction = null; window.pendingReviewTaskId = null; window.activeNotesTaskId = null; window.currentCalendarDate = new Date(); window.activeView = 'homepage'; window.activeWeek = 1; window.undoStack = []; window.redoStack = [];
         window.isFocusMode = false;
+        
+        // Variáveis de Filtro de Busca (Cascata)
+        window.searchFilterArea = 'Todas';
+        window.searchFilterSubArea = 'Todas';
+        window.searchFilterPrio = 'Todas';
 
         // Pomodoro Multi-fase e Lo-Fi Audio
         window.activePomoTaskId = null; window.pomoPhase = 'aula'; window.pomoTime = 50 * 60; window.pomoTotalTime = 50 * 60; window.pomoTimer = null; window.isPomoRunning = false; window.pomoLastTick = 0; window.sessionStudySeconds = 0;
@@ -905,7 +910,9 @@
             if(localStorage.getItem('oledMode') === '1') window.toggleOledMode(true);
             window._reminders = JSON.parse(localStorage.getItem('reminders_v2') || '[]');
             window.renderReminderList();
-            window.updateUI();
+            
+            // Força a página inicial na inicialização
+            window.switchView('homepage');
         }
 
         window.saveToCloud = async function() { try { if(currentUser) await updateDoc(doc(db, "profiles", currentUser.uid), { app_state: window.state }); } catch(e) {} }
@@ -926,8 +933,16 @@
         // ----------------------------------------------------------------------
         // FUNÇÕES UI GERAIS E MODAIS
         // ----------------------------------------------------------------------
-        window.openModal = function(id) { document.getElementById('modal-'+id).classList.add('open'); }
-        window.closeModal = function(id) { document.getElementById('modal-'+id).classList.remove('open'); }
+        window.openModal = function(id) { 
+            const m = document.getElementById('modal-'+id);
+            m.classList.remove('hidden'); 
+            m.classList.add('flex'); 
+        }
+        window.closeModal = function(id) { 
+            const m = document.getElementById('modal-'+id);
+            m.classList.add('hidden'); 
+            m.classList.remove('flex'); 
+        }
         window.openSettingsSidebar = function() { document.getElementById('settings-sidebar').classList.add('open'); document.getElementById('settings-overlay').classList.add('open'); }
         window.closeSettingsSidebar = function() { document.getElementById('settings-sidebar').classList.remove('open'); document.getElementById('settings-overlay').classList.remove('open'); }
         window.toggleSidebar = function() { document.getElementById('main-sidebar').classList.toggle('sidebar-hidden'); }
@@ -944,14 +959,30 @@
             else { delete p.completedDate; delete p.nextReview; } window.triggerSave(); window.updateUI(); 
         }
         window.toggleCrucial = function(taskId) { window.pushState(); window.ensureProgress(taskId); window.state.progress[taskId].crucial = !window.state.progress[taskId].crucial; window.triggerSave(); window.updateUI(); if(window.state.progress[taskId].crucial) window.showToast('Marcado como Crucial 🔥');}
-        window.updateTaskQuestions = function(taskId, newVal, isCorrect = false) { 
-            window.pushState(); const val = parseInt(newVal) || 0; window.ensureProgress(taskId); 
-            if(isCorrect) window.state.progress[taskId].correct = val; 
-            else { const diff = val - (parseInt(window.state.progress[taskId].done) || 0); window.state.progress[taskId].done = val; if (diff > 0) { const today = window.getTodayStr(); window.state.dailyStats[today] = (window.state.dailyStats[today] || 0) + diff; } } window.triggerSave(); window.updateUI(); 
+        
+        window.updateTaskQuestions = function(taskId, newVal) { 
+            window.pushState(); 
+            const val = parseInt(newVal) || 0; 
+            window.ensureProgress(taskId); 
+            const diff = val - (parseInt(window.state.progress[taskId].done) || 0); 
+            window.state.progress[taskId].done = val; 
+            if (diff > 0) { 
+                const today = window.getTodayStr(); 
+                window.state.dailyStats[today] = (window.state.dailyStats[today] || 0) + diff; 
+            } 
+            window.triggerSave(); window.updateUI(); 
         }
+        
+        window.updateScore = function(taskId, type, newVal) {
+            window.pushState(); 
+            const val = parseInt(newVal) || 0; 
+            window.ensureProgress(taskId); 
+            window.state.progress[taskId][type] = val; 
+            window.triggerSave(); window.updateUI(); 
+        }
+
         window.toggleTaskDetails = function(taskId, event) { if(event && (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || event.target.closest('button') || event.target.closest('.custom-checkbox') || event.target.closest('.task-edit-subject') || event.target.closest('.drag-handle'))) return; window.expandedCards[taskId] = !window.expandedCards[taskId]; window.updateUI(); }
         window.updateTaskName = function(weekIdx, taskIdx, newName) { window.pushState(); const week = window.state.weeks.find(w => w.week === weekIdx); if(week && week.tasks[taskIdx]) { week.tasks[taskIdx].subject = newName; window.triggerSave(); } };
-        window.toggleSubTask = function(idSuffix) { window.pushState(); const parts = idSuffix.split('_'); const type = 'sub_' + parts.pop(); const id = parts.join('_'); window.ensureProgress(id); window.state.progress[id][type] = !window.state.progress[id][type]; window.triggerSave(); window.updateUI(); }
         
         window.openAddTaskModal = function(weekNum) { window.activeWeek = weekNum; document.getElementById('add-nome').value = ''; window.openModal('add-task'); }
         window.saveCustomTask = function() {
@@ -963,7 +994,7 @@
         document.getElementById('confirm-delete-btn').onclick = function() { if(window.pendingDeleteAction) { window.pushState(); const week = window.state.weeks.find(w => w.week === window.pendingDeleteAction.weekIdx); if(week) { week.tasks.splice(window.pendingDeleteAction.taskIdx, 1); window.triggerSave(); window.updateUI(); window.showToast("Tarefa removida."); } window.pendingDeleteAction = null; window.closeModal('delete'); } };
 
         // Notas e Anki
-        window.parseNotesLinks = function() { const text = document.getElementById('notes-textarea').value; const links = text.match(/(https?:\/\/[^\s]+)/g); const container = document.getElementById('notes-links-container'); if (links && links.length > 0) { container.innerHTML = '<p class="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-2">Links Detectados</p><div class="flex flex-col gap-2">' + links.map(l => `<a href="${l}" target="_blank" class="bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 truncate"><i class="fas fa-external-link-alt"></i> ${l}</a>`).join('') + '</div>'; container.classList.remove('hidden'); } else { container.innerHTML = ''; container.classList.add('hidden'); } }
+        window.parseNotesLinks = function() { const text = document.getElementById('notes-textarea').value; const links = text.match(/(https?:\/\/[^\s]+)/g); const container = document.getElementById('notes-links-container'); if (links && links.length > 0) { container.innerHTML = '<p class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Links Detectados</p><div class="flex flex-col gap-2">' + links.map(l => `<a href="${l}" target="_blank" class="bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 truncate"><i class="fas fa-external-link-alt"></i> ${l}</a>`).join('') + '</div>'; container.classList.remove('hidden'); } else { container.innerHTML = ''; container.classList.add('hidden'); } }
         window.openNotesModal = function(taskId) { window.activeNotesTaskId = taskId; window.ensureProgress(taskId); document.getElementById('notes-textarea').value = window.state.progress[taskId].notes || ''; window.parseNotesLinks(); window.openModal('notes'); }
         window.closeNotesModal = function() { window.activeNotesTaskId = null; window.closeModal('notes'); }
         window.saveNotes = function() { window.pushState(); if(window.activeNotesTaskId) { window.state.progress[window.activeNotesTaskId].notes = document.getElementById('notes-textarea').value; window.triggerSave(); window.showToast('Anotação salva'); } window.closeNotesModal(); }
@@ -1074,6 +1105,28 @@
             }
             window.triggerSave(); window.updateUI(); window.closeModal('remanejo');
         }
+        
+        window.openReviewModal = function(taskId) { window.pendingReviewTaskId = taskId; window.openModal('review'); }
+        window.closeReviewModal = function() { window.pendingReviewTaskId = null; window.closeModal('review'); }
+        window.scheduleReview = function(days) { 
+            if(window.pendingReviewTaskId) { 
+                window.pushState();
+                const date = new Date(); date.setDate(date.getDate() + days); 
+                const dateStr = date.toISOString().split('T')[0]; 
+                window.ensureProgress(window.pendingReviewTaskId); 
+                window.state.progress[window.pendingReviewTaskId].nextReview = dateStr; 
+                window.triggerSave(); window.updateUI(); window.showToast('Revisão agendada!');
+            } 
+            window.closeReviewModal(); 
+        }
+        window.completeReview = function(taskId) {
+            if(window.state.progress[taskId]) { 
+                delete window.state.progress[taskId].nextReview; 
+                confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 }}); 
+                window.showToast('Revisão concluída!'); 
+                window.triggerSave(); window.updateUI(); 
+            } 
+        };
 
         // ----------------------------------------------------------------------
         // RENDERIZADORES UI E GRÁFICOS
@@ -1093,8 +1146,9 @@
                 const pct = w.tasks.length ? Math.round((done/w.tasks.length)*100) : 0;
                 const active = (window.activeView === 'week' && window.activeWeek === w.week) ? 'ring-2 ring-slate-900 shadow-md font-bold z-10' : '';
                 let statusClass = done === w.tasks.length && w.tasks.length > 0 ? "bg-emerald-50 text-emerald-900 border-l-4 border-emerald-500" : done > 0 ? "bg-amber-50 text-amber-900 border-l-4 border-amber-400" : "bg-white text-slate-600 border-l-4 border-transparent hover:bg-slate-50";
+                const dateRange = window.getWeekDateRange(w.week);
                 
-                nav.innerHTML += `<div onclick="window.activeWeek=${w.week}; window.switchView('week');" class="px-4 py-3.5 rounded-xl mb-2 cursor-pointer transition-all border border-slate-200 ${statusClass} ${active} flex justify-between items-center" ondragover="window.handleDragOverWeek(event)" ondragleave="window.handleDragLeaveWeek(event)" ondrop="window.handleDropWeek(event, ${w.week})"><div><span class="block text-[11px] font-black uppercase tracking-wide opacity-80 pointer-events-none">Semana ${w.week}</span></div><span class="text-xs font-black bg-white/60 px-2 py-1 rounded shadow-sm pointer-events-none">${pct}%</span></div>`;
+                nav.innerHTML += `<div onclick="window.activeWeek=${w.week}; window.switchView('week');" class="px-4 py-3.5 rounded-xl mb-2 cursor-pointer transition-all border border-slate-200 ${statusClass} ${active} flex justify-between items-center" ondragover="window.handleDragOverWeek(event)" ondragleave="window.handleDragLeaveWeek(event)" ondrop="window.handleDropWeek(event, ${w.week})"><div><span class="block text-[11px] font-black uppercase tracking-wide opacity-80 pointer-events-none">Semana ${w.week}</span><span class="text-[9px] text-slate-500 font-mono mt-0.5 block font-medium pointer-events-none">${dateRange}</span></div><span class="text-xs font-black bg-white/60 px-2 py-1 rounded shadow-sm pointer-events-none">${pct}%</span></div>`;
             });
         }
 
@@ -1107,29 +1161,29 @@
             if(currW && currW.timeSlots) {
                 currW.timeSlots.forEach((slot, sIdx) => {
                     const cell = currW.agenda ? currW.agenda[`d${dayIdx}_s${sIdx}`] : null; const txt = cell ? cell.text : '- Estudo/Livre -';
-                    agendaHtml += `<div class="flex items-start gap-4 timeline-item"><div class="text-[10px] font-bold font-mono text-gray-400 mt-1 w-20 shrink-0">${slot}</div><div class="font-bold text-sm text-slate-800 dark:text-white bg-white dark:bg-cm-mid px-4 py-2 border border-slate-200 dark:border-transparent rounded-xl flex-1 shadow-sm break-words" style="${cell && cell.color ? `--agenda-color: ${cell.color};` : ''}">${txt}</div></div>`;
+                    agendaHtml += `<div class="flex items-start gap-4 timeline-item"><div class="text-[10px] font-bold font-mono text-slate-400 mt-1 w-20 shrink-0">${slot}</div><div class="font-bold text-sm text-slate-800 dark:text-white bg-white dark:bg-cm-mid px-4 py-2 border border-slate-200 dark:border-transparent rounded-xl flex-1 shadow-sm break-words" style="${cell && cell.color ? `--agenda-color: ${cell.color};` : ''}">${txt}</div></div>`;
                 });
             }
 
-            let html = `<div class="max-w-4xl mx-auto fade-enter"><div class="mb-10"><h1 class="text-4xl font-serif text-slate-900 dark:text-white tracking-tight">Bom dia, ${nome}!</h1><p class="text-gray-500 dark:text-cm-muted mt-2 text-lg">Aqui está o seu painel de comando de hoje.</p></div><div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10"><div class="card-ui p-6 flex flex-col justify-center items-center text-center"><div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Semana Atual</div><div class="text-xl font-black text-blue-500 flex items-center gap-2"><i class="fas fa-calendar-week"></i> Semana ${currW?currW.week:''}</div></div><div class="card-ui p-6 flex flex-col justify-center items-center text-center"><div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Questões Hoje</div><div class="text-3xl font-black text-green-500 flex items-center gap-2">${window.state.dailyStats[window.getTodayStr()]||0}</div></div><div class="card-ui p-6 flex flex-col justify-center items-center text-center bg-black text-white dark:bg-cm-green dark:text-cm-dark border-transparent cursor-pointer hover:scale-105 transition shadow-md" onclick="window.startPomoTask('avulso', 'Foco Livre')"><i class="fas fa-play text-2xl mb-2 text-green-400 dark:text-cm-dark"></i><div class="font-bold text-sm">Foco Livre</div></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><div><h3 class="text-sm font-bold uppercase tracking-widest text-gray-500 mb-6 flex items-center gap-2"><i class="far fa-clock"></i> A Linha do Tempo (Hoje)</h3><div class="card-ui p-8 pt-10">${agendaHtml}<button onclick="window.switchView('week')" class="w-full text-xs font-bold text-blue-600 hover:underline mt-4 text-center">Editar grade (Aba Semanas)</button></div></div><div><h3 class="text-sm font-bold uppercase tracking-widest text-gray-500 mb-6 flex items-center gap-2"><i class="fas fa-tasks"></i> Foco Principal (Sem. ${currW?currW.week:''})</h3><div class="space-y-3">`;
-            todayTasks.slice(0, 6).forEach(t => { html += `<div class="card-ui p-4 flex items-center gap-3 ${window.getPrioClass(t.prioridade, t.tipo)} cursor-pointer" onclick="window.activeWeek=${currW?currW.week:1}; window.switchView('week');"><div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-cm-dark2 flex items-center justify-center text-gray-400 shrink-0"><i class="fas fa-arrow-right"></i></div><div class="min-w-0"><div class="font-bold text-sm text-slate-800 dark:text-white leading-tight truncate">${t.subject}</div><span class="${window.getCategoryColor(t.category)} text-[8px] uppercase font-bold px-1.5 rounded mt-1 inline-block">${t.category}</span></div></div>`; });
-            if(todayTasks.length===0) html+=`<div class="text-gray-400 text-sm text-center py-10 italic">Tudo concluído para esta semana! Descanse.</div>`;
+            let html = `<div class="max-w-4xl mx-auto fade-enter"><div class="mb-10"><h1 class="text-4xl font-serif text-slate-900 dark:text-white tracking-tight">Bom dia, ${nome}!</h1><p class="text-slate-500 dark:text-cm-muted mt-2 text-lg">Aqui está o seu painel de comando de hoje.</p></div><div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10"><div class="card-ui p-6 flex flex-col justify-center items-center text-center"><div class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Semana Atual</div><div class="text-xl font-black text-blue-500 flex items-center gap-2"><i class="fas fa-calendar-week"></i> Semana ${currW?currW.week:''}</div></div><div class="card-ui p-6 flex flex-col justify-center items-center text-center"><div class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Questões Hoje</div><div class="text-3xl font-black text-green-500 flex items-center gap-2">${window.state.dailyStats[window.getTodayStr()]||0}</div></div><div class="card-ui p-6 flex flex-col justify-center items-center text-center bg-black text-white dark:bg-cm-green dark:text-cm-dark border-transparent cursor-pointer hover:scale-105 transition shadow-md" onclick="window.startPomoTask('avulso', 'Foco Livre')"><i class="fas fa-play text-2xl mb-2 text-green-400 dark:text-cm-dark"></i><div class="font-bold text-sm">Foco Livre</div></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><div><h3 class="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2"><i class="far fa-clock"></i> A Linha do Tempo (Hoje)</h3><div class="card-ui p-8 pt-10">${agendaHtml}<button onclick="window.switchView('week')" class="w-full text-xs font-bold text-blue-600 hover:underline mt-4 text-center">Editar grade (Aba Semanas)</button></div></div><div><h3 class="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2"><i class="fas fa-tasks"></i> Foco Principal (Sem. ${currW?currW.week:''})</h3><div class="space-y-3">`;
+            todayTasks.slice(0, 6).forEach(t => { html += `<div class="card-ui p-4 flex items-center gap-3 ${window.getPrioClass(t.prioridade, t.tipo)} cursor-pointer" onclick="window.activeWeek=${currW?currW.week:1}; window.switchView('week');"><div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-cm-dark2 flex items-center justify-center text-slate-400 shrink-0"><i class="fas fa-arrow-right"></i></div><div class="min-w-0"><div class="font-bold text-sm text-slate-800 dark:text-white leading-tight truncate">${t.subject}</div><span class="${window.getCategoryColor(t.category)} text-[8px] uppercase font-bold px-1.5 rounded mt-1 inline-block">${t.category}</span></div></div>`; });
+            if(todayTasks.length===0) html+=`<div class="text-slate-400 text-sm text-center py-10 italic">Tudo concluído para esta semana! Descanse.</div>`;
             html += `</div></div></div></div>`; content.innerHTML = html;
         }
 
         window.renderWeek = function() {
             const w = window.state.weeks.find(d => d.week === window.activeWeek); const content = document.getElementById('content-area'); if(!w) return; const days = window.getWeekDates(window.activeWeek);
             
-            let agendaHtml = `<div class="mb-12 fade-enter"><div class="flex justify-between items-center mb-6"><div><h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Semana ${w.week}</h2><span class="text-sm font-bold text-gray-500 dark:text-emerald-500">${w.phase}</span></div><button onclick="window.openModal('replica-agenda')" class="text-xs font-bold bg-white dark:bg-cm-mid border border-slate-200 dark:border-gray-700 px-4 py-2 rounded-xl shadow-sm hover:border-blue-500 transition"><i class="fas fa-copy mr-1 text-blue-500"></i> Configurar Grade</button></div><div class="overflow-x-auto rounded-xl shadow-lg border border-slate-200 dark:border-gray-800 bg-white dark:bg-cm-dark2"><table class="agenda-table min-w-[700px]"><thead><tr><th class="p-3 w-24">Horário</th>${days.map(d=>`<th class="p-3 text-xs font-bold">${d.name}</th>`).join('')}</tr></thead><tbody>`;
+            let agendaHtml = `<div class="mb-12 fade-enter"><div class="flex justify-between items-center mb-6"><div><h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Semana ${w.week}</h2><span class="text-sm font-bold text-slate-500 dark:text-emerald-500">${w.phase}</span></div><button onclick="window.openModal('replica-agenda')" class="text-xs font-bold bg-white dark:bg-cm-mid border border-slate-200 dark:border-gray-700 px-4 py-2 rounded-xl shadow-sm hover:border-blue-500 transition"><i class="fas fa-copy mr-1 text-blue-500"></i> Configurar Grade</button></div><div class="overflow-x-auto rounded-xl shadow-lg border border-slate-200 dark:border-gray-800 bg-white dark:bg-cm-dark2"><table class="agenda-table min-w-[700px]"><thead><tr><th class="p-3 w-24 bg-slate-900 text-white border-none">Horário</th>${days.map(d=>`<th class="p-3 bg-slate-900 text-white border-l border-slate-700 text-center"><div class="font-bold text-sm uppercase tracking-widest">${d.name}</div><div class="text-[10px] text-slate-400 font-mono mt-1">${d.date}</div></th>`).join('')}</tr></thead><tbody>`;
             w.timeSlots.forEach((slot, sIdx) => {
-                agendaHtml += `<tr><td class="p-0 w-24 align-middle time-col relative border-r border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-cm-mid/30"><div class="w-full text-center font-mono text-[10px] font-bold outline-none p-3" contenteditable="true" onblur="window.updateTimeSlot(${window.activeWeek}, ${sIdx}, this.innerText)">${slot}</div><div class="row-controls"><button onclick="window.addAgendaRowAt(${window.activeWeek}, ${sIdx})" class="text-[10px] text-blue-600 hover:bg-blue-50 py-1"><i class="fas fa-plus"></i></button><button onclick="window.requestRemoveAgendaRow(${window.activeWeek}, ${sIdx})" class="text-[10px] text-red-600 hover:bg-red-50 py-1"><i class="fas fa-minus"></i></button></div></td>`;
+                agendaHtml += `<tr><td class="p-0 w-24 align-middle time-col relative border-r border-slate-100 dark:border-gray-800 bg-slate-50/50 dark:bg-cm-mid/30"><div class="w-full text-center font-mono text-[10px] font-bold outline-none p-3" contenteditable="true" onblur="window.updateTimeSlot(${window.activeWeek}, ${sIdx}, this.innerText)">${slot}</div><div class="row-controls"><button onclick="window.addAgendaRowAt(${window.activeWeek}, ${sIdx})" class="text-[10px] text-blue-600 hover:bg-blue-50 py-1"><i class="fas fa-plus"></i></button><button onclick="window.requestRemoveAgendaRow(${window.activeWeek}, ${sIdx})" class="text-[10px] text-red-600 hover:bg-red-50 py-1"><i class="fas fa-minus"></i></button></div></td>`;
                 days.forEach((d, dIdx) => { const c = w.agenda[`${d.key}_s${sIdx}`] || {}; const bgColor = c.color || '#ffffff'; agendaHtml += `<td class="p-0 h-16 relative"><div class="agenda-cell w-full h-full p-2 outline-none flex items-center justify-center text-xs font-medium text-slate-700 dark:text-white" style="background-color: ${bgColor}; --agenda-color: ${bgColor};" contenteditable="true" onblur="window.updateAgendaCell(${window.activeWeek}, '${d.key}', ${sIdx}, this.innerText)">${c.text||''}</div></td>`; }); agendaHtml += `</tr>`;
             });
-            agendaHtml += `</tbody></table></div><p class="text-[10px] text-gray-400 mt-2"><i class="fas fa-info-circle text-blue-400"></i> Edite a tabela acima para configurar as suas aulas. As alterações são guardadas na nuvem.</p></div>`;
+            agendaHtml += `</tbody></table></div><p class="text-[10px] text-slate-400 mt-2"><i class="fas fa-info-circle text-blue-400"></i> Edite a tabela acima para configurar as suas aulas. As alterações são guardadas na nuvem.</p></div>`;
 
-            let filtersHtml = `<div class="flex flex-wrap gap-2 mb-4"><button onclick="window.setWeekFilter('all')" class="px-4 py-2 rounded-xl text-xs font-bold border transition shadow-sm ${window.weekFilter==='all'?'bg-slate-900 text-white border-slate-900':'bg-white text-slate-500 border-slate-200 hover:bg-gray-50 dark:bg-cm-dark2'}">Todas</button><button onclick="window.setWeekFilter('pending')" class="px-4 py-2 rounded-xl text-xs font-bold border transition shadow-sm ${window.weekFilter==='pending'?'bg-slate-900 text-white border-slate-900':'bg-white text-slate-500 border-slate-200 hover:bg-gray-50 dark:bg-cm-dark2'}">Pendentes</button><button onclick="window.setWeekFilter('done')" class="px-4 py-2 rounded-xl text-xs font-bold border transition shadow-sm ${window.weekFilter==='done'?'bg-emerald-600 text-white border-emerald-600':'bg-white text-slate-500 border-slate-200 hover:bg-gray-50 dark:bg-cm-dark2'}">Concluídas</button></div>`;
+            let filtersHtml = `<div class="flex flex-wrap gap-2 mb-4"><button onclick="window.setWeekFilter('all')" class="px-4 py-2 rounded-xl text-xs font-bold border transition shadow-sm ${window.weekFilter==='all'?'bg-slate-900 text-white border-slate-900':'bg-white text-slate-500 border-slate-200 hover:bg-slate-50 dark:bg-cm-dark2'}">Todas</button><button onclick="window.setWeekFilter('pending')" class="px-4 py-2 rounded-xl text-xs font-bold border transition shadow-sm ${window.weekFilter==='pending'?'bg-slate-900 text-white border-slate-900':'bg-white text-slate-500 border-slate-200 hover:bg-slate-50 dark:bg-cm-dark2'}">Pendentes</button><button onclick="window.setWeekFilter('done')" class="px-4 py-2 rounded-xl text-xs font-bold border transition shadow-sm ${window.weekFilter==='done'?'bg-emerald-600 text-white border-emerald-600':'bg-white text-slate-500 border-slate-200 hover:bg-slate-50 dark:bg-cm-dark2'}">Concluídas</button></div>`;
 
-            let tasksHtml = `<div class="mb-4 flex justify-between items-center"><h3 class="text-sm font-bold uppercase tracking-widest text-gray-500"><i class="fas fa-bullseye text-green-500 mr-1"></i> Tarefas da Semana (${w.tasks.length})</h3><div class="flex items-center gap-1 bg-white p-1 rounded-xl shadow-sm border border-slate-200 dark:bg-cm-dark2 dark:border-gray-800"><button onclick="window.toggleLoFi()" id="lofi-btn" class="text-gray-400 font-bold text-sm px-3 py-1.5 rounded-lg hover:text-blue-500 transition flex items-center gap-2"><i class="fas fa-headphones-alt"></i> Lo-Fi</button></div></div>${filtersHtml}<div class="grid gap-4 fade-enter">`;
+            let tasksHtml = `<div class="mb-4 flex justify-between items-center"><h3 class="text-sm font-bold uppercase tracking-widest text-slate-500"><i class="fas fa-bullseye text-green-500 mr-1"></i> Tarefas da Semana (${w.tasks.length})</h3><div class="flex items-center gap-1 bg-white p-1 rounded-xl shadow-sm border border-slate-200 dark:bg-cm-dark2 dark:border-gray-800"><button onclick="window.toggleLoFi()" id="lofi-btn" class="text-slate-400 font-bold text-sm px-3 py-1.5 rounded-lg hover:text-blue-500 transition flex items-center gap-2"><i class="fas fa-headphones-alt"></i> Lo-Fi</button></div></div>${filtersHtml}<div class="grid gap-4 fade-enter">`;
             
             let tasksToRender = w.tasks;
             if(window.weekFilter === 'pending') tasksToRender = tasksToRender.filter(t => !window.state.progress[t.id]?.doneStatus);
@@ -1138,25 +1192,50 @@
             tasksToRender.forEach((t, idx) => {
                 const p = window.state.progress[t.id] || {}; const isChecked = p.doneStatus; const prioClass = window.getPrioClass(t.prioridade, t.tipo);
                 const labels = window.getPrioLabel(t.prioridade, t.tipo, t.customizado);
-                const doneVal = p.done || ''; const correctVal = p.correct || ''; const acc = Math.round(((parseInt(p.correct)||0) / (parseInt(p.done)||1)) * 100) || 0;
+                const doneVal = parseInt(p.done) || 0; const correctVal = parseInt(p.correct) || 0; const acc = doneVal > 0 ? Math.round((correctVal / doneVal) * 100) : 0;
                 
                 let isPomoActiveForThis = (window.activePomoTaskId === t.id);
                 const isExpanded = window.expandedCards[t.id] || isPomoActiveForThis;
+                const accColor = doneVal > 0 ? window.getAccuracyColorClass(acc) : 'text-slate-300';
                 
                 let pomoUI = '';
                 if (isPomoActiveForThis) {
                     let displayTime = "50:00"; const m = Math.floor(window.pomoTime / 60); const s = window.pomoTime % 60; displayTime = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
                     let pct1 = 0, pct2 = 0, pct3 = 0; if (window.pomoPhase === 'aula') pct1 = ((window.pomoTotalTime - window.pomoTime) / window.pomoTotalTime) * 100; else if (window.pomoPhase === 'descanso') { pct1 = 100; pct2 = ((window.pomoTotalTime - window.pomoTime) / window.pomoTotalTime) * 100; } else if (window.pomoPhase === 'questoes') { pct1 = 100; pct2 = 100; pct3 = ((window.pomoTotalTime - window.pomoTime) / window.pomoTotalTime) * 100; }
-                    pomoUI = `<div class="mt-4 bg-slate-50 dark:bg-cm-mid border border-slate-200 dark:border-gray-800 p-5 rounded-2xl w-full shadow-inner"><div class="flex justify-between text-[9px] font-black uppercase tracking-widest mb-3"><span id="pomo-lbl-1-${t.id}" class="${window.pomoPhase === 'aula' ? 'text-blue-600' : 'text-slate-400'}"><i class="fas fa-book-open"></i> Aula</span><span id="pomo-lbl-2-${t.id}" class="${window.pomoPhase === 'descanso' ? 'text-amber-500' : 'text-slate-400'}"><i class="fas fa-coffee"></i> Pausa</span><span id="pomo-lbl-3-${t.id}" class="${window.pomoPhase === 'questoes' ? 'text-emerald-600' : 'text-slate-400'}"><i class="fas fa-pen"></i> Questões</span></div><div class="flex gap-2 h-2 mb-5"><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="pomo-bar-1-${t.id}" class="h-full bg-blue-500 transition-all duration-1000" style="width: ${pct1}%"></div></div><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="pomo-bar-2-${t.id}" class="h-full bg-amber-400 transition-all duration-1000" style="width: ${pct2}%"></div></div><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="pomo-bar-3-${t.id}" class="h-full bg-emerald-500 transition-all duration-1000" style="width: ${pct3}%"></div></div></div><div class="flex justify-between items-center"><div id="pomo-display-${t.id}" class="font-mono font-black text-4xl text-slate-800 dark:text-white tracking-tight">${displayTime}</div><div class="flex gap-2 items-center"><button id="pomo-btn-play-${t.id}" onclick="window.pomoToggle('${t.id}')" class="w-10 h-10 flex items-center justify-center text-white rounded-xl shadow-md ${window.isPomoRunning ? 'bg-red-500' : 'bg-slate-900 dark:bg-cm-green'}">${window.isPomoRunning ? '<i class="fas fa-pause text-xs"></i>' : '<i class="fas fa-play text-xs ml-0.5"></i>'}</button><button onclick="window.pomoSkip()" class="px-4 py-2.5 bg-white dark:bg-cm-dark2 border border-slate-200 text-gray-700 dark:text-gray-300 rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-gray-50 transition shadow-sm">Pular <i class="fas fa-forward"></i></button><button onclick="window.pomoStop()" class="px-4 py-2.5 bg-red-50 border border-red-200 text-red-600 rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-red-100 transition shadow-sm"><i class="fas fa-times"></i> Fechar</button></div></div></div>`;
+                    pomoUI = `<div class="mt-4 bg-slate-50 dark:bg-cm-mid border border-slate-200 dark:border-gray-800 p-5 rounded-2xl w-full shadow-inner"><div class="flex justify-between text-[9px] font-black uppercase tracking-widest mb-3"><span id="pomo-lbl-1-${t.id}" class="${window.pomoPhase === 'aula' ? 'text-blue-600' : 'text-slate-400'}"><i class="fas fa-book-open"></i> Aula</span><span id="pomo-lbl-2-${t.id}" class="${window.pomoPhase === 'descanso' ? 'text-amber-500' : 'text-slate-400'}"><i class="fas fa-coffee"></i> Pausa</span><span id="pomo-lbl-3-${t.id}" class="${window.pomoPhase === 'questoes' ? 'text-emerald-600' : 'text-slate-400'}"><i class="fas fa-pen"></i> Questões</span></div><div class="flex gap-2 h-2 mb-5"><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="pomo-bar-1-${t.id}" class="h-full bg-blue-500 transition-all duration-1000" style="width: ${pct1}%"></div></div><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="pomo-bar-2-${t.id}" class="h-full bg-amber-400 transition-all duration-1000" style="width: ${pct2}%"></div></div><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="pomo-bar-3-${t.id}" class="h-full bg-emerald-500 transition-all duration-1000" style="width: ${pct3}%"></div></div></div><div class="flex justify-between items-center"><div id="pomo-display-${t.id}" class="font-mono font-black text-4xl text-slate-800 dark:text-white tracking-tight">${displayTime}</div><div class="flex gap-2 items-center"><button id="pomo-btn-play-${t.id}" onclick="window.pomoToggle('${t.id}')" class="w-10 h-10 flex items-center justify-center text-white rounded-xl shadow-md ${window.isPomoRunning ? 'bg-red-500' : 'bg-slate-900 dark:bg-cm-green'}">${window.isPomoRunning ? '<i class="fas fa-pause text-xs"></i>' : '<i class="fas fa-play text-xs ml-0.5"></i>'}</button><button onclick="window.pomoSkip()" class="px-4 py-2.5 bg-white dark:bg-cm-dark2 border border-slate-200 text-slate-700 dark:text-gray-300 rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-slate-50 transition shadow-sm">Pular <i class="fas fa-forward"></i></button><button onclick="window.pomoStop()" class="px-4 py-2.5 bg-red-50 border border-red-200 text-red-600 rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-red-100 transition shadow-sm"><i class="fas fa-times"></i> Fechar</button></div></div></div>`;
                 }
 
-                tasksHtml += `<div class="card-ui p-5 flex flex-col md:flex-row gap-5 ${prioClass} ${isChecked?'done bg-slate-50 opacity-60 grayscale-[0.5]':''} relative group draggable-item shadow-md" draggable="true" ondragstart="window.handleDragStart(event, ${window.activeWeek}, ${idx})" ondragover="window.handleDragOverTask(event)" ondragleave="window.handleDragLeaveTask(event)" ondrop="window.handleDropTask(event, ${idx})"><div class="flex items-start gap-4 flex-1 min-w-0"><div class="mt-1 cursor-move text-gray-300 group-hover:text-blue-400 drag-handle transition shrink-0"><i class="fas fa-grip-vertical text-lg"></i></div><div class="relative shrink-0"><input type="checkbox" class="peer appearance-none w-6 h-6 border-2 border-slate-300 rounded-lg checked:bg-black checked:border-black transition cursor-pointer" ${isChecked?'checked':''} onchange="window.toggleTask('${t.id}')"><i class="fas fa-check text-white absolute top-1 left-1 pointer-events-none opacity-0 peer-checked:opacity-100 text-xs transition"></i></div><div class="flex-1 cursor-pointer min-w-0" onclick="window.toggleTaskDetails('${t.id}', event)"><div class="font-bold text-slate-800 dark:text-white text-lg leading-snug truncate outline-none task-edit-subject" contenteditable="true" onblur="window.updateTaskName(${window.activeWeek}, ${idx}, this.innerText)">${t.subject}</div><div class="flex items-center justify-between mt-2"><div class="flex gap-2 items-center"><span class="text-[10px] font-bold bg-slate-100 dark:bg-cm-mid px-2.5 py-1 rounded-md text-slate-600 dark:text-gray-300 uppercase tracking-wide border border-transparent">${t.category}</span><button onclick="window.toggleCrucial('${t.id}')" class="fire-btn ${p.crucial ? 'active' : ''} w-8 h-8 rounded-full hover:bg-red-50 flex items-center justify-center transition text-lg"><i class="fas fa-fire ${p.crucial ? 'text-red-500' : 'text-gray-400'}"></i></button></div><button onclick="window.requestDeleteTask(${window.activeWeek}, ${idx})" class="text-gray-300 hover:text-red-500 px-2 py-1 rounded transition text-xl"><i class="fas fa-trash-alt"></i></button></div><div class="flex gap-2 mt-4 flex-wrap"><button onclick="window.toggleSubTask('${t.id}_a')" class="px-3 py-1.5 rounded-lg border ${p.sub_a ? 'bg-slate-800 text-white' : 'bg-white text-slate-500 border-slate-200 dark:bg-cm-dark2 dark:text-gray-400'} text-[10px] font-bold uppercase transition hover:shadow-md flex items-center gap-1.5"><i class="fas fa-play"></i> Aula</button><button onclick="window.toggleSubTask('${t.id}_q')" class="px-3 py-1.5 rounded-lg border ${p.sub_q ? 'bg-slate-800 text-white' : 'bg-white text-slate-500 border-slate-200 dark:bg-cm-dark2 dark:text-gray-400'} text-[10px] font-bold uppercase transition hover:shadow-md flex items-center gap-1.5"><i class="fas fa-pen"></i> Questões</button><button onclick="window.toggleSubTask('${t.id}_k')" class="px-3 py-1.5 rounded-lg border ${p.sub_k ? 'bg-slate-800 text-white' : 'bg-white text-slate-500 border-slate-200 dark:bg-cm-dark2 dark:text-gray-400'} text-[10px] font-bold uppercase transition hover:shadow-md flex items-center gap-1.5"><i class="fas fa-bolt"></i> Anki</button><button onclick="window.startPomoForTask('${t.id}')" class="px-4 py-1.5 rounded-xl border bg-white dark:bg-cm-mid text-slate-700 dark:text-white border-slate-200 hover:bg-slate-50 text-[10px] font-black uppercase tracking-wider transition shadow-sm flex items-center gap-2 ml-auto ${isPomoActiveForThis ? 'hidden' : ''}"><i class="fas fa-stopwatch text-green-500 text-sm"></i> Sessão</button></div>${pomoUI}</div><button onclick="window.toggleTaskDetails('${t.id}', event)" class="text-gray-400 w-8 h-8 rounded-full hover:bg-slate-100 dark:hover:bg-cm-mid transition shrink-0"><i class="fas fa-chevron-down ${isExpanded?'rotate-180':''}"></i></button></div>`;
-                if(isExpanded) {
-                    tasksHtml += `<div class="pt-4 mt-2 border-t border-slate-100 dark:border-gray-800 flex flex-col sm:flex-row gap-5 fade-enter"><div class="flex-1 flex gap-2 items-center"><button onclick="window.openNotesModal('${t.id}')" class="text-gray-500 hover:text-blue-500 px-3 py-2 rounded-xl transition-colors text-sm bg-slate-100 dark:bg-cm-mid font-bold flex items-center gap-2"><i class="fas fa-book-open"></i> Anotações / Links</button></div><div class="flex items-center gap-3 bg-slate-50 dark:bg-cm-dark2 p-3 rounded-xl border border-slate-100 dark:border-gray-800 shrink-0 shadow-inner"><div class="text-center"><span class="text-[9px] font-bold text-gray-400 uppercase block tracking-wider mb-1">Feitas</span><input type="number" value="${doneVal}" onchange="window.updateTaskQuestions('${t.id}', this.value)" class="w-12 bg-transparent text-center font-bold text-slate-800 dark:text-white outline-none border-b-2 border-slate-300 dark:border-gray-700 focus:border-green-500 py-1 transition" placeholder="-"></div><div class="text-center"><span class="text-[9px] font-bold text-gray-400 uppercase block tracking-wider mb-1">Acertos</span><input type="number" value="${correctVal}" onchange="window.updateScore('${t.id}', 'correct', this.value)" class="w-12 bg-transparent text-center font-bold text-slate-800 dark:text-white outline-none border-b-2 border-slate-300 dark:border-gray-700 focus:border-green-500 py-1 transition" placeholder="-"></div><div class="pl-3 border-l border-slate-200 dark:border-gray-800 text-center min-w-[3.5rem]"><span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">%</span><span class="text-lg font-black ${acc>0?'text-green-500':'text-gray-400'}">${acc}%</span></div></div></div>`;
-                }
-                tasksHtml += `</div>`;
+                tasksHtml += `<div class="card-ui p-5 flex flex-col lg:flex-row gap-5 ${prioClass} ${isChecked?'done bg-slate-50/80 opacity-90 border-slate-200':''} relative group draggable-item shadow-sm" draggable="true" ondragstart="window.handleDragStart(event, ${window.activeWeek}, ${idx})" ondragover="window.handleDragOverTask(event)" ondragleave="window.handleDragLeaveTask(event)" ondrop="window.handleDropTask(event, ${idx})">
+                    <div class="flex items-center gap-4 flex-1 min-w-0">
+                        <div class="cursor-move text-slate-300 hover:text-blue-500 drag-handle transition shrink-0"><i class="fas fa-grip-vertical text-lg"></i></div>
+                        <div class="relative shrink-0"><input type="checkbox" class="peer appearance-none w-6 h-6 border-2 border-slate-300 rounded-lg checked:bg-black checked:border-black transition cursor-pointer" ${isChecked?'checked':''} onchange="window.toggleTask('${t.id}')"><i class="fas fa-check text-white absolute top-1 left-1 pointer-events-none opacity-0 peer-checked:opacity-100 text-xs transition"></i></div>
+                        <div class="flex-1 cursor-pointer min-w-0" onclick="window.toggleTaskDetails('${t.id}', event)">
+                            <div class="font-bold text-slate-800 dark:text-white text-lg leading-snug truncate outline-none task-edit-subject" contenteditable="true" onblur="window.updateTaskName(${window.activeWeek}, ${idx}, this.innerText)">${t.subject}</div>
+                            <div class="flex items-center gap-2 mt-1.5">
+                                <span class="${window.getCategoryColor(t.category)} text-[8px] font-bold uppercase px-1.5 rounded border">${t.category}</span>
+                                <span class="bg-slate-100 dark:bg-cm-mid text-slate-500 text-[8px] font-bold uppercase px-1.5 rounded border border-slate-200 dark:border-gray-700">${labels}</span>
+                                <button onclick="window.toggleCrucial('${t.id}')" class="fire-btn ${p.crucial ? 'active' : ''} w-6 h-6 rounded-full hover:bg-red-50 flex items-center justify-center transition text-sm"><i class="fas fa-fire ${p.crucial ? 'text-red-500' : 'text-slate-400'}"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-4 shrink-0 flex-wrap lg:flex-nowrap">
+                        <div class="flex items-center gap-3 bg-slate-50 dark:bg-cm-dark2 p-2.5 rounded-xl border border-slate-200 dark:border-gray-800 shadow-inner">
+                            <div class="text-center"><span class="text-[9px] font-bold text-slate-400 uppercase block tracking-wider mb-1">Feitas</span><input type="number" value="${doneVal || ''}" onchange="window.updateTaskQuestions('${t.id}', this.value)" class="w-10 bg-transparent text-center font-bold text-slate-800 dark:text-white outline-none border-b-2 border-slate-300 dark:border-gray-700 focus:border-blue-500 py-0.5 transition" placeholder="-"></div>
+                            <div class="text-center"><span class="text-[9px] font-bold text-slate-400 uppercase block tracking-wider mb-1">Acertos</span><input type="number" value="${correctVal || ''}" onchange="window.updateScore('${t.id}', 'correct', this.value)" class="w-10 bg-transparent text-center font-bold text-slate-800 dark:text-white outline-none border-b-2 border-slate-300 dark:border-gray-700 focus:border-blue-500 py-0.5 transition" placeholder="-"></div>
+                            <div class="pl-3 border-l border-slate-200 dark:border-gray-800 text-center min-w-[3.5rem]"><span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">%</span><span class="text-base font-black ${accColor}">${acc}%</span></div>
+                        </div>
+                        
+                        <div class="flex items-center gap-2 border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-gray-800 pt-3 lg:pt-0 lg:pl-4 w-full lg:w-auto">
+                            <button onclick="window.openNotesModal('${t.id}')" class="w-9 h-9 rounded-full bg-slate-100 dark:bg-cm-mid text-slate-500 hover:bg-blue-100 hover:text-blue-600 transition flex items-center justify-center shadow-sm" title="Anotações e Links"><i class="fas fa-book-open"></i></button>
+                            <button onclick="window.requestDeleteTask(${window.activeWeek}, ${idx})" class="w-9 h-9 rounded-full bg-slate-100 dark:bg-cm-mid text-slate-500 hover:bg-red-100 hover:text-red-600 transition flex items-center justify-center shadow-sm" title="Excluir"><i class="fas fa-trash-alt"></i></button>
+                            <button onclick="window.startPomoForTask('${t.id}')" class="px-4 py-2 rounded-full bg-slate-900 dark:bg-cm-mid text-white text-[10px] font-bold uppercase tracking-wider hover:bg-slate-700 transition shadow-md flex items-center gap-2 ml-auto ${isPomoActiveForThis ? 'hidden' : ''}"><i class="fas fa-stopwatch text-emerald-400"></i> Focar</button>
+                        </div>
+                    </div>
+                    ${pomoUI}
+                </div>`;
             });
-            tasksHtml += `<button onclick="window.openAddTaskModal(${window.activeWeek})" class="w-full py-8 border-2 border-dashed border-slate-300 dark:border-gray-700 rounded-3xl text-gray-400 hover:text-blue-600 hover:border-blue-400 hover:bg-blue-50/50 transition font-bold text-sm mt-2 flex items-center justify-center gap-3 group"><span class="w-10 h-10 rounded-full bg-slate-100 dark:bg-cm-mid flex items-center justify-center group-hover:bg-blue-100 transition shadow-sm text-lg"><i class="fas fa-plus"></i></span> Inserir Tema Avulso</button></div>`;
+            tasksHtml += `<button onclick="window.openAddTaskModal(${window.activeWeek})" class="w-full py-8 border-2 border-dashed border-slate-300 dark:border-gray-700 rounded-3xl text-slate-400 hover:text-blue-600 hover:border-blue-400 hover:bg-blue-50/50 transition font-bold text-sm mt-2 flex items-center justify-center gap-3 group"><span class="w-10 h-10 rounded-full bg-slate-100 dark:bg-cm-mid flex items-center justify-center group-hover:bg-blue-100 transition shadow-sm text-lg"><i class="fas fa-plus"></i></span> Inserir Tema Avulso</button></div>`;
             content.innerHTML = agendaHtml + tasksHtml;
         }
 
@@ -1164,7 +1243,6 @@
             const content = document.getElementById('content-area'); 
             content.classList.add('fade-enter');
             
-            // Cálculos
             let totalFocoSeconds = 0; Object.values(window.state.timeTracking || {}).forEach(v => totalFocoSeconds += v);
             const hrs = Math.floor(totalFocoSeconds / 3600); const mins = Math.floor((totalFocoSeconds % 3600) / 60);
             
@@ -1173,8 +1251,7 @@
             let totalDone = 0; let totalCorrect = 0;
             window.state.weeks.forEach(w => w.tasks.forEach(t => {
                 const p = window.state.progress[t.id] || {};
-                totalDone += parseInt(p.done) || 0;
-                totalCorrect += parseInt(p.correct) || 0;
+                totalDone += parseInt(p.done) || 0; totalCorrect += parseInt(p.correct) || 0;
             }));
             const precisao = window.calculateAccuracy(totalDone, totalCorrect);
             
@@ -1225,8 +1302,7 @@
                         areaTasks++;
                         const p = window.state.progress[t.id] || {};
                         if(p.doneStatus) areaDone++;
-                        areaTotalQ += parseInt(p.done) || 0;
-                        areaCorrect += parseInt(p.correct) || 0;
+                        areaTotalQ += parseInt(p.done) || 0; areaCorrect += parseInt(p.correct) || 0;
                     }
                 }));
                 const pbar = areaTasks > 0 ? Math.round((areaDone / areaTasks) * 100) : 0;
@@ -1236,7 +1312,7 @@
                 html += `<div class="flex items-center gap-4">
                     <div class="w-28 text-[10px] font-bold text-slate-600 dark:text-gray-300 leading-tight uppercase">${area}</div>
                     <div class="flex-1">
-                        <div class="flex justify-between text-[10px] mb-1 font-bold text-gray-500"><span title="${areaDone} de ${areaTasks} tarefas">Concluído: ${pbar}%</span> <span>Acerto: ${aAcc}%</span></div>
+                        <div class="flex justify-between text-[10px] mb-1 font-bold text-slate-500"><span title="${areaDone} de ${areaTasks} tarefas">Concluído: ${pbar}%</span> <span>Acerto: ${aAcc}%</span></div>
                         <div class="w-full bg-slate-100 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
                             <div class="${color} h-2 rounded-full transition-all duration-1000" style="width: ${pbar}%"></div>
                         </div>
@@ -1262,10 +1338,10 @@
             html += `<div class="lg:col-span-1 bg-white dark:bg-cm-dark2 p-6 rounded-3xl border border-slate-200 dark:border-gray-800 shadow-sm flex flex-col justify-between">
                 <div>
                     <h3 class="text-sm font-black text-slate-700 dark:text-white uppercase tracking-wider mb-1 flex items-center gap-2"><i class="fas fa-fire text-orange-500"></i> Mapa de Constância</h3>
-                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-6">Últimos 30 dias</p>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-6">Últimos 30 dias</p>
                 </div>
                 <div class="flex flex-wrap gap-1.5 justify-start content-start flex-1">${heatmapHtml}</div>
-                <div class="flex items-center gap-2 mt-4 text-[9px] text-gray-400 font-bold uppercase tracking-widest justify-end">Menos <div class="w-3 h-3 rounded-sm bg-slate-100 dark:bg-slate-700/50"></div><div class="w-3 h-3 rounded-sm bg-emerald-400"></div><div class="w-3 h-3 rounded-sm bg-emerald-700"></div> Mais</div>
+                <div class="flex items-center gap-2 mt-4 text-[9px] text-slate-400 font-bold uppercase tracking-widest justify-end">Menos <div class="w-3 h-3 rounded-sm bg-slate-100 dark:bg-slate-700/50"></div><div class="w-3 h-3 rounded-sm bg-emerald-400"></div><div class="w-3 h-3 rounded-sm bg-emerald-700"></div> Mais</div>
             </div></div>`;
 
             // BLOCO 4 & 5: Gráfico e Resumo da Semana
@@ -1275,10 +1351,10 @@
             let weekHtml = `<div class="bg-white dark:bg-cm-dark2 p-6 rounded-3xl border border-slate-200 dark:border-gray-800 shadow-sm h-[280px] flex flex-col"><div class="flex justify-between items-center mb-4"><h3 class="font-black text-sm text-slate-700 dark:text-white uppercase tracking-wider flex items-center gap-2"><i class="fas fa-bullseye text-green-500"></i> Semana Atual (${currW ? currW.week : ''})</h3><button onclick="window.switchView('week')" class="text-[10px] font-bold bg-slate-900 text-white px-3 py-1.5 rounded-lg hover:bg-slate-700 transition">Estudar</button></div><div class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-2.5">`;
             
             if (currW) {
-                if(currW.tasks.length === 0) weekHtml += `<div class="text-xs text-gray-400 italic">Nenhuma tarefa.</div>`;
+                if(currW.tasks.length === 0) weekHtml += `<div class="text-xs text-slate-400 italic">Nenhuma tarefa.</div>`;
                 currW.tasks.forEach(t => {
                     const p = window.state.progress[t.id] || {};
-                    weekHtml += `<div class="flex items-center gap-3 p-2.5 rounded-xl border ${p.doneStatus ? 'bg-slate-50 border-transparent dark:bg-slate-800/50 opacity-60' : 'bg-white border-slate-100 dark:bg-cm-mid dark:border-gray-700'}"><div class="w-5 h-5 rounded-full border-2 ${p.doneStatus ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-gray-300 dark:border-gray-600'} flex items-center justify-center text-[10px] shrink-0"><i class="fas fa-check ${p.doneStatus?'block':'hidden'}"></i></div><div class="flex-1 min-w-0"><div class="font-bold text-xs text-slate-700 dark:text-white truncate">${t.subject}</div><div class="text-[9px] uppercase tracking-widest text-gray-400 font-bold mt-0.5 truncate">${t.category}</div></div></div>`;
+                    weekHtml += `<div class="flex items-center gap-3 p-2.5 rounded-xl border ${p.doneStatus ? 'bg-slate-50 border-transparent dark:bg-slate-800/50 opacity-60' : 'bg-white border-slate-100 dark:bg-cm-mid dark:border-gray-700'}"><div class="w-5 h-5 rounded-full border-2 ${p.doneStatus ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-gray-300 dark:border-gray-600'} flex items-center justify-center text-[10px] shrink-0"><i class="fas fa-check ${p.doneStatus?'block':'hidden'}"></i></div><div class="flex-1 min-w-0"><div class="font-bold text-xs text-slate-700 dark:text-white truncate">${t.subject}</div><div class="text-[9px] uppercase tracking-widest text-slate-400 font-bold mt-0.5 truncate">${t.category}</div></div></div>`;
                 });
             }
             weekHtml += `</div></div>`;
@@ -1303,37 +1379,68 @@
             
             // Calculo Dinâmico para os Filtros
             const counts = { 'Todas': bancoDeMaterias.length };
-            mainCategories.forEach(cat => {
-                counts[cat] = bancoDeMaterias.filter(t => (areaMapping[t.area] || 'Outros') === cat).length;
-            });
+            mainCategories.forEach(cat => { counts[cat] = bancoDeMaterias.filter(t => (areaMapping[t.area] || 'Outros') === cat).length; });
 
-            const filterButtons = ['Todas', ...mainCategories].map(area => {
-                const label = area === 'Clínica' ? 'Clínica Médica' : area;
-                const count = counts[area] || 0;
-                return `<button onclick="window.toggleSearchFilter('${area}')" class="filter-chip flex items-center gap-2 shadow-sm ${window.searchFilterArea === area ? 'active' : ''}"><span>${label}</span> <span class="bg-gray-100 dark:bg-gray-800 text-gray-500 rounded-full px-1.5 py-0.5 text-[9px] ${window.searchFilterArea === area ? 'bg-white/20 text-white' : ''}">${count}</span></button>`;
+            const filterButtonsArea = ['Todas', ...mainCategories].map(area => {
+                const label = area === 'Clínica' ? 'Clínica Médica' : area; const count = counts[area] || 0;
+                return `<button onclick="window.toggleSearchArea('${area}')" class="filter-chip shadow-sm ${window.searchFilterArea === area ? 'active' : ''}"><span>${label}</span> <span class="filter-badge">${count}</span></button>`;
             }).join('');
 
-            const html = `<div class="bg-white dark:bg-cm-dark2 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-gray-800 min-h-[600px]"><div class="mb-10"><h2 class="text-3xl font-black text-slate-800 dark:text-white mb-6 tracking-tight">Buscar Tarefas</h2><input type="text" id="global-search-input" placeholder="Digite o tema, categoria ou palavra-chave..." class="w-full text-lg p-5 border border-slate-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none bg-slate-50 dark:bg-cm-mid transition shadow-sm mb-6 font-medium dark:text-white"><div class="flex flex-wrap gap-2">${filterButtons}</div></div><div id="search-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div></div>`;
+            // Sub-áreas e Prioridades (Filtro Cascata)
+            let subAreaHtml = '';
+            if (window.searchFilterArea !== 'Todas') {
+                const subAreas = [...new Set(bancoDeMaterias.filter(t => (areaMapping[t.area] || 'Outros') === window.searchFilterArea).map(t => t.subarea))].sort();
+                if(subAreas.length > 0) {
+                    const subButtons = ['Todas', ...subAreas].map(sub => `<button onclick="window.toggleSearchSubArea('${sub}')" class="filter-chip text-[10px] shadow-sm ${window.searchFilterSubArea === sub ? 'active' : ''}">${sub}</button>`).join('');
+                    subAreaHtml = `<div class="flex flex-wrap gap-2 mt-3 pl-2 border-l-2 border-slate-200">${subButtons}</div>`;
+                }
+            }
+
+            const prios = [{l:'Todas', v:'Todas'}, {l:'Alta (1)', v:1}, {l:'Média (2)', v:2}, {l:'Baixa (3)', v:3}, {l:'Opcional (4)', v:4}];
+            const prioHtml = `<div class="flex items-center gap-2 mt-4 text-xs font-bold text-slate-500 uppercase tracking-widest"><i class="fas fa-filter"></i> Prioridade: ` + prios.map(p => `<button onclick="window.toggleSearchPrio('${p.v}')" class="filter-chip text-[10px] shadow-sm ${window.searchFilterPrio === p.v ? 'active' : ''}">${p.l}</button>`).join('') + `</div>`;
+
+            const html = `<div class="bg-white dark:bg-cm-dark2 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-gray-800 min-h-[600px]"><div class="mb-10"><h2 class="text-3xl font-black text-slate-800 dark:text-white mb-6 tracking-tight">Buscar Tarefas</h2><input type="text" id="global-search-input" placeholder="Digite o tema, categoria ou palavra-chave..." class="w-full text-lg p-5 border border-slate-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none bg-slate-50 dark:bg-cm-mid transition shadow-sm mb-6 font-medium dark:text-white"><div class="flex flex-col gap-2"><div class="flex flex-wrap gap-2">${filterButtonsArea}</div>${subAreaHtml}${prioHtml}</div></div><div id="search-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div></div>`;
             content.innerHTML = html; 
             setTimeout(() => content.classList.remove('fade-enter'), 500); 
             
             const searchInput = document.getElementById('global-search-input'); 
             const resultsContainer = document.getElementById('search-results');
             
-            window.toggleSearchFilter = function(area) { window.searchFilterArea = area; filterAndRender(searchInput.value); }
+            window.toggleSearchArea = function(area) { window.searchFilterArea = area; window.searchFilterSubArea = 'Todas'; filterAndRender(searchInput.value); }
+            window.toggleSearchSubArea = function(sub) { window.searchFilterSubArea = sub; filterAndRender(searchInput.value); }
+            window.toggleSearchPrio = function(prio) { window.searchFilterPrio = prio; filterAndRender(searchInput.value); }
             
             function filterAndRender(query) {
                 const lowerQ = query.toLowerCase(); 
                 const filtered = bancoDeMaterias.filter(t => {
                     const textMatch = t.tema.toLowerCase().includes(lowerQ) || t.area.toLowerCase().includes(lowerQ);
-                    let areaMatch = true; if (window.searchFilterArea !== 'Todas') { let tArea = areaMapping[t.area] || "Outros"; areaMatch = tArea === window.searchFilterArea; } return textMatch && areaMatch;
+                    let areaMatch = true; if (window.searchFilterArea !== 'Todas') areaMatch = (areaMapping[t.area] || "Outros") === window.searchFilterArea;
+                    let subMatch = true; if (window.searchFilterSubArea !== 'Todas') subMatch = t.subarea === window.searchFilterSubArea;
+                    let prioMatch = true; if (window.searchFilterPrio !== 'Todas') prioMatch = t.prioridade === window.searchFilterPrio;
+                    return textMatch && areaMatch && subMatch && prioMatch;
                 });
                 window._currentFilteredBank = filtered;
-                if(filtered.length === 0) { resultsContainer.innerHTML = `<div class="col-span-full text-center py-24"><i class="fas fa-search-minus text-4xl text-gray-200 dark:text-gray-700 mb-4 block"></i><p class="text-gray-400 font-medium">Nenhuma tarefa encontrada no banco.</p></div>`; } 
+                
+                // Read current agenda text to see what is already used
+                const scheduledIds = new Set();
+                window.state.weeks.forEach(w => w.tasks.forEach(t => scheduledIds.add(t.subject)));
+
+                if(filtered.length === 0) { resultsContainer.innerHTML = `<div class="col-span-full text-center py-24"><i class="fas fa-search-minus text-4xl text-slate-300 dark:text-gray-700 mb-4 block"></i><p class="text-slate-400 font-medium">Nenhuma tarefa encontrada no banco para estes filtros.</p></div>`; } 
                 else { 
-                    resultsContainer.innerHTML = filtered.slice(0, 50).map((item, index) => { 
-                        return `<div class="p-5 border border-slate-200 dark:border-gray-800 rounded-2xl bg-white dark:bg-cm-mid hover:shadow-lg transition-all hover:border-blue-200 card-shadow flex flex-col justify-between items-start draggable-item" draggable="true" ondragstart="window.handleDragStartSearch(event, ${index})"><div class="flex-1 w-full"><div class="font-bold text-sm text-slate-800 dark:text-white leading-tight mb-2">${item.tema}</div><div class="text-[10px] font-bold uppercase text-gray-400 tracking-wide mb-4">${item.area}</div></div><div class="flex justify-between w-full items-center"><div class="text-[10px] text-gray-400 font-medium flex items-center gap-1 bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded"><i class="fas fa-arrows-alt text-gray-300"></i> Arraste p/ semana</div><button onclick="window.addFromBank(${index})" class="bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-blue-600 hover:text-white transition shadow-sm flex-shrink-0" title="Adicionar à Semana Atual"><i class="fas fa-plus"></i> Add</button></div></div>`; 
+                    resultsContainer.innerHTML = filtered.map((item, index) => { 
+                        const isUsed = scheduledIds.has(item.tema);
+                        const statusBadge = isUsed ? `<span class="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded text-[9px] font-bold border border-emerald-200"><i class="fas fa-check"></i> Na Agenda</span>` : `<span class="bg-slate-100 text-slate-500 px-2 py-0.5 rounded text-[9px] font-bold border border-slate-200">Não agendado</span>`;
+                        return `<div class="p-5 border border-slate-200 dark:border-gray-800 rounded-2xl bg-white dark:bg-cm-mid hover:shadow-lg transition-all hover:border-blue-300 card-shadow flex flex-col justify-between items-start draggable-item" draggable="true" ondragstart="window.handleDragStartSearch(event, ${index})"><div class="flex-1 w-full"><div class="font-bold text-sm text-slate-800 dark:text-white leading-tight mb-2">${item.tema}</div><div class="flex items-center gap-2 mb-4"><div class="text-[9px] font-black uppercase text-slate-400 tracking-wide">${item.area}</div>${statusBadge}</div></div><div class="flex justify-between w-full items-center"><div class="text-[10px] text-slate-400 font-medium flex items-center gap-1 bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded"><i class="fas fa-arrows-alt text-slate-300"></i> Arraste p/ semana</div><button onclick="window.addFromBank(${index})" class="bg-slate-900 dark:bg-gray-700 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-blue-600 transition shadow-sm flex-shrink-0" title="Adicionar à Semana Atual"><i class="fas fa-plus"></i> Add</button></div></div>`; 
                     }).join(''); 
+                }
+                
+                // Re-render filters to update active states without full redraw
+                const areaContainer = document.querySelector('.filter-chip').parentElement;
+                if(areaContainer) {
+                    areaContainer.innerHTML = ['Todas', ...mainCategories].map(area => {
+                        const label = area === 'Clínica' ? 'Clínica Médica' : area; const count = counts[area] || 0;
+                        return `<button onclick="window.toggleSearchArea('${area}')" class="filter-chip shadow-sm ${window.searchFilterArea === area ? 'active' : ''}"><span>${label}</span> <span class="filter-badge">${count}</span></button>`;
+                    }).join('');
                 }
             }
             searchInput.addEventListener('input', (e) => filterAndRender(e.target.value)); filterAndRender('');
