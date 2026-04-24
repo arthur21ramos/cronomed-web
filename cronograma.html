@@ -781,7 +781,7 @@
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     currentUser = user;
-                    document.getElementById('user-avatar').innerText = user.email ? user.email[0].toUpperCase() : 'U';
+                    
                     document.getElementById('user-email').innerText = user.email;
                     
                     const docSnap = await getDoc(doc(db, "profiles", user.uid));
