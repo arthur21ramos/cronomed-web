@@ -57,7 +57,7 @@
         .agenda-table td { border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; position: relative; vertical-align: top; }
         .time-col { background-color: #f8fafc; color: #334155; font-weight: 600; vertical-align: middle !important; font-size: 0.75rem; }
         .agenda-cell { width: 100%; height: 100%; min-height: 60px; padding: 6px; display: flex; align-items: center; justify-content: center; text-align: center; outline: none; word-break: break-word; white-space: pre-wrap; font-size: 11px; background-color: #fff; transition: background-color 0.2s; }
-        .agenda-cell:focus { background-color: #fffbeb; box-shadow: inset 0 0 0 2px #fbbf24; z-index: 10; }
+        .agenda-cell:focus { background-color: #fffbeb !important; box-shadow: inset 0 0 0 2px #fbbf24; z-index: 10; color: #000 !important; }
         .row-controls { position: absolute; right: 0; top: 0; bottom: 0; width: 20px; display: flex; flex-direction: column; justify-content: center; gap: 2px; opacity: 0; transition: opacity 0.2s; pointer-events: none; background: rgba(255,255,255,0.9); border-left: 1px solid #e2e8f0; }
         tr:hover .row-controls { opacity: 1; pointer-events: auto; }
 
@@ -72,6 +72,11 @@
         .hy-card.completed { background-color: #f0fdf4; border-color: #86efac; color: #166534; font-weight: 600; }
         .hy-circle { width: 10px; height: 10px; border-radius: 50%; border: 2px solid #cbd5e1; background: white; flex-shrink: 0; }
         .hy-card.completed .hy-circle { background: #166534; border-color: #166534; }
+
+        /* DRAG AND DROP */
+        .draggable-item { cursor: grab; }
+        .draggable-item:active { cursor: grabbing; opacity: 0.6; }
+        .drop-target-week { background-color: rgba(16, 185, 129, 0.1) !important; border-color: #10b981 !important; transform: scale(1.02); }
 
         /* MODAIS E TRANSIÇÕES */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 1rem; }
@@ -98,21 +103,33 @@
         .settings-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 1000; display: none; }
         .settings-overlay.open { display: block; }
 
-        /* DARK MODE & OLED */
-        body.dark-mode { background: #0f172a !important; color: #e2e8f0 !important; }
+        /* ================= DARK MODE BLINDADO ================= */
+        body.dark-mode { background: #0f172a !important; color: #f8fafc !important; }
         body.dark-mode #main-sidebar { background: #1e293b !important; border-color: #334155 !important; }
         body.dark-mode #main-scroll { background: #0f172a !important; }
         body.dark-mode .bg-white { background-color: #1e293b !important; }
         body.dark-mode .bg-gray-50, body.dark-mode .bg-slate-50 { background-color: #0f172a !important; }
-        body.dark-mode .border-gray-200, body.dark-mode .border-gray-100 { border-color: #334155 !important; }
-        body.dark-mode .text-slate-800, body.dark-mode .text-slate-700, body.dark-mode .text-slate-900 { color: #e2e8f0 !important; }
-        body.dark-mode .text-gray-400, body.dark-mode .text-gray-500 { color: #94a3b8 !important; }
         body.dark-mode .bg-gray-100, body.dark-mode .bg-slate-100 { background-color: #334155 !important; }
-        body.dark-mode .dash-item, body.dark-mode .hy-card, body.dark-mode .agenda-cell, body.dark-mode .settings-sidebar, body.dark-mode .reminder-panel, body.dark-mode .remanejo-card { background: #1e293b !important; border-color: #334155 !important; color: #e2e8f0 !important; }
-        body.dark-mode .modal-content { background: #1e293b !important; border-color: #334155 !important; color: #e2e8f0 !important; }
+        
+        body.dark-mode .border-gray-200, body.dark-mode .border-gray-100, body.dark-mode .border-slate-200, body.dark-mode .border-slate-100 { border-color: #334155 !important; }
+        
+        /* Correção das fontes no modo noturno para impedir que desapareçam */
+        body.dark-mode .text-slate-900, body.dark-mode .text-slate-800, body.dark-mode .text-gray-900, body.dark-mode .text-gray-800, body.dark-mode .text-black { color: #f8fafc !important; }
+        body.dark-mode .text-slate-700, body.dark-mode .text-gray-700 { color: #e2e8f0 !important; }
+        body.dark-mode .text-slate-600, body.dark-mode .text-gray-600 { color: #cbd5e1 !important; }
+        body.dark-mode .text-slate-500, body.dark-mode .text-gray-500 { color: #94a3b8 !important; }
+        
+        /* Modais e Paineis em Dark Mode */
+        body.dark-mode .dash-item, body.dark-mode .hy-card, body.dark-mode .settings-sidebar, body.dark-mode .reminder-panel, body.dark-mode .remanejo-card { background: #1e293b !important; border-color: #334155 !important; color: #f8fafc !important; }
+        body.dark-mode .modal-content { background: #1e293b !important; border-color: #334155 !important; color: #f8fafc !important; }
+        
+        /* Tabela e Células em Dark Mode */
         body.dark-mode .agenda-table { border-color: #334155; }
         body.dark-mode .agenda-table td { border-color: #334155; }
+        body.dark-mode .time-col { background-color: #0f172a !important; color: #94a3b8 !important; border-right-color: #334155 !important;}
+        body.dark-mode .agenda-cell { background-color: #1e293b !important; color: #f8fafc !important; border-left: 4px solid var(--agenda-color, transparent); border-radius: 4px; }
         
+        /* OLED Mode */
         body.dark-mode.oled-mode { background: #000000 !important; }
         body.dark-mode.oled-mode #main-scroll, body.dark-mode.oled-mode .bg-gray-50 { background-color: #000000 !important; }
         body.dark-mode.oled-mode #main-sidebar, body.dark-mode.oled-mode .bg-white { background-color: #0a0a0a !important; border-color: #1a1a1a !important; }
@@ -133,7 +150,7 @@
 
         /* LOADER */
         #loader-overlay { position: fixed; inset: 0; background: #f8fafc; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        body.dark-mode #loader-overlay { background: #0a0f0d; }
+        body.dark-mode #loader-overlay { background: #0f172a; }
 
         .task-details-wrapper { transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out; max-height: 0; opacity: 0; overflow: hidden; }
         .task-details-wrapper.expanded { max-height: 600px; opacity: 1; }
@@ -180,6 +197,8 @@
                     </div>
                 </div>
                 <div class="text-xl font-black text-white w-12 text-right hidden sm:block" id="global-percent-text">0%</div>
+                <!-- Botão de Avatar do Usuário -->
+                <div id="user-avatar" class="hidden w-8 h-8 rounded-full bg-green-500 text-white font-bold items-center justify-center uppercase">U</div>
                 <button onclick="openSettingsSidebar()" class="text-gray-400 hover:text-white transition-colors ml-2 bg-gray-800 p-2 rounded-full" title="Configurações">
                     <i class="fas fa-cog"></i>
                 </button>
@@ -193,7 +212,7 @@
                     <button onclick="switchView('homepage')" id="nav-homepage" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-white border border-gray-200 text-gray-600 hover:bg-gray-100 text-left">
                         <i class="fas fa-home text-lg w-5 text-center"></i><span>Página Inicial</span>
                     </button>
-                    <button onclick="switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-black text-white hover:bg-gray-800 text-left">
+                    <button onclick="switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-black text-white hover:bg-gray-800 text-left border border-transparent">
                         <i class="fas fa-chart-line text-lg w-5 text-center"></i><span>Dashboard &amp; Metas</span>
                     </button>
                     <button onclick="switchView('search')" id="nav-search" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-white border border-gray-200 text-gray-600 hover:bg-gray-100 text-left">
@@ -234,8 +253,8 @@
         <div class="p-6 space-y-6">
             <div>
                 <h4 class="text-xs font-bold uppercase text-gray-400 tracking-widest mb-4">Conta</h4>
-                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-3 dark:bg-cm-dark2">
-                    <div class="font-bold text-sm text-slate-800 dark:text-white truncate" id="user-name">Usuário</div>
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-3">
+                    <div class="font-bold text-sm text-slate-800 truncate" id="user-name">Usuário</div>
                     <div class="text-[10px] text-gray-500 truncate" id="user-email">email@email.com</div>
                 </div>
                 <button onclick="window.recalculateRoute()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 bg-white hover:bg-blue-50 text-blue-700 font-bold text-sm transition card-shadow mb-2"><i class="fas fa-sync-alt"></i> Recalcular Rota (Novo Ano)</button>
@@ -244,12 +263,12 @@
             <div>
                 <h4 class="text-xs font-bold uppercase text-gray-400 tracking-widest mb-4">Aparência</h4>
                 <div class="space-y-3">
-                    <div class="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:bg-cm-dark2">
-                        <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white"><i class="fas fa-moon text-sm"></i></div><div><div class="font-bold text-sm text-slate-800 dark:text-white">Modo Noturno</div></div></div>
+                    <div class="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50">
+                        <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white"><i class="fas fa-moon text-sm"></i></div><div><div class="font-bold text-sm text-slate-800">Modo Noturno</div></div></div>
                         <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="dark-mode-toggle" class="sr-only peer" onchange="toggleDarkMode(this.checked)"><div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-slate-900"></div></label>
                     </div>
-                    <div class="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:bg-cm-dark2">
-                        <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-black flex items-center justify-center text-white"><i class="fas fa-circle text-sm"></i></div><div><div class="font-bold text-sm text-slate-800 dark:text-white">True Black (OLED)</div></div></div>
+                    <div class="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50">
+                        <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-black flex items-center justify-center text-white"><i class="fas fa-circle text-sm"></i></div><div><div class="font-bold text-sm text-slate-800">True Black (OLED)</div></div></div>
                         <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="oled-mode-toggle" class="sr-only peer" onchange="toggleOledMode(this.checked)"><div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div></label>
                     </div>
                 </div>
@@ -415,8 +434,7 @@
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // EMBEDDED BANCO DE MATÉRIAS
-        // Para evitar erros de carregamento externo (CORS/MIME/404), os dados foram embutidos diretamente.
+        // EMBEDDED BANCO DE MATÉRIAS (~240 tarefas para Busca e Cronograma)
         const bancoDeMaterias = [
             { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Hipertensão Arterial Sistêmica", "peso_prova": 10, "frequencia_prova": 95, "score": 36.5, "prioridade": 1 },
             { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Síndrome Coronariana Aguda", "peso_prova": 10, "frequencia_prova": 95, "score": 36.5, "prioridade": 1 },
@@ -750,10 +768,14 @@
         window.handleGlobalKeydown = function(e) { if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); window.undo(); } if ((e.ctrlKey || e.metaKey) && e.key === 'y') { e.preventDefault(); window.redo(); } }
 
         // Utils
+        window.getStartDate = function() {
+            if (window.state && window.state.startDate) return new Date(window.state.startDate);
+            return new Date();
+        }
         window.getAccuracyColorClass = function(percentage) { if (percentage >= 90) return 'text-emerald-800'; if (percentage >= 80) return 'text-emerald-500'; if (percentage >= 60) return 'text-amber-500'; return 'text-red-500'; }
         window.calculateAccuracy = function(done, correct) { if (!done || done <= 0) return 0; return Math.min(100, Math.round((correct / done) * 100)); }
-        window.getWeekDateRange = function(weekIndex) { if (weekIndex < 1) return ""; const start = new Date(2026, 1, 1); start.setDate(start.getDate() + (weekIndex - 1) * 7); const end = new Date(start); end.setDate(start.getDate() + 6); const fmt = d => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }); return `${fmt(start)} a ${fmt(end)}`; }
-        window.getWeekDates = function(weekIdx) { const start = new Date(2026, 1, 1); const baseDate = new Date(start); baseDate.setDate(baseDate.getDate() + ((weekIdx - 1) * 7) - 1); const days = []; const dayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]; for(let i=0; i<7; i++) { const d = new Date(baseDate); d.setDate(baseDate.getDate() + i); days.push({ name: dayNames[i], date: d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }), key: `d${i}` }); } return days; }
+        window.getWeekDateRange = function(weekIndex) { if (weekIndex < 1) return ""; const start = window.getStartDate(); start.setDate(start.getDate() + (weekIndex - 1) * 7); const end = new Date(start); end.setDate(start.getDate() + 6); const fmt = d => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }); return `${fmt(start)} a ${fmt(end)}`; }
+        window.getWeekDates = function(weekIdx) { const start = window.getStartDate(); const baseDate = new Date(start); baseDate.setDate(baseDate.getDate() + ((weekIdx - 1) * 7) - 1); const days = []; const dayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]; for(let i=0; i<7; i++) { const d = new Date(baseDate); d.setDate(baseDate.getDate() + i); days.push({ name: dayNames[i], date: d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }), key: `d${i}` }); } return days; }
         window.getTodayStr = function() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
         window.getCategoryColor = function(category) { const map = { "Cirurgia": "bg-red-50 text-red-600 border-red-200", "Clínica Médica": "bg-blue-50 text-blue-600 border-blue-200", "Ginecologia e Obstetrícia": "bg-pink-50 text-pink-600 border-pink-200", "Pediatria": "bg-yellow-50 text-yellow-700 border-yellow-200", "Preventiva": "bg-emerald-50 text-emerald-600 border-emerald-200" }; const mapped = areaMapping[category] || "Clínica Médica"; return map[mapped] || map["Clínica Médica"]; }
         window.getPrioClass = function(prio, tipo) { if(tipo === 'revisao') return 'prio-rev'; if(prio === 1) return 'prio-1'; if(prio === 2) return 'prio-2'; if(prio === 3) return 'prio-3'; return 'prio-4'; }
@@ -781,13 +803,15 @@
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     currentUser = user;
-                    
-                    document.getElementById('user-email').innerText = user.email;
+                    // Certificar que não tentamos atualizar texto se o avatar foi convertido para icone
+                    const userNameEl = document.getElementById('user-name');
+                    const userEmailEl = document.getElementById('user-email');
+                    if (userEmailEl) userEmailEl.innerText = user.email;
                     
                     const docSnap = await getDoc(doc(db, "profiles", user.uid));
                     if(docSnap.exists()) {
                         const data = docSnap.data();
-                        document.getElementById('user-name').innerText = data.nome || 'Usuário';
+                        if (userNameEl) userNameEl.innerText = data.nome || 'Usuário';
                         
                         if (!data.acesso_liberado) { window.location.href = "index.html"; return; }
                         if (!data.has_onboarded) { window.location.href = "onboarding.html"; return; }
@@ -869,6 +893,7 @@
             newWeeks.forEach(w => { delete w._start; delete w._end; w.tasks.sort((a,b) => b.score - a.score); });
 
             window.state.weeks = newWeeks; window.state.progress = {}; window.state.dailyStats = {};
+            window.state.startDate = start.toISOString(); // Armazenando a data inicial no banco
 
             await window.saveToCloud();
             finishLoading();
@@ -943,7 +968,7 @@
         window.closeNotesModal = function() { window.activeNotesTaskId = null; window.closeModal('notes'); }
         window.saveNotes = function() { window.pushState(); if(window.activeNotesTaskId) { window.state.progress[window.activeNotesTaskId].notes = document.getElementById('notes-textarea').value; window.triggerSave(); window.showToast('Anotação salva'); } window.closeNotesModal(); }
 
-        // Agenda Editável
+        // Agenda Editável e Drag & Drop
         window.updateTimeSlot = function(weekIdx, slotIdx, val) { window.pushState(); const w = window.state.weeks.find(w => w.week === weekIdx); if(w) { w.timeSlots[slotIdx] = val; window.triggerSave(); } }
         window.updateAgendaCell = function(weekIdx, dayKey, slotIdx, text) { window.pushState(); const w = window.state.weeks.find(w => w.week === weekIdx); if(w) { const k = `${dayKey}_s${slotIdx}`; if(!w.agenda) w.agenda={}; if(!w.agenda[k]) w.agenda[k]={}; w.agenda[k].text = text; window.triggerSave(); } }
         window.addAgendaRowAt = function(weekIdx, index) { window.pushState(); const week = window.state.weeks.find(w => w.week === weekIdx); week.timeSlots.splice(index + 1, 0, "00:00 - 00:00"); const newAgenda = {}; Object.keys(week.agenda).forEach(key => { const [d, sStr] = key.split('_'); const s = parseInt(sStr.substring(1)); if (s > index) newAgenda[`${d}_s${s+1}`] = week.agenda[key]; else newAgenda[key] = week.agenda[key]; }); week.agenda = newAgenda; window.triggerSave(); window.updateUI(); }
@@ -956,18 +981,86 @@
             window.triggerSave(); window.showToast(`Grade copiada para as próximas ${weeksAhead} semanas!`); window.closeModal('replica-agenda');
         }
 
+        window.draggedTask = null;
+        window.draggedSearchTask = null;
+        window.sourceWeekIndex = null;
+        window.sourceTaskIndex = null;
+
+        window.handleDragStart = function(e, weekIdx, taskIdx) {
+            window.draggedTask = window.state.weeks.find(w => w.week === weekIdx).tasks[taskIdx];
+            window.sourceWeekIndex = window.state.weeks.findIndex(w => w.week === weekIdx);
+            window.sourceTaskIndex = taskIdx;
+            window.draggedSearchTask = null;
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        window.handleDragStartSearch = function(e, index) {
+            window.draggedSearchTask = window._currentFilteredBank[index];
+            window.draggedTask = null;
+            e.dataTransfer.effectAllowed = 'copy';
+        }
+
+        window.handleDropWeek = function(e, targetWeekIdx) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drop-target-week');
+            
+            const targetWeek = window.state.weeks.find(w => w.week === targetWeekIdx);
+            if (!targetWeek) return;
+
+            if (window.draggedTask) {
+                const sourceWeek = window.state.weeks[window.sourceWeekIndex];
+                if (sourceWeek.week === targetWeekIdx) return;
+                
+                sourceWeek.tasks.splice(window.sourceTaskIndex, 1);
+                targetWeek.tasks.push(window.draggedTask);
+                
+                window.saveToCloud(); window.updateUI(); window.resetDrag();
+                window.showToast('Tarefa movida para Semana ' + targetWeekIdx);
+            } else if (window.draggedSearchTask) {
+                targetWeek.tasks.push({
+                    id: `cstm_${Date.now()}_${Math.random().toString(36).substr(2,5)}`,
+                    category: window.draggedSearchTask.area,
+                    subject: window.draggedSearchTask.tema,
+                    prioridade: window.draggedSearchTask.prioridade || 2,
+                    tipo: 'materia_nova',
+                    score: window.draggedSearchTask.score || 0
+                });
+                
+                window.saveToCloud(); window.updateUI(); window.resetDrag();
+                window.showToast('Tarefa adicionada à Semana ' + targetWeekIdx);
+            }
+        }
+
+        window.handleDragOverWeek = function(e) { e.preventDefault(); e.currentTarget.classList.add('drop-target-week'); }
+        window.handleDragLeaveWeek = function(e) { e.currentTarget.classList.remove('drop-target-week'); }
+        window.handleDragOverTask = function(e) { e.preventDefault(); }
+        window.handleDragLeaveTask = function(e) { }
+        window.handleDropTask = function(e, targetTaskIdx) { 
+            e.preventDefault(); 
+            if(window.draggedTask) { 
+                const currentWeekIdx = activeWeek - 1; 
+                if (window.sourceWeekIndex !== currentWeekIdx || window.sourceTaskIndex === targetTaskIdx) return; 
+                const tasks = window.state.weeks[currentWeekIdx].tasks; 
+                const [movedItem] = tasks.splice(window.sourceTaskIndex, 1); 
+                tasks.splice(targetTaskIdx, 0, movedItem); 
+                window.saveToCloud(); window.updateUI(); window.resetDrag(); 
+            } 
+        }
+
+        window.resetDrag = function() { window.draggedTask = null; window.draggedSearchTask = null; window.sourceWeekIndex = null; window.sourceTaskIndex = null; }
+
         // Remanejamento Inteligente
         window.openRemanejoModal = function() {
-            let delayedCount = 0; let curW = 1; const today = new Date();
-            window.state.weeks.forEach(w => { const s = new Date(startDate); s.setDate(startDate.getDate() + (w.week - 1) * 7); if (today >= s) curW = w.week; });
+            let delayedCount = 0; let curW = 1; const today = new Date(); const start = window.getStartDate();
+            window.state.weeks.forEach(w => { const s = new Date(start); s.setDate(start.getDate() + (w.week - 1) * 7); if (today >= s) curW = w.week; });
             window.state.weeks.forEach(w => { if (w.week < curW) { w.tasks.forEach(t => { if (!(window.state.progress[t.id] || {}).doneStatus) delayedCount++; }); } });
             const btnOpts = document.getElementById('remanejo-options'); const btnEmp = document.getElementById('remanejo-empty');
             if(delayedCount === 0) { btnOpts.classList.add('hidden'); btnEmp.classList.remove('hidden'); } else { btnOpts.classList.remove('hidden'); btnEmp.classList.add('hidden'); }
             window.openModal('remanejo');
         }
         window.applyRemanejo = function(strategy) {
-            window.pushState(); const delayedTasks = []; let curW = 1; const today = new Date();
-            window.state.weeks.forEach(w => { const s = new Date(startDate); s.setDate(startDate.getDate() + (w.week - 1) * 7); if (today >= s) curW = w.week; });
+            window.pushState(); const delayedTasks = []; let curW = 1; const today = new Date(); const start = window.getStartDate();
+            window.state.weeks.forEach(w => { const s = new Date(start); s.setDate(start.getDate() + (w.week - 1) * 7); if (today >= s) curW = w.week; });
             window.state.weeks.forEach(w => { if (w.week < curW) { for (let i = w.tasks.length - 1; i >= 0; i--) { const t = w.tasks[i]; if (!(window.state.progress[t.id] || {}).doneStatus) { delayedTasks.push(t); w.tasks.splice(i, 1); } } } });
             if (strategy === 'cut') {
                 const savedTasks = delayedTasks.filter(t => t.prioridade <= 2);
@@ -999,7 +1092,8 @@
                 const pct = w.tasks.length ? Math.round((done/w.tasks.length)*100) : 0;
                 const active = (activeView === 'week' && activeWeek === w.week) ? 'ring-2 ring-slate-900 shadow-md font-bold z-10' : '';
                 let statusClass = done === w.tasks.length && w.tasks.length > 0 ? "bg-emerald-50 text-emerald-900 border-l-4 border-emerald-500" : done > 0 ? "bg-amber-50 text-amber-900 border-l-4 border-amber-400" : "bg-white text-slate-600 border-l-4 border-transparent hover:bg-slate-50";
-                nav.innerHTML += `<div onclick="activeWeek=${w.week}; window.switchView('week');" class="px-4 py-3.5 rounded-xl mb-2 cursor-pointer transition-all border border-gray-100 ${statusClass} ${active} flex justify-between items-center"><div><span class="block text-[11px] font-black uppercase tracking-wide opacity-80">Semana ${w.week}</span></div><span class="text-xs font-black bg-white/60 px-2 py-1 rounded shadow-sm">${pct}%</span></div>`;
+                
+                nav.innerHTML += `<div onclick="activeWeek=${w.week}; window.switchView('week');" class="px-4 py-3.5 rounded-xl mb-2 cursor-pointer transition-all border border-gray-100 ${statusClass} ${active} flex justify-between items-center" ondragover="window.handleDragOverWeek(event)" ondragleave="window.handleDragLeaveWeek(event)" ondrop="window.handleDropWeek(event, ${w.week})"><div><span class="block text-[11px] font-black uppercase tracking-wide opacity-80 pointer-events-none">Semana ${w.week}</span></div><span class="text-xs font-black bg-white/60 px-2 py-1 rounded shadow-sm pointer-events-none">${pct}%</span></div>`;
             });
         }
 
@@ -1012,7 +1106,7 @@
             if(currW && currW.timeSlots) {
                 currW.timeSlots.forEach((slot, sIdx) => {
                     const cell = currW.agenda ? currW.agenda[`d${dayIdx}_s${sIdx}`] : null; const txt = cell ? cell.text : '- Estudo/Livre -';
-                    agendaHtml += `<div class="flex items-start gap-4 timeline-item"><div class="text-[10px] font-bold font-mono text-gray-400 mt-1 w-20 shrink-0">${slot}</div><div class="font-bold text-sm text-slate-800 dark:text-white bg-white dark:bg-cm-mid px-4 py-2 border border-gray-100 dark:border-transparent rounded-xl flex-1 shadow-sm break-words">${txt}</div></div>`;
+                    agendaHtml += `<div class="flex items-start gap-4 timeline-item"><div class="text-[10px] font-bold font-mono text-gray-400 mt-1 w-20 shrink-0">${slot}</div><div class="font-bold text-sm text-slate-800 dark:text-white bg-white dark:bg-cm-mid px-4 py-2 border border-gray-100 dark:border-transparent rounded-xl flex-1 shadow-sm break-words" style="${cell && cell.color ? `--agenda-color: ${cell.color};` : ''}">${txt}</div></div>`;
                 });
             }
 
@@ -1028,7 +1122,7 @@
             let agendaHtml = `<div class="mb-12 fade-enter"><div class="flex justify-between items-center mb-6"><div><h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Semana ${w.week}</h2><span class="text-sm font-bold text-gray-500 dark:text-emerald-500">${w.phase}</span></div><button onclick="window.openModal('replica-agenda')" class="text-xs font-bold bg-white dark:bg-cm-mid border border-gray-200 dark:border-gray-700 px-4 py-2 rounded-xl shadow-sm hover:border-blue-500 transition"><i class="fas fa-copy mr-1 text-blue-500"></i> Configurar Grade</button></div><div class="overflow-x-auto rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-cm-dark2"><table class="agenda-table min-w-[700px]"><thead><tr><th class="p-3 w-24">Horário</th>${days.map(d=>`<th class="p-3 text-xs font-bold">${d.name}</th>`).join('')}</tr></thead><tbody>`;
             w.timeSlots.forEach((slot, sIdx) => {
                 agendaHtml += `<tr><td class="p-0 w-24 align-middle time-col relative border-r border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-cm-mid/30"><div class="w-full text-center font-mono text-[10px] font-bold outline-none p-3" contenteditable="true" onblur="window.updateTimeSlot(${activeWeek}, ${sIdx}, this.innerText)">${slot}</div><div class="row-controls"><button onclick="window.addAgendaRowAt(${activeWeek}, ${sIdx})" class="text-[10px] text-blue-600 hover:bg-blue-50 py-1"><i class="fas fa-plus"></i></button><button onclick="window.requestRemoveAgendaRow(${activeWeek}, ${sIdx})" class="text-[10px] text-red-600 hover:bg-red-50 py-1"><i class="fas fa-minus"></i></button></div></td>`;
-                days.forEach((d, dIdx) => { const c = w.agenda[`${d.key}_s${sIdx}`] || {}; agendaHtml += `<td class="p-0 h-16 relative"><div class="agenda-cell w-full h-full p-2 outline-none flex items-center justify-center text-xs font-medium text-slate-700 dark:text-white" contenteditable="true" onblur="window.updateAgendaCell(${activeWeek}, '${d.key}', ${sIdx}, this.innerText)">${c.text||''}</div></td>`; }); agendaHtml += `</tr>`;
+                days.forEach((d, dIdx) => { const c = w.agenda[`${d.key}_s${sIdx}`] || {}; const bgColor = c.color || '#ffffff'; agendaHtml += `<td class="p-0 h-16 relative"><div class="agenda-cell w-full h-full p-2 outline-none flex items-center justify-center text-xs font-medium text-slate-700 dark:text-white" style="background-color: ${bgColor}; --agenda-color: ${bgColor};" contenteditable="true" onblur="window.updateAgendaCell(${activeWeek}, '${d.key}', ${sIdx}, this.innerText)">${c.text||''}</div></td>`; }); agendaHtml += `</tr>`;
             });
             agendaHtml += `</tbody></table></div><p class="text-[10px] text-gray-400 mt-2"><i class="fas fa-info-circle text-blue-400"></i> Edite a tabela acima para configurar as suas aulas. As alterações são guardadas na nuvem.</p></div>`;
 
@@ -1055,7 +1149,7 @@
                     pomoUI = `<div class="mt-4 bg-slate-50 dark:bg-cm-mid border border-slate-200 dark:border-gray-800 p-5 rounded-2xl w-full shadow-inner"><div class="flex justify-between text-[9px] font-black uppercase tracking-widest mb-3"><span id="pomo-lbl-1-${t.id}" class="${window.pomoPhase === 'aula' ? 'text-blue-600' : 'text-slate-400'}"><i class="fas fa-book-open"></i> Aula</span><span id="pomo-lbl-2-${t.id}" class="${window.pomoPhase === 'descanso' ? 'text-amber-500' : 'text-slate-400'}"><i class="fas fa-coffee"></i> Pausa</span><span id="pomo-lbl-3-${t.id}" class="${window.pomoPhase === 'questoes' ? 'text-emerald-600' : 'text-slate-400'}"><i class="fas fa-pen"></i> Questões</span></div><div class="flex gap-2 h-2 mb-5"><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="pomo-bar-1-${t.id}" class="h-full bg-blue-500 transition-all duration-1000" style="width: ${pct1}%"></div></div><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="pomo-bar-2-${t.id}" class="h-full bg-amber-400 transition-all duration-1000" style="width: ${pct2}%"></div></div><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="pomo-bar-3-${t.id}" class="h-full bg-emerald-500 transition-all duration-1000" style="width: ${pct3}%"></div></div></div><div class="flex justify-between items-center"><div id="pomo-display-${t.id}" class="font-mono font-black text-4xl text-slate-800 dark:text-white tracking-tight">${displayTime}</div><div class="flex gap-2 items-center"><button id="pomo-btn-play-${t.id}" onclick="window.pomoToggle('${t.id}')" class="w-10 h-10 flex items-center justify-center text-white rounded-xl shadow-md ${window.isPomoRunning ? 'bg-red-500' : 'bg-slate-900 dark:bg-cm-green'}">${window.isPomoRunning ? '<i class="fas fa-pause text-xs"></i>' : '<i class="fas fa-play text-xs ml-0.5"></i>'}</button><button onclick="window.pomoSkip()" class="px-4 py-2.5 bg-white dark:bg-cm-dark2 border border-gray-200 text-gray-700 dark:text-gray-300 rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-gray-50 transition shadow-sm">Pular <i class="fas fa-forward"></i></button><button onclick="window.pomoStop()" class="px-4 py-2.5 bg-red-50 border border-red-200 text-red-600 rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-red-100 transition shadow-sm"><i class="fas fa-times"></i> Fechar</button></div></div></div>`;
                 }
 
-                tasksHtml += `<div class="card-ui p-5 flex flex-col md:flex-row gap-5 ${prioClass} ${isChecked?'done bg-slate-50 opacity-60 grayscale-[0.5]':''} relative group"><div class="flex items-start gap-4 flex-1 min-w-0"><div class="mt-1 relative shrink-0"><input type="checkbox" class="peer appearance-none w-6 h-6 border-2 border-gray-300 rounded-lg checked:bg-black checked:border-black transition cursor-pointer" ${isChecked?'checked':''} onchange="window.toggleTask('${t.id}')"><i class="fas fa-check text-white absolute top-1 left-1 pointer-events-none opacity-0 peer-checked:opacity-100 text-xs transition"></i></div><div class="flex-1 cursor-pointer min-w-0" onclick="window.toggleTaskDetails('${t.id}', event)"><div class="font-bold text-slate-800 dark:text-white text-lg leading-snug truncate outline-none task-edit-subject" contenteditable="true" onblur="window.updateTaskName(${activeWeek}, ${idx}, this.innerText)">${t.subject}</div><div class="flex items-center justify-between mt-2"><div class="flex gap-2 items-center"><span class="text-[10px] font-bold bg-slate-100 dark:bg-cm-mid px-2.5 py-1 rounded-md text-slate-600 dark:text-gray-300 uppercase tracking-wide border border-transparent">${t.category}</span><button onclick="window.toggleCrucial('${t.id}')" class="fire-btn ${p.crucial ? 'active' : ''} w-8 h-8 rounded-full hover:bg-red-50 flex items-center justify-center transition text-lg"><i class="fas fa-fire ${p.crucial ? 'text-red-500' : 'text-gray-400'}"></i></button></div><button onclick="window.requestDeleteTask(${activeWeek}, ${idx})" class="text-gray-300 hover:text-red-500 px-2 py-1 rounded transition text-xl"><i class="fas fa-trash-alt"></i></button></div><div class="flex gap-2 mt-4 flex-wrap"><button onclick="window.toggleSubTask('${t.id}_a')" class="px-3 py-1.5 rounded-lg border ${p.sub_a ? 'bg-slate-800 text-white' : 'bg-white text-slate-500 border-gray-200 dark:bg-cm-dark2 dark:text-gray-400'} text-[10px] font-bold uppercase transition hover:shadow-md flex items-center gap-1.5"><i class="fas fa-play"></i> Aula</button><button onclick="window.toggleSubTask('${t.id}_q')" class="px-3 py-1.5 rounded-lg border ${p.sub_q ? 'bg-slate-800 text-white' : 'bg-white text-slate-500 border-gray-200 dark:bg-cm-dark2 dark:text-gray-400'} text-[10px] font-bold uppercase transition hover:shadow-md flex items-center gap-1.5"><i class="fas fa-pen"></i> Questões</button><button onclick="window.toggleSubTask('${t.id}_k')" class="px-3 py-1.5 rounded-lg border ${p.sub_k ? 'bg-slate-800 text-white' : 'bg-white text-slate-500 border-gray-200 dark:bg-cm-dark2 dark:text-gray-400'} text-[10px] font-bold uppercase transition hover:shadow-md flex items-center gap-1.5"><i class="fas fa-bolt"></i> Anki</button><button onclick="window.startPomoForTask('${t.id}')" class="px-4 py-1.5 rounded-xl border bg-white dark:bg-cm-mid text-slate-700 dark:text-white border-gray-200 hover:bg-gray-50 text-[10px] font-black uppercase tracking-wider transition shadow-sm flex items-center gap-2 ml-auto ${isPomoActiveForThis ? 'hidden' : ''}"><i class="fas fa-stopwatch text-green-500 text-sm"></i> Sessão</button></div>${pomoUI}</div><button onclick="window.toggleTaskDetails('${t.id}', event)" class="text-gray-400 w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-cm-mid transition shrink-0"><i class="fas fa-chevron-down ${isExpanded?'rotate-180':''}"></i></button></div>`;
+                tasksHtml += `<div class="card-ui p-5 flex flex-col md:flex-row gap-5 ${prioClass} ${isChecked?'done bg-slate-50 opacity-60 grayscale-[0.5]':''} relative group draggable-item" draggable="true" ondragstart="window.handleDragStart(event, ${activeWeek}, ${idx})" ondragover="window.handleDragOverTask(event)" ondragleave="window.handleDragLeaveTask(event)" ondrop="window.handleDropTask(event, ${idx})"><div class="flex items-start gap-4 flex-1 min-w-0"><div class="mt-1 cursor-move text-gray-300 group-hover:text-blue-400 drag-handle transition shrink-0"><i class="fas fa-grip-vertical text-lg"></i></div><div class="relative shrink-0"><input type="checkbox" class="peer appearance-none w-6 h-6 border-2 border-gray-300 rounded-lg checked:bg-black checked:border-black transition cursor-pointer" ${isChecked?'checked':''} onchange="window.toggleTask('${t.id}')"><i class="fas fa-check text-white absolute top-1 left-1 pointer-events-none opacity-0 peer-checked:opacity-100 text-xs transition"></i></div><div class="flex-1 cursor-pointer min-w-0" onclick="window.toggleTaskDetails('${t.id}', event)"><div class="font-bold text-slate-800 dark:text-white text-lg leading-snug truncate outline-none task-edit-subject" contenteditable="true" onblur="window.updateTaskName(${activeWeek}, ${idx}, this.innerText)">${t.subject}</div><div class="flex items-center justify-between mt-2"><div class="flex gap-2 items-center"><span class="text-[10px] font-bold bg-slate-100 dark:bg-cm-mid px-2.5 py-1 rounded-md text-slate-600 dark:text-gray-300 uppercase tracking-wide border border-transparent">${t.category}</span><button onclick="window.toggleCrucial('${t.id}')" class="fire-btn ${p.crucial ? 'active' : ''} w-8 h-8 rounded-full hover:bg-red-50 flex items-center justify-center transition text-lg"><i class="fas fa-fire ${p.crucial ? 'text-red-500' : 'text-gray-400'}"></i></button></div><button onclick="window.requestDeleteTask(${activeWeek}, ${idx})" class="text-gray-300 hover:text-red-500 px-2 py-1 rounded transition text-xl"><i class="fas fa-trash-alt"></i></button></div><div class="flex gap-2 mt-4 flex-wrap"><button onclick="window.toggleSubTask('${t.id}_a')" class="px-3 py-1.5 rounded-lg border ${p.sub_a ? 'bg-slate-800 text-white' : 'bg-white text-slate-500 border-gray-200 dark:bg-cm-dark2 dark:text-gray-400'} text-[10px] font-bold uppercase transition hover:shadow-md flex items-center gap-1.5"><i class="fas fa-play"></i> Aula</button><button onclick="window.toggleSubTask('${t.id}_q')" class="px-3 py-1.5 rounded-lg border ${p.sub_q ? 'bg-slate-800 text-white' : 'bg-white text-slate-500 border-gray-200 dark:bg-cm-dark2 dark:text-gray-400'} text-[10px] font-bold uppercase transition hover:shadow-md flex items-center gap-1.5"><i class="fas fa-pen"></i> Questões</button><button onclick="window.toggleSubTask('${t.id}_k')" class="px-3 py-1.5 rounded-lg border ${p.sub_k ? 'bg-slate-800 text-white' : 'bg-white text-slate-500 border-gray-200 dark:bg-cm-dark2 dark:text-gray-400'} text-[10px] font-bold uppercase transition hover:shadow-md flex items-center gap-1.5"><i class="fas fa-bolt"></i> Anki</button><button onclick="window.startPomoForTask('${t.id}')" class="px-4 py-1.5 rounded-xl border bg-white dark:bg-cm-mid text-slate-700 dark:text-white border-gray-200 hover:bg-gray-50 text-[10px] font-black uppercase tracking-wider transition shadow-sm flex items-center gap-2 ml-auto ${isPomoActiveForThis ? 'hidden' : ''}"><i class="fas fa-stopwatch text-green-500 text-sm"></i> Sessão</button></div>${pomoUI}</div><button onclick="window.toggleTaskDetails('${t.id}', event)" class="text-gray-400 w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-cm-mid transition shrink-0"><i class="fas fa-chevron-down ${isExpanded?'rotate-180':''}"></i></button></div>`;
                 if(isExpanded) {
                     tasksHtml += `<div class="pt-4 mt-2 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row gap-5 fade-enter"><div class="flex-1 flex gap-2 items-center"><button onclick="window.openNotesModal('${t.id}')" class="text-gray-500 hover:text-blue-500 px-3 py-2 rounded-xl transition-colors text-sm bg-gray-100 dark:bg-cm-mid font-bold flex items-center gap-2"><i class="fas fa-book-open"></i> Anotações / Links</button></div><div class="flex items-center gap-3 bg-gray-50 dark:bg-cm-dark2 p-3 rounded-xl border border-gray-100 dark:border-gray-800 shrink-0 shadow-inner"><div class="text-center"><span class="text-[9px] font-bold text-gray-400 uppercase block tracking-wider mb-1">Feitas</span><input type="number" value="${doneVal}" onchange="window.updateTaskQuestions('${t.id}', this.value)" class="w-12 bg-transparent text-center font-bold text-slate-800 dark:text-white outline-none border-b-2 border-gray-300 dark:border-gray-700 focus:border-green-500 py-1 transition" placeholder="-"></div><div class="text-center"><span class="text-[9px] font-bold text-gray-400 uppercase block tracking-wider mb-1">Acertos</span><input type="number" value="${correctVal}" onchange="window.updateScore('${t.id}', 'correct', this.value)" class="w-12 bg-transparent text-center font-bold text-slate-800 dark:text-white outline-none border-b-2 border-gray-300 dark:border-gray-700 focus:border-green-500 py-1 transition" placeholder="-"></div><div class="pl-3 border-l border-gray-200 dark:border-gray-800 text-center min-w-[3.5rem]"><span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">%</span><span class="text-lg font-black ${acc>0?'text-green-500':'text-gray-400'}">${acc}%</span></div></div></div>`;
                 }
@@ -1095,26 +1189,24 @@
                     const textMatch = t.tema.toLowerCase().includes(lowerQ) || t.area.toLowerCase().includes(lowerQ);
                     let areaMatch = true; if (searchFilterArea !== 'Todas') { let tArea = areaMapping[t.area] || "Outros"; areaMatch = tArea === searchFilterArea; } return textMatch && areaMatch;
                 });
+                window._currentFilteredBank = filtered;
                 if(filtered.length === 0) { resultsContainer.innerHTML = `<div class="col-span-full text-center py-24"><i class="fas fa-search-minus text-4xl text-gray-200 dark:text-gray-700 mb-4 block"></i><p class="text-gray-400 font-medium">Nenhuma tarefa encontrada no banco.</p></div>`; } 
                 else { 
                     resultsContainer.innerHTML = filtered.slice(0, 50).map((item, index) => { 
-                        return `<div class="p-5 border border-gray-100 dark:border-gray-800 rounded-2xl bg-white dark:bg-cm-mid hover:shadow-lg transition-all hover:border-blue-200 card-shadow flex justify-between items-center"><div class="flex-1 min-w-0"><div class="font-bold text-sm text-slate-800 dark:text-white leading-tight mb-2">${item.tema}</div><div class="text-[10px] font-bold uppercase text-gray-400 tracking-wide">${item.area}</div></div><button onclick="window.addFromBank(${index})" class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-blue-600 hover:text-white transition shadow-sm ml-2 flex-shrink-0" title="Adicionar à Semana Atual"><i class="fas fa-plus"></i> Add</button></div>`; 
+                        return `<div class="p-5 border border-gray-100 dark:border-gray-800 rounded-2xl bg-white dark:bg-cm-mid hover:shadow-lg transition-all hover:border-blue-200 card-shadow flex flex-col justify-between items-start draggable-item" draggable="true" ondragstart="window.handleDragStartSearch(event, ${index})"><div class="flex-1 w-full"><div class="font-bold text-sm text-slate-800 dark:text-white leading-tight mb-2">${item.tema}</div><div class="text-[10px] font-bold uppercase text-gray-400 tracking-wide mb-4">${item.area}</div></div><div class="flex justify-between w-full items-center"><div class="text-[10px] text-gray-400 font-medium flex items-center gap-1 bg-gray-50 dark:bg-slate-800 px-2 py-1 rounded"><i class="fas fa-arrows-alt text-gray-300"></i> Arraste p/ semana</div><button onclick="window.addFromBank(${index})" class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-blue-600 hover:text-white transition shadow-sm flex-shrink-0" title="Adicionar à Semana Atual"><i class="fas fa-plus"></i> Add</button></div></div>`; 
                     }).join(''); 
                 }
             }
             searchInput.addEventListener('input', (e) => filterAndRender(e.target.value)); filterAndRender('');
             
-            window._currentFilteredBank = bancoDeMaterias;
             window.addFromBank = function(index) {
-                const query = searchInput.value.toLowerCase();
-                const filtered = bancoDeMaterias.filter(t => { const textMatch = t.tema.toLowerCase().includes(query) || t.area.toLowerCase().includes(query); let areaMatch = true; if (searchFilterArea !== 'Todas') { let tArea = areaMapping[t.area] || "Outros"; areaMatch = tArea === searchFilterArea; } return textMatch && areaMatch; });
-                const taskToAdd = filtered[index];
+                const taskToAdd = window._currentFilteredBank[index];
                 if(taskToAdd) {
                     let targetWeek = window.activeWeek; if(targetWeek === 0) targetWeek = 1;
                     const week = window.state.weeks.find(w => w.week === targetWeek);
                     if(week) {
                         window.pushState();
-                        week.tasks.push({ id: `cstm_${Date.now()}`, category: taskToAdd.area, subject: taskToAdd.tema, prioridade: taskToAdd.prioridade, customizado: true, tipo: 'materia_nova' });
+                        week.tasks.push({ id: `cstm_${Date.now()}`, category: taskToAdd.area, subject: taskToAdd.tema, prioridade: taskToAdd.prioridade || 2, customizado: true, tipo: 'materia_nova', score: taskToAdd.score || 0 });
                         window.triggerSave(); window.showToast(`Adicionado à Semana ${targetWeek}!`); window.updateUI();
                     }
                 }
