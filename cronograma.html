@@ -37,14 +37,14 @@
     <style>
         html, body { height: 100%; overflow: hidden; -webkit-tap-highlight-color: transparent; }
         
-        /* Tema Claro (Padrão) */
+        /* Tema Claro (Padrão Premium) */
         body { background-color: #f8fafc; color: #1e293b; }
         .glass-header { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; }
         .sidebar { background: #ffffff; border-right: 1px solid #e2e8f0; }
         .card-ui { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 1.5rem; transition: all 0.3s ease; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
         .card-ui:hover { border-color: #cbd5e1; transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
         
-        /* Tema Escuro (Ativado via classe .dark no HTML) */
+        /* Tema Escuro (Ativado via .dark) */
         .dark body { background-color: #0a0f0d; color: #e8f0eb; }
         .dark .glass-header { background: rgba(10, 15, 13, 0.9); border-bottom-color: rgba(0,194,122,0.1); }
         .dark .sidebar { background: rgba(17, 26, 21, 0.95); border-right-color: rgba(0,194,122,0.1); }
@@ -56,6 +56,7 @@
         .dark .text-gray-500 { color: #7a9e8a; }
         .dark .bg-gray-50 { background-color: #1e2e25; }
         .dark .border-gray-200 { border-color: rgba(255,255,255,0.1); }
+        .dark .border-gray-100 { border-color: rgba(255,255,255,0.05); }
         .dark .agenda-cell { color: #e8f0eb; }
 
         .sidebar { transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; z-index: 40; }
@@ -70,8 +71,8 @@
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         [contenteditable]:empty:before { content: attr(placeholder); color: #94a3b8; display: block; }
         
-        /* Linhas de Prioridade */
-        .prio-1 { border-left: 4px solid #ff4d4d !important; }
+        /* Linguagem Visual de Prioridades (Linha Lateral) */
+        .prio-1 { border-left: 4px solid #ef4444 !important; }
         .prio-2 { border-left: 4px solid #f59e0b !important; }
         .prio-3 { border-left: 4px solid #3b82f6 !important; }
         .prio-4 { border-left: 4px solid #94a3b8 !important; }
@@ -79,14 +80,14 @@
 
         .task-card.done { opacity: 0.5; filter: grayscale(0.6); }
         
-        /* Modal */
+        /* Modais */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 1rem; }
         .modal-overlay.open { display: flex; }
-        .modal-content { background: #ffffff; border-radius: 24px; padding: 2.5rem; w-full max-w: 500px; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: scaleIn 0.2s ease; }
+        .modal-content { background: #ffffff; border-radius: 24px; padding: 2.5rem; width: 100%; max-width: 500px; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: scaleIn 0.2s ease; max-height: 90vh; overflow-y: auto; }
         .dark .modal-content { background: #111a15; border: 1px solid rgba(0,194,122,0.2); }
         @keyframes scaleIn { from { opacity: 0; transform: scale(.95); } to { opacity: 1; transform: scale(1); } }
 
-        /* Agenda / Timeline */
+        /* Timeline (Home) */
         .timeline-item { position: relative; padding-left: 1.5rem; border-left: 2px solid #e2e8f0; margin-bottom: 1.5rem; }
         .dark .timeline-item { border-left-color: #1e2e25; }
         .timeline-item::before { content: ''; position: absolute; left: -0.35rem; top: 0; width: 0.6rem; height: 0.6rem; border-radius: 50%; background: #00c27a; }
@@ -95,6 +96,7 @@
         .dark .custom-checkbox { border-color: rgba(255,255,255,0.3); }
         .custom-checkbox:checked { background-color: #00c27a; border-color: #00c27a; }
         .custom-checkbox:checked::after { content: '✓'; position: absolute; color: white; font-size: 1rem; font-weight: 900; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .dark .custom-checkbox:checked::after { color: #0a0f0d; }
 
         .fade-enter { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -102,15 +104,26 @@
         .task-details-wrapper { transition: max-height 0.3s ease, opacity 0.2s ease; max-height: 0; opacity: 0; overflow: hidden; }
         .task-details-wrapper.expanded { max-height: 500px; opacity: 1; }
 
-        /* Player Spotify-like */
+        /* Mini Player Pomodoro (Spotify Style) */
         .mini-player { position: fixed; bottom: 20px; right: 20px; z-index: 999; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 100px; padding: 0.5rem 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: none; align-items: center; gap: 1rem; transition: transform 0.2s; }
         .dark .mini-player { background: #111a15; border-color: #00c27a; box-shadow: 0 10px 25px rgba(0,194,122,0.1); }
         .mini-player.show { display: flex; animation: slideUp 0.3s ease; }
         @keyframes slideUp { from { transform: translateY(100px); } to { transform: translateY(0); } }
 
         /* Loader Overlay */
-        #loader-overlay { position: fixed; inset: 0; background: #f8fafc; z-index: 9999; display: flex; flex-col; align-items: center; justify-content: center; }
+        #loader-overlay { position: fixed; inset: 0; background: #f8fafc; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .dark #loader-overlay { background: #0a0f0d; }
+
+        /* Tabela da Agenda */
+        .agenda-table { border-collapse: separate; border-spacing: 0; width: 100%; border: 1px solid #e2e8f0; table-layout: fixed; border-radius: 8px; overflow: hidden; }
+        .dark .agenda-table { border-color: rgba(255,255,255,0.06); }
+        .agenda-table th { background-color: #0f172a; color: white; font-weight: 600; padding: 10px; text-transform: uppercase; font-size: 0.7rem; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #334155; text-align: center; }
+        .dark .agenda-table th { background-color: #0a0f0d; border-color: rgba(255,255,255,0.06); }
+        .agenda-table td { border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; position: relative; vertical-align: top; }
+        .dark .agenda-table td { border-color: rgba(255,255,255,0.06); }
+        .row-controls { position: absolute; right: 0; top: 0; bottom: 0; width: 20px; display: flex; flex-direction: column; justify-content: center; gap: 2px; opacity: 0; transition: opacity 0.2s; pointer-events: none; background: rgba(255,255,255,0.9); border-left: 1px solid #e2e8f0; }
+        .dark .row-controls { background: rgba(17, 26, 21, 0.9); border-left-color: rgba(255,255,255,0.06); }
+        tr:hover .row-controls { opacity: 1; pointer-events: auto; }
     </style>
 </head>
 <body class="transition-colors duration-300">
@@ -119,13 +132,13 @@
     <div id="loader-overlay">
         <i class="fas fa-circle-notch fa-spin text-5xl text-cm-green mb-4"></i>
         <h2 class="text-2xl font-serif font-bold text-slate-800 dark:text-white">A carregar o seu Cronograma...</h2>
-        <p class="text-gray-500 mt-2" id="loader-text">Sincronizando dados com a nuvem</p>
+        <p class="text-gray-500 mt-2" id="loader-text">A sincronizar com a base de dados inteligente</p>
     </div>
 
     <!-- TOAST -->
     <div id="toast-container" class="fixed top-20 right-6 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
 
-    <!-- MINI PLAYER POMODORO -->
+    <!-- MINI PLAYER POMODORO FLUTUANTE -->
     <div id="mini-player" class="mini-player">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-cm-mid flex items-center justify-center text-cm-green animate-pulse"><i class="fas fa-clock"></i></div>
@@ -142,7 +155,7 @@
 
     <div class="h-screen flex flex-col pb-16 md:pb-0 relative z-10">
         
-        <!-- HEADER -->
+        <!-- HEADER SUPERIOR -->
         <header class="glass-header p-4 z-50 flex-shrink-0 flex justify-between items-center transition-colors duration-300">
             <div class="flex items-center gap-4 md:gap-6">
                 <button onclick="toggleSidebar()" class="text-gray-500 hover:text-cm-green focus:outline-none transition-colors"><i class="fas fa-bars text-xl"></i></button>
@@ -151,7 +164,7 @@
             <div class="text-right flex items-center gap-3 md:gap-5">
                 <button onclick="toggleDarkMode()" class="text-gray-400 hover:text-slate-800 dark:hover:text-white transition text-lg" title="Mudar Tema"><i class="fas fa-moon" id="theme-icon"></i></button>
                 <div class="relative cursor-pointer group" onclick="toggleProfileMenu()">
-                    <div class="w-10 h-10 rounded-full bg-cm-green text-white font-bold flex items-center justify-center shadow-md uppercase" id="user-avatar">A</div>
+                    <div class="w-10 h-10 rounded-full bg-cm-green text-white font-bold flex items-center justify-center shadow-md uppercase" id="user-avatar">U</div>
                     <!-- Menu de Perfil -->
                     <div id="profile-menu" class="absolute right-0 top-12 mt-2 w-48 bg-white dark:bg-cm-dark2 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-2 hidden flex-col z-50 transition-colors">
                         <div class="px-4 py-2 border-b border-gray-100 dark:border-gray-800 mb-1">
@@ -166,25 +179,33 @@
         </header>
 
         <div class="flex flex-1 overflow-hidden relative">
-            <!-- SIDEBAR -->
+            <!-- SIDEBAR ESQUERDA -->
             <aside id="main-sidebar" class="w-72 sidebar hidden md:flex">
                 <div class="p-5 border-b border-gray-200 dark:border-gray-800 space-y-2 shrink-0">
-                    <button onclick="switchView('homepage')" id="nav-homepage" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all bg-cm-green/10 text-cm-green dark:bg-cm-green text-left"><i class="fas fa-home text-lg w-5 text-center"></i><span>Página Inicial</span></button>
+                    <button onclick="switchView('homepage')" id="nav-homepage" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all bg-cm-green/10 text-cm-green dark:bg-cm-green dark:text-cm-dark text-left"><i class="fas fa-home text-lg w-5 text-center"></i><span>Página Inicial</span></button>
                     <button onclick="switchView('week')" id="nav-week" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-gray-500 hover:bg-gray-100 dark:hover:bg-cm-mid dark:text-cm-muted hover:text-slate-800 dark:hover:text-white text-left"><i class="fas fa-calendar-alt text-lg w-5 text-center"></i><span>A Minha Semana</span></button>
                     <button onclick="switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-gray-500 hover:bg-gray-100 dark:hover:bg-cm-mid dark:text-cm-muted hover:text-slate-800 dark:hover:text-white text-left"><i class="fas fa-chart-pie text-lg w-5 text-center"></i><span>Dashboard</span></button>
                     <button onclick="switchView('search')" id="nav-search" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-gray-500 hover:bg-gray-100 dark:hover:bg-cm-mid dark:text-cm-muted hover:text-slate-800 dark:hover:text-white text-left"><i class="fas fa-search text-lg w-5 text-center"></i><span>Banco de Tarefas</span></button>
                 </div>
-                <div class="px-5 pt-4 pb-2 text-[10px] uppercase font-bold text-gray-400 dark:text-cm-muted tracking-widest">Navegação Rápida</div>
+                
+                <!-- Botão de Remanejo IA -->
+                <div class="px-5 py-3 border-b border-gray-200 dark:border-gray-800">
+                    <button onclick="openRemanejoModal()" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs bg-purple-50 text-purple-600 hover:bg-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:hover:bg-purple-900/40 border border-purple-200 dark:border-purple-800 transition">
+                        <i class="fas fa-wand-magic-sparkles"></i> Remanejamento IA
+                    </button>
+                </div>
+
+                <div class="px-5 pt-4 pb-2 text-[10px] uppercase font-bold text-gray-400 dark:text-cm-muted tracking-widest">Semanas do Curso</div>
                 <nav class="px-3 space-y-1 sidebar-content" id="week-nav"></nav>
             </aside>
 
-            <!-- MAIN CONTENT -->
+            <!-- CONTEÚDO PRINCIPAL -->
             <main class="flex-1 p-4 md:p-8 overflow-y-auto relative w-full" id="main-scroll">
                 <div id="content-area" class="container mx-auto max-w-6xl pb-24"></div>
             </main>
         </div>
 
-        <!-- MOBILE NAV -->
+        <!-- NAVEGAÇÃO MOBILE (Fundo da tela) -->
         <nav class="md:hidden fixed bottom-0 left-0 w-full glass-header flex justify-around p-3 z-50">
             <button onclick="switchView('homepage')" class="flex flex-col items-center text-gray-500 dark:text-cm-muted hover:text-cm-green transition-colors"><i class="fas fa-home text-xl mb-1"></i><span class="text-[9px] font-bold uppercase">Início</span></button>
             <button onclick="switchView('week')" class="flex flex-col items-center text-gray-500 dark:text-cm-muted hover:text-cm-green transition-colors"><i class="fas fa-calendar-alt text-xl mb-1"></i><span class="text-[9px] font-bold uppercase">Semana</span></button>
@@ -193,8 +214,9 @@
         </nav>
     </div>
 
-    <!-- MODALS -->
-    <!-- ADD TASK -->
+    <!-- ================== MODAIS ================== -->
+    
+    <!-- MODAL: ADICIONAR TAREFA -->
     <div class="modal-overlay" id="modal-add-task">
         <div class="modal-content text-slate-800 dark:text-white">
             <button class="absolute top-4 right-4 text-gray-400 hover:text-slate-800 dark:hover:text-white" onclick="closeModal('add-task')"><i class="fas fa-times text-xl"></i></button>
@@ -209,17 +231,18 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[10px] font-bold uppercase text-gray-500 tracking-widest mb-1.5">Área Principal</label>
-                        <select id="add-area" class="w-full bg-gray-50 dark:bg-cm-mid border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-sm outline-none focus:border-cm-green">
+                        <select id="add-area" class="w-full bg-gray-50 dark:bg-cm-mid border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-sm outline-none focus:border-cm-green cursor-pointer">
                             <option value="Cirurgia">Cirurgia</option>
                             <option value="Clínica Médica">Clínica Médica</option>
                             <option value="Ginecologia e Obstetrícia">Gineco e Obstetrícia</option>
                             <option value="Pediatria">Pediatria</option>
                             <option value="Preventiva">Preventiva</option>
+                            <option value="Outros">Outros</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold uppercase text-gray-500 tracking-widest mb-1.5">Prioridade</label>
-                        <select id="add-prio" class="w-full bg-gray-50 dark:bg-cm-mid border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-sm outline-none focus:border-cm-green">
+                        <select id="add-prio" class="w-full bg-gray-50 dark:bg-cm-mid border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-sm outline-none focus:border-cm-green cursor-pointer">
                             <option value="1">Alta (Crucial)</option>
                             <option value="2" selected>Média</option>
                             <option value="3">Baixa</option>
@@ -232,12 +255,12 @@
         </div>
     </div>
 
-    <!-- AGENDA REPLICATOR -->
+    <!-- MODAL: REPLICAR AGENDA -->
     <div class="modal-overlay" id="modal-replica-agenda">
         <div class="modal-content text-center">
             <div class="mb-5 text-blue-500 bg-blue-50 dark:bg-blue-900/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto"><i class="fas fa-copy text-2xl"></i></div>
             <h3 class="text-xl font-serif text-slate-800 dark:text-white mb-2">Replicar Grade Horária</h3>
-            <p class="text-sm text-gray-500 mb-6">A sua grade (horários da esquerda) e blocos fixos da agenda serão copiados.</p>
+            <p class="text-sm text-gray-500 mb-6">Os seus blocos e horários desta semana serão copiados para o futuro.</p>
             <div class="space-y-3">
                 <button onclick="executeReplicaAgenda(4)" class="w-full py-3.5 bg-gray-100 dark:bg-cm-mid text-slate-800 dark:text-white rounded-xl font-bold hover:bg-gray-200 dark:hover:bg-gray-800 transition">Copiar para as próximas 4 semanas</button>
                 <button onclick="executeReplicaAgenda(999)" class="w-full py-3.5 bg-cm-green text-white dark:text-cm-dark rounded-xl font-bold shadow-md hover:bg-cm-greenD transition">Copiar para todo o resto do ano</button>
@@ -246,15 +269,46 @@
         </div>
     </div>
 
+    <!-- MODAL: REMANEJAMENTO INTELIGENTE -->
+    <div class="modal-overlay" id="modal-remanejo">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-serif text-slate-900 dark:text-white flex items-center gap-2"><i class="fas fa-magic text-purple-500"></i> Remanejamento IA</h3>
+                <button onclick="closeModal('remanejo')" class="text-gray-400 hover:text-slate-800 dark:hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">O sistema detetou tarefas atrasadas de semanas anteriores. Como quer reorganizar o seu estudo?</p>
+            
+            <div id="remanejo-options" class="space-y-3">
+                <button onclick="applyRemanejo('dilute')" class="w-full text-left p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition group">
+                    <div class="font-bold text-slate-800 dark:text-white group-hover:text-purple-700 dark:group-hover:text-purple-300">Diluir Suavemente</div>
+                    <div class="text-xs text-gray-500 mt-1">Redistribui os atrasos pelas próximas 4 semanas para não sobrecarregar.</div>
+                </button>
+                <button onclick="applyRemanejo('cut')" class="w-full text-left p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-red-400 dark:hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition group">
+                    <div class="font-bold text-slate-800 dark:text-white group-hover:text-red-700 dark:group-hover:text-red-300">Corte de Gordura (Intensivo)</div>
+                    <div class="text-xs text-gray-500 mt-1">Elimina os atrasos que são de Prioridade Baixa, mantendo apenas o essencial.</div>
+                </button>
+            </div>
+            
+            <div id="remanejo-empty" class="hidden text-center py-8">
+                <i class="fas fa-check-circle text-4xl text-cm-green mb-3"></i>
+                <div class="font-bold text-slate-800 dark:text-white">Não há atrasos!</div>
+                <div class="text-sm text-gray-500">O seu cronograma está perfeitamente em dia. Continue assim!</div>
+            </div>
+        </div>
+    </div>
+
     <!-- ======================================================================
-         LÓGICA E FIREBASE
+         LÓGICA, INTEGRAÇÃO COM BANCO E FIREBASE
          ====================================================================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // 📥 IMPORTANDO O BANCO DE TAREFAS DO SEU GITHUB
+        import { bancoDeMaterias } from './banco.js';
 
-        // ⚠️ SUBSTITUA PELAS SUAS CHAVES DO FIREBASE
+        // ⚠️ COLE AS SUAS CHAVES DO FIREBASE ABAIXO
         const firebaseConfig = {
             apiKey: "AIzaSyAwQrhAoma0iuofm_MMghCbBnPPtLbrn0E",
             authDomain: "cronomed-4b880.firebaseapp.com",
@@ -264,55 +318,23 @@
             appId: "1:853512629124:web:42bb7b6808ca5487060bd1"
         };
 
-        // --- O BANCO DE DADOS MASTER (Resumido para a versão inicial) ---
-        // Você pode colar os seus 240+ temas aqui depois. Coloquei os essenciais para testar.
-        const bancoDeMaterias = [
-            { "area": "Clínica Médica", "tema": "Hipertensão Arterial Sistêmica", "prioridade": 1 },
-            { "area": "Clínica Médica", "tema": "Insuficiência Cardíaca", "prioridade": 1 },
-            { "area": "Clínica Médica", "tema": "Diabetes Mellitus", "prioridade": 1 },
-            { "area": "Clínica Médica", "tema": "Doenças da Tireoide", "prioridade": 2 },
-            { "area": "Clínica Médica", "tema": "Asma e DPOC", "prioridade": 1 },
-            { "area": "Clínica Médica", "tema": "AVC", "prioridade": 1 },
-            { "area": "Clínica Médica", "tema": "Lesão Renal Aguda", "prioridade": 1 },
-            { "area": "Clínica Médica", "tema": "Sepse e Choque Séptico", "prioridade": 1 },
-            { "area": "Clínica Médica", "tema": "Anemias", "prioridade": 2 },
-            { "area": "Clínica Médica", "tema": "Lúpus Eritematoso Sistêmico", "prioridade": 3 },
-            { "area": "Cirurgia", "tema": "ATLS e Avaliação Inicial do Trauma", "prioridade": 1 },
-            { "area": "Cirurgia", "tema": "Abdome Agudo", "prioridade": 1 },
-            { "area": "Cirurgia", "tema": "Apendicite Aguda", "prioridade": 1 },
-            { "area": "Cirurgia", "tema": "Colelitíase", "prioridade": 2 },
-            { "area": "Cirurgia", "tema": "Hérnias da Parede Abdominal", "prioridade": 2 },
-            { "area": "Cirurgia", "tema": "Queimaduras", "prioridade": 3 },
-            { "area": "Pediatria", "tema": "Reanimação Neonatal", "prioridade": 1 },
-            { "area": "Pediatria", "tema": "Puericultura", "prioridade": 1 },
-            { "area": "Pediatria", "tema": "Infecções Respiratórias Agudas", "prioridade": 1 },
-            { "area": "Pediatria", "tema": "Doenças Exantemáticas", "prioridade": 2 },
-            { "area": "Pediatria", "tema": "Cardiopatias Congênitas", "prioridade": 3 },
-            { "area": "Ginecologia e Obstetrícia", "tema": "Doença Hipertensiva da Gestação", "prioridade": 1 },
-            { "area": "Ginecologia e Obstetrícia", "tema": "Trabalho de Parto Prematuro", "prioridade": 1 },
-            { "area": "Ginecologia e Obstetrícia", "tema": "Infecções Sexualmente Transmissíveis", "prioridade": 1 },
-            { "area": "Ginecologia e Obstetrícia", "tema": "Sangramento Uterino Anormal", "prioridade": 2 },
-            { "area": "Ginecologia e Obstetrícia", "tema": "Anticoncepção", "prioridade": 2 },
-            { "area": "Preventiva", "tema": "Princípios do SUS", "prioridade": 1 },
-            { "area": "Preventiva", "tema": "Medidas de Associação e Risco", "prioridade": 1 },
-            { "area": "Preventiva", "tema": "Vigilância Epidemiológica", "prioridade": 2 }
-        ];
-
         let app, auth, db, currentUser;
-        window.state = { weeks: [], progress: {}, dailyStats: {}, simulados: [] };
+        
+        // Estado Global
+        window.state = { weeks: [], progress: {}, dailyStats: {} };
         window.activeView = 'homepage';
         window.activeWeek = 1;
         window.expandedCards = {};
         window.isDarkMode = false;
         
-        // Pomo Variables
+        // Pomodoro
         window.pomoTime = 50 * 60;
-        window.pomoTotal = 50 * 60;
         window.isPomoRunning = false;
         window.activePomoId = null;
-        window.pomoPhase = 'aula';
 
-        // START
+        // ----------------------------------------------------------------------
+        // INICIALIZAÇÃO E AUTENTICAÇÃO
+        // ----------------------------------------------------------------------
         try {
             app = initializeApp(firebaseConfig);
             auth = getAuth(app);
@@ -329,10 +351,11 @@
                         const data = docSnap.data();
                         document.getElementById('user-name').innerText = data.nome || 'Usuário';
                         
+                        // Proteções
                         if (!data.acesso_liberado) { window.location.href = "index.html"; return; }
                         if (!data.has_onboarded) { window.location.href = "onboarding.html"; return; }
                         
-                        // Load App State or Generate
+                        // Carrega estado ou Gera cronograma
                         if (data.app_state && data.app_state.weeks && data.app_state.weeks.length > 0) {
                             window.state = data.app_state;
                             finishLoading();
@@ -344,106 +367,169 @@
             });
         } catch(e) {
             console.error("Firebase Auth Error", e);
-            document.getElementById('loader-text').innerText = "Erro ao conectar. Executando em modo Demonstração local.";
+            document.getElementById('loader-text').innerText = "Modo Teste Local (Sem Nuvem).";
             generateSchedule({ horas: "4h", internato: "nao", dataInicio: new Date().toISOString(), dataProva: new Date(new Date().setMonth(new Date().getMonth() + 10)).toISOString() });
         }
 
-        // ======================================================================
-        // O CÉREBRO: ALGORITMO GERADOR DO CRONOGRAMA
-        // ======================================================================
+        // ----------------------------------------------------------------------
+        // O CÉREBRO: ALGORITMO GERADOR (Com a "Regra do Teto")
+        // ----------------------------------------------------------------------
         async function generateSchedule(obData) {
-            document.getElementById('loader-text').innerText = "A processar algoritmo de prioridades...";
+            document.getElementById('loader-text').innerText = "A processar matriz de prioridades e teto de tarefas...";
             
-            const start = obData.dataInicio ? new Date(obData.dataInicio) : new Date();
-            const end = obData.dataProva ? new Date(obData.dataProva) : new Date(new Date().setMonth(new Date().getMonth() + 10));
-            const totalSemanas = Math.max(4, Math.floor((end - start) / (1000 * 60 * 60 * 24 * 7)));
+            // 1. Cálculos de Tempo
+            const start = obData.dataInicio ? new Date(obData.dataInicio + 'T12:00:00') : new Date();
+            const end = obData.dataProva ? new Date(obData.dataProva + 'T12:00:00') : new Date(new Date().setMonth(new Date().getMonth() + 10));
+            const totalSemanas = Math.max(4, Math.ceil((end - start) / (1000 * 60 * 60 * 24 * 7)));
             
-            // 1. Filtrar Banco por Tempo
-            let filteredDB = bancoDeMaterias.filter(t => t.prioridade <= 2); // default
-            if (totalSemanas > 35) filteredDB = bancoDeMaterias; // tem tempo, estuda tudo
-            if (totalSemanas < 15) filteredDB = bancoDeMaterias.filter(t => t.prioridade === 1); // intensivo
+            // 2. A "Regra do Teto" (Max 15 tarefas teóricas por semana)
+            const MAX_TASKS_PER_WEEK = 15;
+            const maxTasksAllowed = totalSemanas * MAX_TASKS_PER_WEEK;
+
+            // 3. Filtros Base (Ordena pelo score que você criou)
+            let filteredDB = [...bancoDeMaterias].sort((a, b) => b.score - a.score);
+            if (obData.horas === '2h') filteredDB = filteredDB.filter(t => t.prioridade <= 2);
+            else if (obData.horas === '4h') filteredDB = filteredDB.filter(t => t.prioridade <= 3);
             
-            // 2. Criar Semanas
+            // Aplica o teto cortando as menos importantes
+            if (filteredDB.length > maxTasksAllowed) {
+                filteredDB = filteredDB.slice(0, maxTasksAllowed);
+            }
+            
+            // 4. Estruturar as Semanas (Incluindo os blocos da noite)
             const newWeeks = [];
-            for(let i=1; i<=totalSemanas; i++) {
+            for(let i=0; i<totalSemanas; i++) {
+                const wStart = new Date(start); wStart.setDate(start.getDate() + (i*7));
+                const wEnd = new Date(wStart); wEnd.setDate(wStart.getDate() + 6);
                 newWeeks.push({
-                    week: i,
-                    phase: "Estudo Focado",
-                    timeSlots: ["08:00 - 12:00", "14:00 - 18:00"],
+                    week: i+1,
+                    _start: wStart,
+                    _end: wEnd,
+                    phase: "Estudo Misto",
+                    timeSlots: ["08:00 - 12:00", "14:00 - 18:00", "18:00 - 22:00"], 
                     agenda: {},
                     tasks: []
                 });
             }
 
-            // 3. Distribuir Tarefas (Simplificado: Espiral Misto)
-            let wIdx = 0;
-            filteredDB.forEach((task, index) => {
-                newWeeks[wIdx].tasks.push({
-                    id: `gen_${index}`,
-                    category: task.area,
-                    subject: task.tema,
-                    prioridade: task.prioridade,
-                    tipo: "materia_nova"
+            const spreadTasks = (tasks, targetWeeks, isRevision = false) => {
+                if(targetWeeks.length === 0) targetWeeks = newWeeks;
+                tasks.forEach((t, i) => {
+                    const wIdx = i % targetWeeks.length;
+                    targetWeeks[wIdx].tasks.push({
+                        id: `gen_${Date.now()}_${Math.random().toString(36).substr(2,6)}`,
+                        category: t.area,
+                        subject: t.tema,
+                        prioridade: t.prioridade,
+                        tipo: isRevision ? 'revisao' : 'materia_nova'
+                    });
                 });
-                wIdx++;
-                if(wIdx >= totalSemanas) wIdx = 0;
+            };
+
+            // 5. Distribuir Tarefas (Internato vs. Livre)
+            if (obData.internato === 'sim' && obData.datasRodizios) {
+                const mapArea = { 'Cirurgia': 'cirurgia', 'Clínica Médica': 'clinica', 'Ginecologia e Obstetrícia': 'go', 'Pediatria': 'ped' };
+                
+                newWeeks.forEach(w => {
+                    let phaseStr = [];
+                    Object.keys(obData.datasRodizios).forEach(rKey => {
+                        const r = obData.datasRodizios[rKey];
+                        if (!r.concluido && r.in && r.fim) {
+                            const rStart = new Date(r.in + 'T12:00:00');
+                            const rEnd = new Date(r.fim + 'T12:00:00'); rEnd.setMonth(rEnd.getMonth() + 1);
+                            if (w._start >= rStart && w._start <= rEnd) phaseStr.push(rKey);
+                        }
+                    });
+                    if(phaseStr.length > 0) w.phase = "Internato " + phaseStr.join('/').toUpperCase();
+                });
+
+                const tasksByArea = { 'Cirurgia': [], 'Clínica Médica': [], 'Ginecologia e Obstetrícia': [], 'Pediatria': [], 'Preventiva': [] };
+                filteredDB.forEach(t => { if(tasksByArea[t.area]) tasksByArea[t.area].push(t); else tasksByArea['Clínica Médica'].push(t); });
+
+                Object.keys(tasksByArea).forEach(area => {
+                    const tasks = tasksByArea[area];
+                    const rKey = mapArea[area];
+                    
+                    if (rKey) {
+                        const r = obData.datasRodizios[rKey];
+                        if (r && r.concluido) {
+                            const revTasks = tasks.filter(t => t.prioridade === 1);
+                            spreadTasks(revTasks, newWeeks, true);
+                        } else if (r && r.in && r.fim) {
+                            const rStart = new Date(r.in + 'T12:00:00');
+                            const rEnd = new Date(r.fim + 'T12:00:00'); rEnd.setMonth(rEnd.getMonth() + 1);
+                            const validWeeks = newWeeks.filter(w => w._start >= rStart && w._start <= rEnd);
+                            spreadTasks(tasks, validWeeks.length > 0 ? validWeeks : newWeeks);
+                        } else {
+                            spreadTasks(tasks, newWeeks);
+                        }
+                    } else {
+                        spreadTasks(tasks, newWeeks);
+                    }
+                });
+
+            } else {
+                // Estudo Livre (Spiral Curriculum)
+                filteredDB.forEach((task, index) => {
+                    const wIdx = index % totalSemanas;
+                    newWeeks[wIdx].tasks.push({
+                        id: `gen_${index}_${Date.now()}`,
+                        category: task.area,
+                        subject: task.tema,
+                        prioridade: task.prioridade,
+                        tipo: "materia_nova"
+                    });
+                });
+            }
+
+            // 6. Limpar e adicionar Simulados a cada 4 semanas
+            newWeeks.forEach(w => {
+                delete w._start; delete w._end;
+                if (w.week % 4 === 0 && obData.horas !== '2h') {
+                    w.tasks.push({ id: `sim_${w.week}`, category: "Outros", subject: "🎯 Simulado Geral na Íntegra", prioridade: 1, tipo: "simulado" });
+                }
+                w.tasks.sort((a,b) => a.prioridade - b.prioridade);
             });
 
             window.state.weeks = newWeeks;
             window.state.progress = {};
             window.state.dailyStats = {};
 
-            // 4. Salvar
             await window.saveToCloud();
             finishLoading();
         }
 
         function finishLoading() {
             document.getElementById('loader-overlay').style.display = 'none';
-            // Configurar tema salvo no cache do navegador
             if(localStorage.getItem('cm_theme') === 'dark') window.toggleDarkMode(true);
             window.updateUI();
         }
 
+        // SALVAMENTO COM DEBOUNCE PARA NÃO SOBRECARREGAR A NUVEM
         window.saveToCloud = async function() {
-            try {
-                if(currentUser) {
-                    await updateDoc(doc(db, "profiles", currentUser.uid), { app_state: window.state });
-                }
-            } catch(e) { console.error("Save error", e); }
+            try { if(currentUser) await updateDoc(doc(db, "profiles", currentUser.uid), { app_state: window.state }); } 
+            catch(e) { console.error("Save error", e); }
         }
         
-        // Timer de auto-save (A cada 5 segundos se houver mudança)
         let saveTimeout;
         window.triggerSave = function() {
             clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(() => { window.saveToCloud(); }, 5000);
+            saveTimeout = setTimeout(() => { window.saveToCloud(); }, 3000); 
         }
 
         window.handleLogout = async function() { if(auth) await signOut(auth); window.location.href = "index.html"; }
         window.recalculateRoute = function() { window.location.href = "onboarding.html"; }
 
-        // ======================================================================
-        // FUNÇÕES UI BASE
-        // ======================================================================
+        // ----------------------------------------------------------------------
+        // FUNÇÕES UI GERAIS E ESTILOS
+        // ----------------------------------------------------------------------
         window.toggleDarkMode = function(force) {
-            const body = document.body;
             const icon = document.getElementById('theme-icon');
-            if (force === true || force === false) {
-                window.isDarkMode = force;
-            } else {
-                window.isDarkMode = !window.isDarkMode;
-            }
+            if (force === true || force === false) window.isDarkMode = force;
+            else window.isDarkMode = !window.isDarkMode;
             
-            if (window.isDarkMode) {
-                document.documentElement.classList.add('dark');
-                icon.classList.replace('fa-moon', 'fa-sun');
-                localStorage.setItem('cm_theme', 'dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-                icon.classList.replace('fa-sun', 'fa-moon');
-                localStorage.setItem('cm_theme', 'light');
-            }
+            if (window.isDarkMode) { document.documentElement.classList.add('dark'); icon.classList.replace('fa-moon', 'fa-sun'); localStorage.setItem('cm_theme', 'dark'); } 
+            else { document.documentElement.classList.remove('dark'); icon.classList.replace('fa-sun', 'fa-moon'); localStorage.setItem('cm_theme', 'light'); }
         }
 
         window.toggleSidebar = function() { document.getElementById('main-sidebar').classList.toggle('sidebar-hidden'); }
@@ -452,310 +538,196 @@
         window.closeModal = function(id) { document.getElementById('modal-'+id).classList.remove('open'); }
 
         window.showToast = function(msg) {
-            const container = document.getElementById('toast-container');
-            const t = document.createElement('div');
+            const container = document.getElementById('toast-container'); const t = document.createElement('div');
             t.className = `px-6 py-3 rounded-xl shadow-lg font-bold text-sm flex items-center gap-3 fade-enter bg-cm-green text-cm-dark`;
             t.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
-            container.appendChild(t);
-            setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(()=>t.remove(), 300); }, 3000);
+            container.appendChild(t); setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(()=>t.remove(), 300); }, 3000);
         }
 
         window.getTodayStr = function() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
-        window.getCategoryColor = function(category) {
-            const map = { "Cirurgia": "bg-red-500/10 text-red-500 border-red-500/20", "Clínica Médica": "bg-blue-500/10 text-blue-500 border-blue-500/20", "Ginecologia e Obstetrícia": "bg-pink-500/10 text-pink-500 border-pink-500/20", "Pediatria": "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20", "Preventiva": "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" };
-            return map[category] || "bg-gray-500/10 text-gray-500 border-gray-500/20";
+        window.getCategoryColor = function(cat) {
+            const map = { "Cirurgia": "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20", "Clínica Médica": "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20", "Ginecologia e Obstetrícia": "bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20", "Pediatria": "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20", "Preventiva": "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20" };
+            return map[cat] || "bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-500/20";
+        }
+        window.getPrioClass = function(prio, tipo) {
+            if(tipo === 'revisao') return 'prio-rev';
+            if(prio === 1) return 'prio-1'; if(prio === 2) return 'prio-2'; if(prio === 3) return 'prio-3'; return 'prio-4';
+        }
+        window.getPrioLabel = function(prio, tipo, custom) {
+            if(tipo === 'simulado') return 'SIMULADO'; if(tipo === 'revisao') return 'REVISÃO'; if(custom) return 'CUSTOMIZADO';
+            if(prio===1) return 'ALTA'; if(prio===2) return 'MÉDIA'; if(prio===3) return 'BAIXA'; return 'OPCIONAL';
         }
 
-        // ======================================================================
-        // AÇÕES NAS TAREFAS
-        // ======================================================================
+        // ----------------------------------------------------------------------
+        // AÇÕES NAS TAREFAS E REMANEJAMENTO
+        // ----------------------------------------------------------------------
         window.ensureProgress = function(id) { if (!state.progress[id]) state.progress[id] = {}; }
-
         window.toggleTask = function(id) { 
-            window.ensureProgress(id); 
-            const newStatus = !state.progress[id].doneStatus; 
-            state.progress[id].doneStatus = newStatus; 
-            if(newStatus) { 
-                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#00c27a', '#1e2e25'] });
-            } 
+            window.ensureProgress(id); const newStatus = !state.progress[id].doneStatus; state.progress[id].doneStatus = newStatus; 
+            if(newStatus) confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#00c27a', '#1e2e25'] });
             window.triggerSave(); window.updateUI(); 
         }
-
         window.updateTaskQuestions = function(taskId, newVal, isCorrect = false) { 
             const val = parseInt(newVal) || 0; window.ensureProgress(taskId); 
-            if(isCorrect) { state.progress[taskId].correct = val; }
-            else {
-                const oldVal = parseInt(state.progress[taskId].done) || 0; 
-                const diff = val - oldVal; 
-                state.progress[taskId].done = val; 
-                if (diff > 0) { const today = window.getTodayStr(); state.dailyStats[today] = (state.dailyStats[today] || 0) + diff; } 
-            }
+            if(isCorrect) state.progress[taskId].correct = val; 
+            else { const diff = val - (parseInt(state.progress[taskId].done) || 0); state.progress[taskId].done = val; if (diff > 0) { const today = window.getTodayStr(); state.dailyStats[today] = (state.dailyStats[today] || 0) + diff; } }
             window.triggerSave(); window.updateUI(); 
         }
-
         window.toggleTaskDetails = function(taskId, event) {
             if(event && (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || event.target.closest('button') || event.target.closest('.custom-checkbox'))) return;
-            window.expandedCards[taskId] = !window.expandedCards[taskId];
-            window.updateUI();
+            window.expandedCards[taskId] = !window.expandedCards[taskId]; window.updateUI();
         }
-
-        // Modal Custom Task
-        window.openAddTaskModal = function(weekNum) { window.activeWeek = weekNum; document.getElementById('add-nome').value = ''; window.openModal('add-task'); }
         window.saveCustomTask = function() {
-            const nome = document.getElementById('add-nome').value.trim();
-            const area = document.getElementById('add-area').value;
-            const prio = parseInt(document.getElementById('add-prio').value);
-            if(!nome) return alert("Insira o nome.");
-            const week = state.weeks.find(w => w.week === activeWeek);
-            if(week) {
-                week.tasks.push({ id: `cstm_${Date.now()}`, category: area, subject: nome, prioridade: prio, customizado: true });
-                window.triggerSave(); window.updateUI(); window.showToast("Tema adicionado!"); window.closeModal('add-task');
-            }
+            const nome = document.getElementById('add-nome').value.trim(); const area = document.getElementById('add-area').value; const prio = parseInt(document.getElementById('add-prio').value);
+            if(!nome) return alert("Insira o nome da tarefa."); const week = state.weeks.find(w => w.week === activeWeek);
+            if(week) { week.tasks.push({ id: `cstm_${Date.now()}`, category: area, subject: nome, prioridade: prio, customizado: true, tipo: 'materia_nova' }); window.triggerSave(); window.updateUI(); window.showToast("Tema adicionado!"); window.closeModal('add-task'); }
         }
-
         window.deleteTask = function(weekIdx, taskIdx) {
-            if(confirm("Remover esta tarefa da semana?")) {
-                const week = state.weeks.find(w => w.week === weekIdx);
-                if(week) { week.tasks.splice(taskIdx, 1); window.triggerSave(); window.updateUI(); window.showToast("Removida."); }
-            }
+            if(confirm("Deseja realmente remover esta tarefa?")) { const week = state.weeks.find(w => w.week === weekIdx); if(week) { week.tasks.splice(taskIdx, 1); window.triggerSave(); window.updateUI(); window.showToast("Tarefa removida."); } }
         }
 
-        // ======================================================================
-        // AGENDA HORÁRIA EDITÁVEL
-        // ======================================================================
+        window.openRemanejoModal = function() {
+            let delayedCount = 0;
+            state.weeks.forEach(w => { if (w.week < activeWeek) { w.tasks.forEach(t => { if (!(state.progress[t.id] || {}).doneStatus) delayedCount++; }); } });
+            const btnOptions = document.getElementById('remanejo-options'); const btnEmpty = document.getElementById('remanejo-empty');
+            if(delayedCount === 0) { btnOptions.classList.add('hidden'); btnEmpty.classList.remove('hidden'); } 
+            else { btnOptions.classList.remove('hidden'); btnEmpty.classList.add('hidden'); }
+            window.openModal('remanejo');
+        }
+
+        window.applyRemanejo = function(strategy) {
+            const delayedTasks = [];
+            state.weeks.forEach(w => { if (w.week < activeWeek) { for (let i = w.tasks.length - 1; i >= 0; i--) { const t = w.tasks[i]; if (!(state.progress[t.id] || {}).doneStatus) { delayedTasks.push(t); w.tasks.splice(i, 1); } } } });
+            if (strategy === 'cut') {
+                const savedTasks = delayedTasks.filter(t => t.prioridade <= 2);
+                const targetW = state.weeks.find(w => w.week === activeWeek); if(targetW) targetW.tasks.push(...savedTasks);
+                window.showToast("Atrasos limpos. Mantivemos apenas o essencial!");
+            } else {
+                let wPtr = 0;
+                const futureWeeks = state.weeks.filter(w => w.week >= activeWeek && w.week < activeWeek + 4);
+                if(futureWeeks.length === 0) futureWeeks.push(state.weeks[state.weeks.length-1]);
+                delayedTasks.forEach(t => { futureWeeks[wPtr % futureWeeks.length].tasks.push(t); wPtr++; });
+                window.showToast("Tarefas diluídas suavemente.");
+            }
+            window.triggerSave(); window.updateUI(); window.closeModal('remanejo');
+        }
+
+        // ----------------------------------------------------------------------
+        // AGENDA EDITÁVEL
+        // ----------------------------------------------------------------------
         window.updateTimeSlot = function(weekIdx, slotIdx, val) { const w = state.weeks.find(w => w.week === weekIdx); if(w) { w.timeSlots[slotIdx] = val; window.triggerSave(); } }
         window.updateAgendaCell = function(weekIdx, dayKey, slotIdx, text) { const w = state.weeks.find(w => w.week === weekIdx); if(w) { const k = `${dayKey}_${slotIdx}`; if(!w.agenda) w.agenda={}; if(!w.agenda[k]) w.agenda[k]={}; w.agenda[k].text = text; window.triggerSave(); } }
+        window.addAgendaRowAt = function(weekIdx, index) { const week = state.weeks.find(w => w.week === weekIdx); week.timeSlots.splice(index + 1, 0, "00:00 - 00:00"); const newAgenda = {}; Object.keys(week.agenda).forEach(key => { const [d, sStr] = key.split('_'); const s = parseInt(sStr); if (s > index) newAgenda[`${d}_${s+1}`] = week.agenda[key]; else newAgenda[key] = week.agenda[key]; }); week.agenda = newAgenda; window.triggerSave(); window.updateUI(); }
+        window.requestRemoveAgendaRow = function(weekIdx, index) { if(confirm("Excluir esta linha inteira?")) { const week = state.weeks.find(w => w.week === weekIdx); week.timeSlots.splice(index, 1); const newAgenda = {}; Object.keys(week.agenda).forEach(key => { const [d, sStr] = key.split('_'); const s = parseInt(sStr); if (s < index) newAgenda[key] = week.agenda[key]; else if (s > index) newAgenda[`${d}_${s-1}`] = week.agenda[key]; }); week.agenda = newAgenda; window.triggerSave(); window.updateUI(); } }
         
         window.executeReplicaAgenda = function(weeksAhead) {
-            const sourceW = state.weeks.find(w => w.week === activeWeek);
-            if(!sourceW) return;
-            state.weeks.forEach(w => {
-                if(w.week > activeWeek && w.week <= activeWeek + weeksAhead) {
-                    w.timeSlots = [...sourceW.timeSlots];
-                    w.agenda = JSON.parse(JSON.stringify(sourceW.agenda));
-                }
-            });
-            window.triggerSave(); window.showToast("Agenda replicada com sucesso!"); window.closeModal('replica-agenda');
+            const sourceW = state.weeks.find(w => w.week === activeWeek); if(!sourceW) return;
+            state.weeks.forEach(w => { if(w.week > activeWeek && w.week <= activeWeek + weeksAhead) { w.timeSlots = [...sourceW.timeSlots]; w.agenda = JSON.parse(JSON.stringify(sourceW.agenda)); } });
+            window.triggerSave(); window.showToast("Grade copiada para as próximas semanas!"); window.closeModal('replica-agenda');
         }
 
-        // ======================================================================
-        // POMODORO FLUTUANTE (Spotify Style)
-        // ======================================================================
+        // ----------------------------------------------------------------------
+        // POMODORO FLUTUANTE
+        // ----------------------------------------------------------------------
         window.togglePomo = function() {
             if (window.isPomoRunning) { window.isPomoRunning = false; document.getElementById('mp-play-btn').innerHTML = '<i class="fas fa-play ml-1"></i>'; } 
             else { window.isPomoRunning = true; document.getElementById('mp-play-btn').innerHTML = '<i class="fas fa-pause"></i>'; }
         }
         window.stopPomo = function() { window.isPomoRunning = false; window.activePomoId = null; document.getElementById('mini-player').classList.remove('show'); }
         window.startPomoTask = function(taskId, phase) {
-            window.activePomoId = taskId; window.pomoPhase = phase;
-            window.pomoTotal = phase === 'aula' ? 50*60 : (phase === 'questoes' ? 25*60 : 5*60);
-            window.pomoTime = window.pomoTotal; window.isPomoRunning = true;
-            document.getElementById('mp-phase').innerText = phase;
-            document.getElementById('mp-play-btn').innerHTML = '<i class="fas fa-pause"></i>';
+            window.activePomoId = taskId; window.pomoTime = phase === 'aula' ? 50*60 : 25*60; window.isPomoRunning = true;
+            document.getElementById('mp-phase').innerText = `Foco: ${phase}`; document.getElementById('mp-play-btn').innerHTML = '<i class="fas fa-pause"></i>';
             document.getElementById('mini-player').classList.add('show');
         }
         setInterval(() => {
             if(window.isPomoRunning && window.pomoTime > 0) {
-                window.pomoTime--;
-                const m = Math.floor(window.pomoTime / 60); const s = window.pomoTime % 60;
+                window.pomoTime--; const m = Math.floor(window.pomoTime / 60); const s = window.pomoTime % 60;
                 document.getElementById('mp-time').innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-                if(window.pomoTime === 0) { window.togglePomo(); window.showToast("Tempo concluído! Descanse."); }
+                if(window.pomoTime === 0) { window.togglePomo(); window.showToast("Sessão finalizada. Descanse um pouco!"); }
             }
         }, 1000);
 
-        // ======================================================================
-        // RENDERS
-        // ======================================================================
+        // ----------------------------------------------------------------------
+        // RENDERIZADORES UI
+        // ----------------------------------------------------------------------
         window.switchView = function(view) {
             activeView = view;
-            ['nav-dashboard', 'nav-search', 'nav-homepage', 'nav-week'].forEach(id => { const el = document.getElementById(id); if (el) { el.className = el.className.replace('bg-cm-green/10 text-cm-green dark:bg-cm-green dark:text-cm-dark', 'text-gray-500 hover:bg-gray-100 dark:hover:bg-cm-mid dark:text-cm-muted hover:text-slate-800 dark:hover:text-white bg-transparent'); } });
-            const activeEl = document.getElementById(`nav-${view}`); if (activeEl) { activeEl.className = activeEl.className.replace('text-gray-500 hover:bg-gray-100 dark:hover:bg-cm-mid dark:text-cm-muted hover:text-slate-800 dark:hover:text-white bg-transparent', 'bg-cm-green/10 text-cm-green dark:bg-cm-green dark:text-cm-dark'); }
+            ['nav-dashboard', 'nav-search', 'nav-homepage', 'nav-week'].forEach(id => { const el = document.getElementById(id); if (el) el.className = el.className.replace('bg-cm-green/10 text-cm-green dark:bg-cm-green dark:text-cm-dark', 'text-gray-500 hover:bg-gray-100 dark:hover:bg-cm-mid dark:text-cm-muted hover:text-slate-800 dark:hover:text-white bg-transparent'); });
+            const activeEl = document.getElementById(`nav-${view}`); if (activeEl) activeEl.className = activeEl.className.replace('text-gray-500 hover:bg-gray-100 dark:hover:bg-cm-mid dark:text-cm-muted hover:text-slate-800 dark:hover:text-white bg-transparent', 'bg-cm-green/10 text-cm-green dark:bg-cm-green dark:text-cm-dark');
             window.updateUI();
         }
 
         window.renderNav = function() {
             const nav = document.getElementById('week-nav'); if(!nav) return; nav.innerHTML = '';
             state.weeks.forEach(w => {
-                const total = w.tasks.length; let done = 0;
-                w.tasks.forEach(t => { if(state.progress[t.id]?.doneStatus) done++; });
-                const pct = total ? Math.round((done/total)*100) : 0;
+                let done = 0; w.tasks.forEach(t => { if(state.progress[t.id]?.doneStatus) done++; });
+                const pct = w.tasks.length ? Math.round((done/w.tasks.length)*100) : 0;
                 const active = (activeView === 'week' && activeWeek === w.week) ? 'bg-gray-100 dark:bg-cm-mid border-cm-green' : 'border-transparent hover:bg-gray-50 dark:hover:bg-cm-mid/50';
                 nav.innerHTML += `<div onclick="activeWeek=${w.week}; window.switchView('week');" class="px-4 py-2.5 rounded-xl mb-1 cursor-pointer transition-all border-l-2 ${active} flex justify-between items-center text-slate-700 dark:text-gray-300"><div><span class="block text-xs font-bold">Semana ${w.week}</span></div><span class="text-[10px] font-bold px-1.5 rounded ${pct===100?'bg-cm-green text-cm-dark':'bg-gray-200 dark:bg-cm-dark2'}">${pct}%</span></div>`;
             });
         }
 
         window.renderHomepage = function() {
-            const content = document.getElementById('content-area');
-            const nome = document.getElementById('user-name').innerText.split(' ')[0] || 'Doutor(a)';
-            const todayStr = window.getTodayStr();
-            const todayCount = state.dailyStats[todayStr] || 0;
-            
-            // Achar semana atual baseada nas datas (Simulado simples aqui: assume semana 1 como agora se não tiver datas reais)
-            let currW = state.weeks[0]; // Fallback
-            
-            let todayTasks = currW ? currW.tasks.filter(t => !(state.progress[t.id] || {}).doneStatus) : [];
-
-            // Mini Agenda Hoje (Fictício do dia atual da semana 1)
+            const content = document.getElementById('content-area'); const nome = document.getElementById('user-name').innerText.split(' ')[0] || 'Doutor(a)';
+            const currW = state.weeks.find(w => w.week === activeWeek) || state.weeks[0]; 
+            const todayTasks = currW ? currW.tasks.filter(t => !(state.progress[t.id] || {}).doneStatus) : [];
             const dayIdx = new Date().getDay();
             let agendaHtml = '';
             if(currW && currW.timeSlots) {
                 currW.timeSlots.forEach((slot, sIdx) => {
-                    const cell = currW.agenda ? currW.agenda[`d${dayIdx}_${sIdx}`] : null;
-                    const txt = cell ? cell.text : '- Livre -';
-                    agendaHtml += `<div class="flex items-start gap-4 timeline-item"><div class="text-[10px] font-bold font-mono text-gray-400 mt-1">${slot}</div><div class="font-bold text-sm text-slate-800 dark:text-white bg-gray-50 dark:bg-cm-mid px-4 py-2 rounded-xl flex-1">${txt}</div></div>`;
+                    const cell = currW.agenda ? currW.agenda[`d${dayIdx}_${sIdx}`] : null; const txt = cell ? cell.text : '- Estudo/Livre -';
+                    agendaHtml += `<div class="flex items-start gap-4 timeline-item"><div class="text-[10px] font-bold font-mono text-gray-400 mt-1 w-20 shrink-0">${slot}</div><div class="font-bold text-sm text-slate-800 dark:text-white bg-white dark:bg-cm-mid px-4 py-2 border border-gray-100 dark:border-transparent rounded-xl flex-1 shadow-sm break-words">${txt}</div></div>`;
                 });
             }
 
-            let html = `
-            <div class="max-w-4xl mx-auto fade-enter">
-                <div class="mb-10">
-                    <h1 class="text-4xl font-serif text-slate-900 dark:text-white tracking-tight">Bom dia, ${nome}!</h1>
-                    <p class="text-gray-500 dark:text-cm-muted mt-2 text-lg">O seu foco de hoje está desenhado abaixo. Faltam <b class="text-cm-green">140 dias</b> para as provas principais.</p>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                    <div class="card-ui p-6 flex flex-col justify-center items-center text-center">
-                        <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Ofensiva</div>
-                        <div class="text-3xl font-black text-orange-500 flex items-center gap-2"><i class="fas fa-fire"></i> 3 dias</div>
-                    </div>
-                    <div class="card-ui p-6 flex flex-col justify-center items-center text-center">
-                        <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Questões Hoje</div>
-                        <div class="text-3xl font-black text-cm-green flex items-center gap-2">${todayCount}</div>
-                    </div>
-                    <div class="card-ui p-6 flex flex-col justify-center items-center text-center bg-cm-green text-white dark:text-cm-dark border-transparent cursor-pointer hover:scale-105 transition" onclick="window.startPomoTask('avulso', 'aula')">
-                        <i class="fas fa-play text-2xl mb-2"></i>
-                        <div class="font-bold text-sm">Iniciar Foco Livre</div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div>
-                        <h3 class="text-sm font-bold uppercase tracking-widest text-gray-500 mb-6 flex items-center gap-2"><i class="far fa-clock"></i> Linha do Tempo</h3>
-                        <div class="card-ui p-8 pt-10">
-                            ${agendaHtml}
-                            <button onclick="switchView('week')" class="w-full text-xs font-bold text-cm-green hover:underline mt-4 text-center">Editar minha grade na Aba Semanas</button>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-bold uppercase tracking-widest text-gray-500 mb-6 flex items-center gap-2"><i class="fas fa-tasks"></i> Foco Principal Hoje</h3>
-                        <div class="space-y-3">
-                            ${todayTasks.slice(0, 5).map(t => {
-                                const prio = t.prioridade || 2; const pClass = `prio-${prio}`;
-                                const tagColor = window.getCategoryColor(t.category);
-                                return `<div class="card-ui p-4 flex items-center gap-3 border-l-4 ${pClass} cursor-pointer" onclick="activeWeek=${currW.week}; window.switchView('week');">
-                                    <div class="w-8 h-8 rounded-full bg-gray-50 dark:bg-cm-dark2 flex items-center justify-center text-gray-400"><i class="fas fa-arrow-right"></i></div>
-                                    <div><div class="font-bold text-sm text-slate-800 dark:text-white leading-tight">${t.subject}</div><span class="${tagColor} text-[8px] uppercase font-bold px-1.5 rounded mt-1 inline-block">${t.category}</span></div>
-                                </div>`;
-                            }).join('')}
-                        </div>
-                    </div>
-                </div>
-            </div>`;
-            content.innerHTML = html;
+            let html = `<div class="max-w-4xl mx-auto fade-enter"><div class="mb-10"><h1 class="text-4xl font-serif text-slate-900 dark:text-white tracking-tight">Bom dia, ${nome}!</h1><p class="text-gray-500 dark:text-cm-muted mt-2 text-lg">Aqui está o seu painel de comando para o dia de hoje.</p></div><div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10"><div class="card-ui p-6 flex flex-col justify-center items-center text-center"><div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Semana Atual</div><div class="text-xl font-black text-blue-500 flex items-center gap-2"><i class="fas fa-calendar-week"></i> Semana ${currW?currW.week:''}</div></div><div class="card-ui p-6 flex flex-col justify-center items-center text-center"><div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Questões Hoje</div><div class="text-3xl font-black text-cm-green flex items-center gap-2">${state.dailyStats[window.getTodayStr()]||0}</div></div><div class="card-ui p-6 flex flex-col justify-center items-center text-center bg-cm-green text-white dark:text-cm-dark border-transparent cursor-pointer hover:scale-105 transition shadow-md" onclick="window.startPomoTask('avulso', 'Foco Livre')"><i class="fas fa-play text-2xl mb-2"></i><div class="font-bold text-sm">Foco Livre</div></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><div><h3 class="text-sm font-bold uppercase tracking-widest text-gray-500 mb-6 flex items-center gap-2"><i class="far fa-clock"></i> A Linha do Tempo (Hoje)</h3><div class="card-ui p-8 pt-10">${agendaHtml}<button onclick="switchView('week')" class="w-full text-xs font-bold text-cm-green hover:underline mt-4 text-center">Editar minha grade na Aba Semanas</button></div></div><div><h3 class="text-sm font-bold uppercase tracking-widest text-gray-500 mb-6 flex items-center gap-2"><i class="fas fa-tasks"></i> Foco Principal (Sem. ${currW?currW.week:''})</h3><div class="space-y-3">`;
+            todayTasks.slice(0, 6).forEach(t => { html += `<div class="card-ui p-4 flex items-center gap-3 ${window.getPrioClass(t.prioridade, t.tipo)} cursor-pointer" onclick="activeWeek=${currW?currW.week:1}; window.switchView('week');"><div class="w-8 h-8 rounded-full bg-gray-50 dark:bg-cm-dark2 flex items-center justify-center text-gray-400 shrink-0"><i class="fas fa-arrow-right"></i></div><div class="min-w-0"><div class="font-bold text-sm text-slate-800 dark:text-white leading-tight truncate">${t.subject}</div><span class="${window.getCategoryColor(t.category)} text-[8px] uppercase font-bold px-1.5 rounded mt-1 inline-block">${t.category}</span></div></div>`; });
+            if(todayTasks.length===0) html+=`<div class="text-gray-400 text-sm text-center py-10 italic">Tudo concluído para esta semana! Descanse.</div>`;
+            html += `</div></div></div></div>`; content.innerHTML = html;
         }
 
         window.renderWeek = function() {
-            const w = state.weeks.find(d => d.week === activeWeek); const content = document.getElementById('content-area');
-            if(!w) return;
-
-            const days = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+            const w = state.weeks.find(d => d.week === activeWeek); const content = document.getElementById('content-area'); if(!w) return; const days = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
             
-            // GRADE HORÁRIA EDITÁVEL
-            let agendaHtml = `<div class="mb-12 fade-enter">
-                <div class="flex justify-between items-center mb-6">
-                    <div><h2 class="text-3xl font-serif text-slate-900 dark:text-white">A Minha Semana ${w.week}</h2><span class="text-sm text-gray-500 dark:text-cm-muted">Organize seu tempo e cumpra os alvos.</span></div>
-                    <button onclick="window.openModal('replica-agenda')" class="text-xs font-bold bg-white dark:bg-cm-mid border border-gray-200 dark:border-gray-700 px-4 py-2 rounded-xl shadow-sm hover:border-cm-green transition"><i class="fas fa-copy mr-1 text-cm-green"></i> Configurar Grade</button>
-                </div>
-                <div class="overflow-x-auto rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-cm-dark2">
-                    <table class="w-full text-left min-w-[700px] border-collapse">
-                        <thead><tr class="bg-gray-50 dark:bg-cm-mid"><th class="p-3 w-20 border-b border-gray-200 dark:border-gray-800"></th>${days.map(d=>`<th class="p-3 text-xs font-bold text-gray-500 uppercase tracking-widest text-center border-b border-l border-gray-200 dark:border-gray-800">${d}</th>`).join('')}</tr></thead>
-                        <tbody>
-                            ${w.timeSlots.map((slot, sIdx) => `<tr>
-                                <td class="p-0 border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-cm-mid/30"><div contenteditable="true" onblur="window.updateTimeSlot(${activeWeek}, ${sIdx}, this.innerText)" class="w-full text-center text-[10px] font-bold font-mono text-gray-500 outline-none focus:bg-cm-green/10 p-4">${slot}</div></td>
-                                ${days.map((d, dIdx) => {
-                                    const cell = w.agenda ? w.agenda[`d${dIdx}_${sIdx}`] : null; const txt = cell ? cell.text : '';
-                                    return `<td class="p-0 border-b border-l border-gray-200 dark:border-gray-800 relative"><div contenteditable="true" onblur="window.updateAgendaCell(${activeWeek}, 'd${dIdx}', ${sIdx}, this.innerText)" class="w-full h-full min-h-[60px] p-2 text-xs font-medium text-slate-700 dark:text-white outline-none focus:bg-cm-green/10 transition flex items-center justify-center text-center bg-transparent break-words">${txt}</div></td>`;
-                                }).join('')}
-                            </tr>`).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            </div>`;
+            let agendaHtml = `<div class="mb-12 fade-enter"><div class="flex justify-between items-center mb-6"><div><h2 class="text-3xl font-serif text-slate-900 dark:text-white">Semana ${w.week}</h2><span class="text-sm font-bold text-gray-500 dark:text-cm-green">${w.phase}</span></div><button onclick="window.openModal('replica-agenda')" class="text-xs font-bold bg-white dark:bg-cm-mid border border-gray-200 dark:border-gray-700 px-4 py-2 rounded-xl shadow-sm hover:border-cm-green transition"><i class="fas fa-copy mr-1 text-cm-green"></i> Configurar Grade</button></div><div class="overflow-x-auto rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-cm-dark2"><table class="agenda-table min-w-[700px]"><thead><tr><th class="p-3 w-24">Horário</th>${days.map(d=>`<th class="p-3 text-xs font-bold">${d}</th>`).join('')}</tr></thead><tbody>`;
+            w.timeSlots.forEach((slot, sIdx) => {
+                agendaHtml += `<tr><td class="p-0 w-24 align-middle time-col relative border-r border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-cm-mid/30"><div class="w-full text-center font-mono text-[10px] font-bold outline-none p-3" contenteditable="true" onblur="window.updateTimeSlot(${activeWeek}, ${sIdx}, this.innerText)">${slot}</div><div class="row-controls"><button onclick="window.addAgendaRowAt(${activeWeek}, ${sIdx})" class="text-[10px] text-blue-600 hover:bg-blue-50 py-1"><i class="fas fa-plus"></i></button><button onclick="window.requestRemoveAgendaRow(${activeWeek}, ${sIdx})" class="text-[10px] text-red-600 hover:bg-red-50 py-1"><i class="fas fa-minus"></i></button></div></td>`;
+                days.forEach((d, dIdx) => { const c = w.agenda[`d${dIdx}_${sIdx}`] || {}; agendaHtml += `<td class="p-0 h-16 relative"><div class="agenda-cell w-full h-full p-2 outline-none flex items-center justify-center text-xs font-medium text-slate-700 dark:text-white" contenteditable="true" onblur="window.updateAgendaCell(${activeWeek}, 'd${dIdx}', ${sIdx}, this.innerText)">${c.text||''}</div></td>`; }); agendaHtml += `</tr>`;
+            });
+            agendaHtml += `</tbody></table></div><p class="text-[10px] text-gray-400 mt-2"><i class="fas fa-info-circle text-blue-400"></i> Edite a tabela acima para configurar as suas aulas e plantões. As alterações são guardadas na nuvem.</p></div>`;
 
-            // TAREFAS
-            let tasksHtml = `<div class="mb-4 flex justify-between items-center"><h3 class="text-sm font-bold uppercase tracking-widest text-gray-500"><i class="fas fa-bullseye text-cm-green mr-1"></i> Alvos da Semana</h3></div><div class="grid gap-3 fade-enter">`;
-            
-            w.tasks.forEach((task, idx) => {
-                const taskId = task.id; const p = state.progress[taskId] || {}; const isChecked = p.doneStatus;
-                const prio = task.prioridade || 2; const pClass = `prio-${prio}`;
-                const tagColor = window.getCategoryColor(task.category); 
-                const isExp = window.expandedCards[taskId];
-                const acc = window.calculateAccuracy(p.done, p.correct);
+            let tasksHtml = `<div class="mb-4 flex justify-between items-center"><h3 class="text-sm font-bold uppercase tracking-widest text-gray-500"><i class="fas fa-bullseye text-cm-green mr-1"></i> Tarefas da Semana (${w.tasks.length})</h3></div><div class="grid gap-3 fade-enter">`;
+            w.tasks.forEach((t, idx) => {
+                const p = state.progress[t.id] || {}; const isChecked = p.doneStatus; const prioClass = window.getPrioClass(t.prioridade, t.tipo);
+                const labels = window.getPrioLabel(t.prioridade, t.tipo, t.customizado);
+                const acc = Math.round(((parseInt(p.correct)||0) / (parseInt(p.done)||1)) * 100) || 0;
                 
-                let labels = prio===1? 'ALTA PREVALÊNCIA': prio===2? 'MÉDIA PREVALÊNCIA': prio===3? 'BAIXA PREVALÊNCIA': 'OPCIONAL';
-                if(task.customizado) labels = 'CUSTOMIZADO';
-
-                tasksHtml += `<div class="card-ui p-4 flex flex-col gap-2 border-l-4 ${pClass} ${isChecked ? 'done' : ''}">
-                    <div class="flex items-center gap-4 w-full">
-                        <div class="relative flex-shrink-0"><input type="checkbox" class="custom-checkbox" ${isChecked?'checked':''} onchange="window.toggleTask('${taskId}')"></div>
-                        <div class="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 cursor-pointer" onclick="window.toggleTaskDetails('${taskId}', event)">
-                            <div class="font-bold text-slate-800 dark:text-white text-[15px] leading-tight truncate">${task.subject}</div>
-                            <div class="flex gap-2">
-                                <span class="${tagColor} text-[8px] font-bold uppercase tracking-widest px-1.5 rounded border hidden sm:block">${task.category}</span>
-                                <span class="bg-gray-100 dark:bg-cm-mid text-gray-500 text-[8px] font-bold uppercase tracking-widest px-1.5 rounded hidden sm:block border border-gray-200 dark:border-gray-700">${labels}</span>
-                            </div>
-                        </div>
-                        <button onclick="window.toggleTaskDetails('${taskId}', event)" class="text-gray-400 w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-cm-mid transition"><i class="fas fa-chevron-down transition-transform ${isExp?'rotate-180':''}"></i></button>
-                    </div>`;
-                    
-                if(isExp) {
-                    tasksHtml += `<div class="pt-4 mt-2 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row gap-5 fade-enter">
-                        <div class="flex-1 flex flex-col gap-3">
-                            <div class="flex gap-2">
-                                <button onclick="window.startPomoTask('${taskId}', 'aula')" class="bg-gray-100 dark:bg-cm-mid text-slate-700 dark:text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:border-cm-green border border-transparent transition flex items-center gap-2"><i class="fas fa-play text-cm-green"></i> Focar (Aula)</button>
-                                <button onclick="window.startPomoTask('${taskId}', 'questoes')" class="bg-gray-100 dark:bg-cm-mid text-slate-700 dark:text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:border-cm-green border border-transparent transition flex items-center gap-2"><i class="fas fa-pen text-cm-green"></i> Focar (Qst)</button>
-                            </div>
-                            <button onclick="window.deleteTask(${activeWeek}, ${idx})" class="text-[10px] text-gray-400 hover:text-red-500 font-bold uppercase w-fit"><i class="fas fa-trash-alt"></i> Remover da semana</button>
-                        </div>
-                        <div class="flex items-center gap-3 bg-gray-50 dark:bg-cm-dark p-3 rounded-xl border border-gray-100 dark:border-gray-800 shrink-0">
-                            <div class="text-center"><span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 block">Feitas</span><input type="number" value="${p.done||''}" onchange="window.updateTaskQuestions('${taskId}', this.value)" class="w-12 bg-transparent text-center font-bold text-slate-800 dark:text-white outline-none border-b border-gray-300 dark:border-gray-700 focus:border-cm-green py-1" placeholder="-"></div>
-                            <div class="text-center"><span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 block">Acertos</span><input type="number" value="${p.correct||''}" onchange="window.updateTaskQuestions('${taskId}', this.value, true)" class="w-12 bg-transparent text-center font-bold text-slate-800 dark:text-white outline-none border-b border-gray-300 dark:border-gray-700 focus:border-cm-green py-1" placeholder="-"></div>
-                            <div class="pl-3 border-l border-gray-200 dark:border-gray-800 text-center min-w-[3.5rem]"><span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 block">%</span><span class="text-lg font-black ${acc>0?'text-cm-green':'text-gray-400'}">${acc}%</span></div>
-                        </div>
-                    </div>`;
+                tasksHtml += `<div class="card-ui p-4 flex flex-col gap-2 ${prioClass} ${isChecked?'done':''}"><div class="flex items-center gap-4 w-full"><div class="relative shrink-0"><input type="checkbox" class="custom-checkbox" ${isChecked?'checked':''} onchange="window.toggleTask('${t.id}')"></div><div class="flex-1 cursor-pointer min-w-0" onclick="window.toggleTaskDetails('${t.id}', event)"><div class="font-bold text-slate-800 dark:text-white text-[15px] leading-tight truncate">${t.subject}</div><div class="flex gap-2 mt-1"><span class="${window.getCategoryColor(t.category)} text-[8px] font-bold uppercase px-1.5 rounded border">${t.category}</span><span class="bg-gray-100 dark:bg-cm-mid text-gray-500 text-[8px] font-bold uppercase px-1.5 rounded border border-gray-200 dark:border-gray-700">${labels}</span></div></div><button onclick="window.toggleTaskDetails('${t.id}', event)" class="text-gray-400 w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-cm-mid transition shrink-0"><i class="fas fa-chevron-down ${window.expandedCards[t.id]?'rotate-180':''}"></i></button></div>`;
+                if(window.expandedCards[t.id]) {
+                    tasksHtml += `<div class="pt-4 mt-2 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row gap-5 fade-enter"><div class="flex-1 flex gap-2"><button onclick="window.startPomoTask('${t.id}', 'aula')" class="bg-gray-100 dark:bg-cm-mid text-slate-700 dark:text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:border-cm-green border border-transparent transition flex items-center gap-2"><i class="fas fa-play text-cm-green"></i> Focar</button><button onclick="window.deleteTask(${activeWeek}, ${idx})" class="text-[10px] text-gray-400 hover:text-red-500 uppercase ml-auto"><i class="fas fa-trash-alt"></i></button></div><div class="flex items-center gap-3 bg-gray-50 dark:bg-cm-dark p-3 rounded-xl border border-gray-100 dark:border-gray-800 shrink-0"><div class="text-center"><span class="text-[9px] font-bold text-gray-400 uppercase block tracking-wider mb-1">Feitas</span><input type="number" value="${p.done||''}" onchange="window.updateTaskQuestions('${t.id}', this.value)" class="w-12 bg-transparent text-center font-bold text-slate-800 dark:text-white outline-none border-b border-gray-300 dark:border-gray-700 focus:border-cm-green py-1" placeholder="-"></div><div class="text-center"><span class="text-[9px] font-bold text-gray-400 uppercase block tracking-wider mb-1">Acertos</span><input type="number" value="${p.correct||''}" onchange="window.updateTaskQuestions('${t.id}', this.value, true)" class="w-12 bg-transparent text-center font-bold text-slate-800 dark:text-white outline-none border-b border-gray-300 dark:border-gray-700 focus:border-cm-green py-1" placeholder="-"></div><div class="pl-3 border-l border-gray-200 dark:border-gray-800 text-center min-w-[3.5rem]"><span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">%</span><span class="text-lg font-black ${acc>0?'text-cm-green':'text-gray-400'}">${acc}%</span></div></div></div>`;
                 }
                 tasksHtml += `</div>`;
             });
-            
             tasksHtml += `<button onclick="window.openAddTaskModal(${activeWeek})" class="w-full py-6 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-2xl text-gray-400 hover:text-cm-green hover:border-cm-green transition font-bold text-sm mt-2 flex items-center justify-center gap-2"><i class="fas fa-plus"></i> Inserir Tema Avulso</button></div>`;
-            
             content.innerHTML = agendaHtml + tasksHtml;
         }
 
-        window.renderDashboard = function() {
+        window.renderDashboard = function() { 
             const content = document.getElementById('content-area'); 
-            content.innerHTML = `<div class="fade-enter"><h2 class="text-3xl font-serif text-slate-900 dark:text-white mb-6">Dashboard</h2><div class="card-ui p-10 text-center"><i class="fas fa-chart-line text-5xl text-gray-300 dark:text-gray-700 mb-4"></i><p class="text-gray-500 font-bold">Gráficos de evolução serão preenchidos conforme avança no Cronograma.</p></div></div>`;
+            const qCanvas = `<div class="bg-white dark:bg-cm-dark2 p-6 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 h-full"><h3 class="font-black text-sm text-slate-700 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2"><i class="fas fa-chart-bar text-blue-500"></i> Questões (14 dias)</h3><canvas id="chart-questions" height="150"></canvas></div>`;
+            content.innerHTML = `<div class="fade-enter"><h2 class="text-3xl font-serif text-slate-900 dark:text-white mb-6">Dashboard</h2><div class="grid grid-cols-1 lg:grid-cols-2 gap-8">${qCanvas}</div></div>`; 
+            setTimeout(() => {
+                const ctx = document.getElementById('chart-questions');
+                if (ctx) {
+                    const labels = []; const data = [];
+                    for (let i = 13; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); labels.push(`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`); data.push(state.dailyStats[`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`] || 0); }
+                    new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ data, backgroundColor: '#00c27a', borderRadius: 4 }] }, options: { plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false } });
+                }
+            }, 100);
         }
-
-        window.renderSearch = function() {
-            const content = document.getElementById('content-area'); 
-            content.innerHTML = `<div class="fade-enter"><h2 class="text-3xl font-serif text-slate-900 dark:text-white mb-6">Banco de Tarefas</h2><div class="card-ui p-10 text-center"><i class="fas fa-search text-5xl text-gray-300 dark:text-gray-700 mb-4"></i><p class="text-gray-500 font-bold">Pesquise pelas ${bancoDeMaterias.length}+ matérias mapeadas.</p></div></div>`;
-        }
-
-        window.updateUI = function() { 
-            window.renderNav(); 
-            if(activeView === 'homepage') window.renderHomepage(); 
-            else if(activeView === 'dashboard') window.renderDashboard(); 
-            else if (activeView === 'search') window.renderSearch(); 
-            else window.renderWeek(); 
-            
-            // Calc Global Prog
-            let total = 0, done = 0;
-            state.weeks.forEach(w => { total += w.tasks.length; w.tasks.forEach(t => { if(state.progress[t.id]?.doneStatus) done++; }) });
-            const pct = total ? Math.round((done/total)*100) : 0;
-            document.getElementById('global-progress').style.width = `${pct}%`;
-            document.getElementById('global-percent-text').innerText = `${pct}%`;
-        }
+        
+        window.renderSearch = function() { document.getElementById('content-area').innerHTML = `<div class="fade-enter"><h2 class="text-3xl font-serif text-slate-900 dark:text-white mb-6">Banco de Tarefas</h2><div class="card-ui p-10 text-center"><i class="fas fa-search text-5xl text-gray-300 dark:text-gray-700 mb-4"></i><p class="text-gray-500 font-bold">A aba de pesquisa em desenvolvimento. Em breve todos os temas de banco.js serão listados aqui.</p></div></div>`; }
+        window.updateUI = function() { window.renderNav(); if(activeView === 'homepage') window.renderHomepage(); else if(activeView === 'dashboard') window.renderDashboard(); else if (activeView === 'search') window.renderSearch(); else window.renderWeek(); }
     </script>
 </body>
 </html>
