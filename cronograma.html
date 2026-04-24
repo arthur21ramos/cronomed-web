@@ -30,6 +30,7 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&display=swap');
 
         /* Layout Fixes */
         html, body { height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -53,7 +54,7 @@
 
         /* AGENDA STYLING */
         .agenda-table { border-collapse: separate; border-spacing: 0; width: 100%; border: 1px solid #e2e8f0; table-layout: fixed; border-radius: 8px; overflow: hidden; }
-        .agenda-table th { background-color: #0f172a; color: white; font-weight: 600; padding: 10px; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #334155; }
+        .agenda-table th { background-color: #0f172a; color: white; font-weight: 600; padding: 10px; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #334155; text-align: center; }
         .agenda-table td { border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; position: relative; vertical-align: top; }
         .time-col { background-color: #f8fafc; color: #334155; font-weight: 600; vertical-align: middle !important; font-size: 0.75rem; }
         .agenda-cell { width: 100%; height: 100%; min-height: 60px; padding: 6px; display: flex; align-items: center; justify-content: center; text-align: center; outline: none; word-break: break-word; white-space: pre-wrap; font-size: 11px; background-color: #fff; transition: background-color 0.2s; }
@@ -64,12 +65,12 @@
         /* DRAG AND DROP */
         .draggable-item { cursor: grab; }
         .draggable-item:active { cursor: grabbing; opacity: 0.6; }
-        .drop-target-week { background-color: rgba(16, 185, 129, 0.1) !important; border-color: #10b981 !important; transform: scale(1.02); }
+        .drop-target-week { background-color: rgba(59, 130, 246, 0.1) !important; border-color: #3b82f6 !important; transform: scale(1.02); }
 
-        /* MODAIS E TRANSIÇÕES - CENTRALIZADOS */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 1rem; }
+        /* MODAIS E TRANSIÇÕES - CORRIGIDOS E CENTRALIZADOS */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 1rem; }
         .modal-overlay.flex { display: flex; }
-        .modal-content { animation: scaleIn 0.2s ease; max-height: 90vh; overflow-y: auto; }
+        .modal-content { background: white; border-radius: 1.5rem; padding: 2rem; width: 100%; max-width: 28rem; position: relative; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.3); animation: scaleIn 0.2s ease; max-height: 90vh; overflow-y: auto; text-align: left; }
         @keyframes scaleIn { from { opacity: 0; transform: scale(.95); } to { opacity: 1; transform: scale(1); } }
         .fade-enter { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
@@ -78,11 +79,11 @@
         .fire-btn.active { filter: grayscale(0%); opacity: 1; transform: scale(1.15); }
         .fire-btn:hover { opacity: 0.7; filter: grayscale(30%); }
 
-        /* FILTROS (SEARCH) */
-        .filter-chip { padding: 6px 14px; border-radius: 100px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid #e2e8f0; background: white; color: #475569; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+        /* FILTROS (SEARCH) - CHIPS EM FORMATO DE PILULA */
+        .filter-chip { padding: 6px 14px; border-radius: 100px; font-size: 11px; font-weight: 700; cursor: pointer; border: 1px solid #e2e8f0; background: white; color: #475569; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
         .filter-chip:hover { background: #f8fafc; border-color: #cbd5e1; }
         .filter-chip.active { background: #0f172a; color: white; border-color: #0f172a; }
-        .filter-badge { background: #f1f5f9; color: #64748b; border-radius: 100px; padding: 2px 6px; font-size: 9px; font-weight: 800; }
+        .filter-badge { background: #f1f5f9; color: #64748b; border-radius: 100px; padding: 2px 6px; font-size: 9px; font-weight: 900; }
         .filter-chip.active .filter-badge { background: rgba(255,255,255,0.2); color: white; }
 
         /* SETTINGS SIDEBAR */
@@ -96,8 +97,8 @@
         body.dark-mode #main-sidebar { background: #1e293b !important; border-color: #334155 !important; }
         body.dark-mode #main-scroll { background: #0f172a !important; }
         body.dark-mode .bg-white { background-color: #1e293b !important; }
-        body.dark-mode .bg-slate-50, body.dark-mode .bg-slate-100 { background-color: #0f172a !important; }
-        body.dark-mode .bg-gray-50, body.dark-mode .bg-gray-100 { background-color: #1e293b !important; }
+        body.dark-mode .bg-gray-50, body.dark-mode .bg-slate-50 { background-color: #0f172a !important; }
+        body.dark-mode .bg-gray-100, body.dark-mode .bg-slate-100 { background-color: #334155 !important; }
         
         body.dark-mode .border-gray-200, body.dark-mode .border-gray-100, body.dark-mode .border-slate-200, body.dark-mode .border-slate-100 { border-color: #334155 !important; }
         
@@ -114,12 +115,6 @@
         body.dark-mode .time-col { background-color: #0f172a !important; color: #94a3b8 !important; border-right-color: #334155 !important;}
         body.dark-mode .agenda-cell { background-color: #1e293b !important; color: #f8fafc !important; border-left: 4px solid var(--agenda-color, transparent); border-radius: 4px; }
         
-        /* OLED Mode */
-        body.dark-mode.oled-mode { background: #000000 !important; }
-        body.dark-mode.oled-mode #main-scroll, body.dark-mode.oled-mode .bg-slate-100 { background-color: #000000 !important; }
-        body.dark-mode.oled-mode #main-sidebar, body.dark-mode.oled-mode .bg-white { background-color: #0a0a0a !important; border-color: #1a1a1a !important; }
-        body.dark-mode.oled-mode .modal-content { background: #0a0a0a !important; border-color: #1a1a1a !important; }
-
         /* REMINDERS BALLOON */
         .reminder-balloon { position: fixed; bottom: 84px; right: 24px; z-index: 150; } 
         @media (min-width: 768px) { .reminder-balloon { bottom: 24px; } }
@@ -148,13 +143,13 @@
         .prio-rev { border-left: 4px dashed #10b981 !important; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 overflow-hidden" onkeydown="window.handleGlobalKeydown(event)">
+<body class="bg-gray-50 text-slate-800 overflow-hidden" onkeydown="window.handleGlobalKeydown(event)">
 
     <!-- OVERLAY DE CARREGAMENTO -->
     <div id="loader-overlay">
-        <i class="fas fa-circle-notch fa-spin text-5xl text-emerald-500 mb-4"></i>
+        <i class="fas fa-circle-notch fa-spin text-5xl text-blue-600 mb-4"></i>
         <h2 class="text-2xl font-black text-slate-800 dark:text-white font-serif">A carregar o seu Cronograma...</h2>
-        <p class="text-slate-500 mt-2 font-medium" id="loader-text">A sincronizar inteligência com o banco de dados...</p>
+        <p class="text-gray-500 mt-2 font-medium" id="loader-text">A sincronizar inteligência com o banco de dados...</p>
     </div>
 
     <!-- TOAST -->
@@ -165,42 +160,39 @@
         <!-- HEADER -->
         <header class="bg-black text-white p-4 shadow-lg sticky-header z-50 flex-shrink-0 flex justify-between items-center transition-colors duration-300">
             <div class="flex items-center gap-6">
-                <button onclick="window.toggleSidebar()" class="text-slate-400 hover:text-white focus:outline-none transition-colors">
+                <button onclick="window.toggleSidebar()" class="text-gray-400 hover:text-white focus:outline-none transition-colors">
                     <i class="fas fa-bars text-xl"></i>
                 </button>
                 <div>
-                    <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2 font-serif">
-                        <i class="fas fa-heartbeat text-emerald-500"></i> CronoMED
+                    <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2" style="font-family: 'Fraunces', serif;">
+                        <i class="fas fa-heartbeat text-blue-500"></i> CronoMED
                     </h1>
                 </div>
             </div>
             <div class="text-right flex items-center gap-4">
                 <div class="flex flex-col items-end hidden sm:flex">
-                    <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Progresso Geral</div>
-                    <div class="w-40 bg-slate-800 rounded-full h-2 mt-1 border border-slate-700 relative overflow-hidden">
-                        <div id="global-progress" class="bg-emerald-500 h-2 rounded-full transition-all duration-700 shadow-[0_0_10px_rgba(16,185,129,0.5)] absolute top-0 left-0" style="width: 0%"></div>
+                    <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Progresso Geral</div>
+                    <div class="w-40 bg-gray-800 rounded-full h-2 mt-1 border border-gray-700 relative overflow-hidden">
+                        <div id="global-progress" class="bg-blue-500 h-2 rounded-full transition-all duration-700 shadow-[0_0_10px_rgba(59,130,246,0.5)] absolute top-0 left-0" style="width: 0%"></div>
                     </div>
                 </div>
                 <div class="text-xl font-black text-white w-12 text-right hidden sm:block" id="global-percent-text">0%</div>
-                <!-- Botão de Avatar do Usuário -->
-                <div id="user-avatar" class="hidden w-8 h-8 rounded-full bg-emerald-500 text-white font-bold items-center justify-center uppercase">U</div>
-                <button onclick="window.openSettingsSidebar()" class="text-slate-400 hover:text-white transition-colors ml-2 bg-slate-800 p-2 rounded-full" title="Configurações">
-                    <i class="fas fa-cog"></i>
-                </button>
+                <!-- Botão de Avatar do Usuário garantido na DOM -->
+                <div id="user-avatar" class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center uppercase cursor-pointer" onclick="window.openSettingsSidebar()">U</div>
             </div>
         </header>
 
         <div class="flex flex-1 overflow-hidden relative">
             <!-- SIDEBAR -->
-            <aside id="main-sidebar" class="w-80 bg-white border-r border-slate-200 sidebar flex flex-col z-40 shadow-xl hidden md:flex transition-colors duration-300">
-                <div class="p-6 border-b border-slate-100 bg-slate-50/50 space-y-3 shrink-0">
-                    <button onclick="window.switchView('homepage')" id="nav-homepage" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-left">
+            <aside id="main-sidebar" class="w-80 bg-white border-r border-gray-200 sidebar flex flex-col z-40 shadow-xl hidden md:flex transition-colors duration-300">
+                <div class="p-6 border-b border-gray-100 bg-gray-50/50 space-y-3 shrink-0">
+                    <button onclick="window.switchView('homepage')" id="nav-homepage" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 text-left">
                         <i class="fas fa-home text-lg w-5 text-center"></i><span>Página Inicial</span>
                     </button>
                     <button onclick="window.switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-black text-white hover:bg-slate-800 text-left border border-transparent">
                         <i class="fas fa-chart-line text-lg w-5 text-center"></i><span>Dashboard &amp; Metas</span>
                     </button>
-                    <button onclick="window.switchView('search')" id="nav-search" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-left">
+                    <button onclick="window.switchView('search')" id="nav-search" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 text-left">
                         <i class="fas fa-search text-lg w-5 text-center"></i><span>Busca de Tarefas</span>
                     </button>
                     <button onclick="window.openRemanejoModal()" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-purple-50 border border-purple-200 text-purple-700 hover:bg-purple-100 text-left">
@@ -211,18 +203,18 @@
             </aside>
 
             <!-- MAIN CONTENT -->
-            <main class="flex-1 p-4 md:p-8 overflow-y-auto bg-slate-50 relative w-full transition-colors duration-300" id="main-scroll">
+            <main class="flex-1 p-4 md:p-8 overflow-y-auto bg-gray-50 relative w-full transition-colors duration-300" id="main-scroll">
                 <button onclick="window.toggleFocusMode()" class="focus-exit-btn fixed top-6 right-6 z-[999] bg-red-600 text-white px-5 py-2.5 rounded-full font-black shadow-xl hover:bg-red-700 transition items-center gap-2"><i class="fas fa-compress-arrows-alt"></i> Sair do Foco</button>
                 <div id="content-area" class="container mx-auto max-w-6xl pb-24"></div>
             </main>
         </div>
 
         <!-- MOBILE NAV -->
-        <nav class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 flex justify-around p-3 z-50 dark:bg-slate-900 dark:border-slate-800">
-            <button onclick="window.switchView('homepage')" class="flex flex-col items-center text-slate-500 hover:text-emerald-600 transition-colors"><i class="fas fa-home text-lg mb-1"></i><span class="text-[9px] font-bold">Início</span></button>
-            <button onclick="window.switchView('week')" class="flex flex-col items-center text-slate-500 hover:text-emerald-600 transition-colors"><i class="fas fa-calendar-alt text-lg mb-1"></i><span class="text-[9px] font-bold">Semana</span></button>
-            <button onclick="window.switchView('dashboard')" class="flex flex-col items-center text-slate-500 hover:text-emerald-600 transition-colors"><i class="fas fa-chart-pie text-lg mb-1"></i><span class="text-[9px] font-bold">Resumo</span></button>
-            <button onclick="window.switchView('search')" class="flex flex-col items-center text-slate-500 hover:text-emerald-600 transition-colors"><i class="fas fa-search text-lg mb-1"></i><span class="text-[9px] font-bold">Buscar</span></button>
+        <nav class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 flex justify-around p-3 z-50 dark:bg-slate-900 dark:border-slate-800">
+            <button onclick="window.switchView('homepage')" class="flex flex-col items-center text-gray-500 hover:text-blue-600 transition-colors"><i class="fas fa-home text-lg mb-1"></i><span class="text-[9px] font-bold">Início</span></button>
+            <button onclick="window.switchView('week')" class="flex flex-col items-center text-gray-500 hover:text-blue-600 transition-colors"><i class="fas fa-calendar-alt text-lg mb-1"></i><span class="text-[9px] font-bold">Semana</span></button>
+            <button onclick="window.switchView('dashboard')" class="flex flex-col items-center text-gray-500 hover:text-blue-600 transition-colors"><i class="fas fa-chart-pie text-lg mb-1"></i><span class="text-[9px] font-bold">Resumo</span></button>
+            <button onclick="window.switchView('search')" class="flex flex-col items-center text-gray-500 hover:text-blue-600 transition-colors"><i class="fas fa-search text-lg mb-1"></i><span class="text-[9px] font-bold">Buscar</span></button>
         </nav>
     </div>
 
@@ -231,30 +223,26 @@
     <!-- CONFIGURAÇÕES (SIDEBAR) -->
     <div id="settings-overlay" class="settings-overlay" onclick="window.closeSettingsSidebar()"></div>
     <div id="settings-sidebar" class="settings-sidebar bg-white">
-        <div class="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-900 text-white">
+        <div class="p-6 border-b border-gray-200 flex justify-between items-center bg-slate-900 text-white">
             <h3 class="font-black text-lg flex items-center gap-2"><i class="fas fa-cog"></i> Configurações</h3>
-            <button onclick="window.closeSettingsSidebar()" class="text-slate-300 hover:text-white transition"><i class="fas fa-times text-xl"></i></button>
+            <button onclick="window.closeSettingsSidebar()" class="text-gray-300 hover:text-white transition"><i class="fas fa-times text-xl"></i></button>
         </div>
         <div class="p-6 space-y-6">
             <div>
-                <h4 class="text-xs font-bold uppercase text-slate-400 tracking-widest mb-4">Conta</h4>
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-3 dark:bg-cm-dark2">
+                <h4 class="text-xs font-bold uppercase text-gray-400 tracking-widest mb-4">Conta</h4>
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-3 dark:bg-cm-dark2">
                     <div class="font-bold text-sm text-slate-800 dark:text-white truncate" id="user-name">Usuário</div>
-                    <div class="text-[10px] text-slate-500 truncate" id="user-email">email@email.com</div>
+                    <div class="text-[10px] text-gray-500 truncate" id="user-email">email@email.com</div>
                 </div>
-                <button onclick="window.recalculateRoute()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-200 bg-white hover:bg-blue-50 text-blue-700 font-bold text-sm transition card-shadow mb-2"><i class="fas fa-sync-alt"></i> Recalcular Rota (Novo Ano)</button>
-                <button onclick="window.handleLogout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-200 bg-white hover:bg-red-50 text-red-600 font-bold text-sm transition card-shadow"><i class="fas fa-sign-out-alt"></i> Sair da Conta</button>
+                <button onclick="window.recalculateRoute()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 bg-white hover:bg-blue-50 text-blue-700 font-bold text-sm transition card-shadow mb-2"><i class="fas fa-sync-alt"></i> Recalcular Rota (Novo Ano)</button>
+                <button onclick="window.handleLogout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 bg-white hover:bg-red-50 text-red-600 font-bold text-sm transition card-shadow"><i class="fas fa-sign-out-alt"></i> Sair da Conta</button>
             </div>
             <div>
-                <h4 class="text-xs font-bold uppercase text-slate-400 tracking-widest mb-4">Aparência</h4>
+                <h4 class="text-xs font-bold uppercase text-gray-400 tracking-widest mb-4">Aparência</h4>
                 <div class="space-y-3">
-                    <div class="flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50 dark:bg-cm-dark2">
+                    <div class="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:bg-cm-dark2">
                         <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white"><i class="fas fa-moon text-sm"></i></div><div><div class="font-bold text-sm text-slate-800 dark:text-white">Modo Noturno</div></div></div>
-                        <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="dark-mode-toggle" class="sr-only peer" onchange="window.toggleDarkMode(this.checked)"><div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-slate-900"></div></label>
-                    </div>
-                    <div class="flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50 dark:bg-cm-dark2">
-                        <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-black flex items-center justify-center text-white"><i class="fas fa-circle text-sm"></i></div><div><div class="font-bold text-sm text-slate-800 dark:text-white">True Black (OLED)</div></div></div>
-                        <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="oled-mode-toggle" class="sr-only peer" onchange="window.toggleOledMode(this.checked)"><div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div></label>
+                        <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="dark-mode-toggle" class="sr-only peer" onchange="window.toggleDarkMode(this.checked)"><div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-slate-900"></div></label>
                     </div>
                 </div>
             </div>
@@ -263,20 +251,20 @@
 
     <!-- MODAL: ADD TAREFA AVULSA -->
     <div class="modal-overlay" id="modal-add-task">
-        <div class="modal-content bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 border border-slate-200">
+        <div class="modal-content bg-white rounded-2xl shadow-2xl p-8 border border-gray-200">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-black text-slate-900">Nova Tarefa</h3>
-                <button onclick="window.closeModal('add-task')" class="text-slate-400 hover:text-black w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition"><i class="fas fa-times text-lg"></i></button>
+                <h3 class="text-xl font-black text-gray-900">Nova Tarefa</h3>
+                <button onclick="window.closeModal('add-task')" class="text-gray-400 hover:text-black w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition"><i class="fas fa-times text-lg"></i></button>
             </div>
             <div class="space-y-4 mb-6 text-left">
                 <div>
-                    <label class="block text-xs font-bold uppercase text-slate-500 tracking-widest mb-1.5">Nome do Tema</label>
-                    <input type="text" id="add-nome" placeholder="Ex: Aula da Faculdade" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:border-emerald-500">
+                    <label class="block text-xs font-bold uppercase text-gray-500 tracking-widest mb-1.5">Nome do Tema</label>
+                    <input type="text" id="add-nome" placeholder="Ex: Aula da Faculdade" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold uppercase text-slate-500 tracking-widest mb-1.5">Área</label>
-                        <select id="add-area" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:border-emerald-500 cursor-pointer">
+                        <label class="block text-xs font-bold uppercase text-gray-500 tracking-widest mb-1.5">Área</label>
+                        <select id="add-area" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 cursor-pointer">
                             <option value="Cirurgia">Cirurgia</option>
                             <option value="Clínica Médica">Clínica Médica</option>
                             <option value="Ginecologia e Obstetrícia">Gineco e Obstetrícia</option>
@@ -286,8 +274,8 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase text-slate-500 tracking-widest mb-1.5">Prioridade</label>
-                        <select id="add-prio" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:border-emerald-500 cursor-pointer">
+                        <label class="block text-xs font-bold uppercase text-gray-500 tracking-widest mb-1.5">Prioridade</label>
+                        <select id="add-prio" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 cursor-pointer">
                             <option value="1">Alta (1)</option>
                             <option value="2" selected>Média (2)</option>
                             <option value="3">Baixa (3)</option>
@@ -296,95 +284,95 @@
                     </div>
                 </div>
             </div>
-            <button onclick="window.saveCustomTask()" class="w-full bg-emerald-600 text-white py-3.5 rounded-xl font-bold hover:bg-emerald-700 transition">Adicionar à Semana</button>
+            <button onclick="window.saveCustomTask()" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold hover:bg-blue-700 transition">Adicionar à Semana</button>
         </div>
     </div>
 
     <!-- MODAL: REPLICAR AGENDA -->
     <div class="modal-overlay" id="modal-replica-agenda">
-        <div class="modal-content bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 border border-slate-200 text-center">
+        <div class="modal-content bg-white rounded-2xl shadow-2xl p-8 border border-gray-200 text-center">
             <div class="flex justify-between items-center mb-2">
-                <h3 class="text-xl font-black text-slate-900 mx-auto">Replicar Grade Horária</h3>
-                <button onclick="window.closeModal('replica-agenda')" class="text-slate-400 hover:text-black absolute right-6 top-6 w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition"><i class="fas fa-times"></i></button>
+                <h3 class="text-xl font-black text-gray-900 mx-auto">Replicar Grade</h3>
+                <button onclick="window.closeModal('replica-agenda')" class="text-gray-400 hover:text-black absolute right-6 top-6 w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition"><i class="fas fa-times"></i></button>
             </div>
             <div class="mb-5 text-blue-500 bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mt-4"><i class="fas fa-copy text-2xl"></i></div>
-            <p class="text-sm text-slate-500 mb-6">Quantas semanas à frente deseja manter esta mesma rotina de horários?</p>
+            <p class="text-sm text-gray-500 mb-6">Quantas semanas à frente deseja manter esta mesma rotina de horários?</p>
             <div class="space-y-4">
-                <input type="number" id="replica-weeks-input" value="4" min="1" class="w-24 text-center bg-slate-50 border border-slate-200 text-lg font-black px-4 py-3 rounded-xl mx-auto block focus:outline-none focus:border-blue-500">
+                <input type="number" id="replica-weeks-input" value="4" min="1" class="w-24 text-center bg-gray-50 border border-gray-200 text-lg font-black px-4 py-3 rounded-xl mx-auto block focus:outline-none focus:border-blue-500">
                 <button onclick="window.executeReplicaAgenda()" class="w-full py-3.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition shadow-md">Replicar Grade</button>
             </div>
         </div>
     </div>
 
     <!-- MODAL: CADERNO DE ANOTAÇÕES -->
-    <div id="notes-modal" class="modal-overlay">
-        <div class="modal-content bg-white rounded-3xl shadow-2xl w-full max-w-lg p-8 border border-slate-200 flex flex-col text-left">
+    <div class="modal-overlay" id="modal-notes">
+        <div class="modal-content bg-white rounded-2xl shadow-2xl p-8 border border-gray-200 flex flex-col text-left">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-black text-slate-900 flex items-center gap-2"><i class="fas fa-book-medical text-emerald-600"></i> Caderno de Anotações</h3>
-                <button onclick="window.closeNotesModal()" class="text-slate-400 hover:text-black w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition"><i class="fas fa-times"></i></button>
+                <h3 class="text-xl font-black text-gray-900 flex items-center gap-2"><i class="fas fa-book-medical text-blue-600"></i> Anotações e Links</h3>
+                <button onclick="window.closeNotesModal()" class="text-gray-400 hover:text-black w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition"><i class="fas fa-times"></i></button>
             </div>
-            <p class="text-xs text-slate-500 mb-4">Guarde os seus links do Anki, videoaulas ou resumos para este tema.</p>
-            <textarea id="notes-textarea" rows="6" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition resize-none custom-scrollbar" placeholder="Cole aqui o link do seu deck do Anki, Drive ou resumo..." oninput="window.parseNotesLinks()"></textarea>
+            <p class="text-xs text-gray-500 mb-4">Guarde os seus links do Anki, videoaulas ou resumos para este tema. O sistema detetará links automaticamente.</p>
+            <textarea id="notes-textarea" rows="6" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-700 focus:outline-none focus:border-blue-500 transition resize-none custom-scrollbar" placeholder="Cole aqui..." oninput="window.parseNotesLinks()"></textarea>
             <div id="notes-links-container" class="hidden mt-4 w-full"></div>
-            <div class="flex gap-3 mt-6 pt-4 border-t border-slate-100">
-                <button onclick="window.closeNotesModal()" class="flex-1 py-3 rounded-xl font-bold text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Fechar</button>
-                <button onclick="window.saveNotes()" class="flex-1 py-3 rounded-xl font-bold text-sm bg-black text-white hover:bg-slate-800 transition">Salvar</button>
+            <div class="flex gap-3 mt-6 pt-4 border-t border-gray-100">
+                <button onclick="window.closeNotesModal()" class="flex-1 py-3 rounded-xl font-bold text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition">Fechar</button>
+                <button onclick="window.saveNotes()" class="flex-1 py-3 rounded-xl font-bold text-sm bg-black text-white hover:bg-gray-800 transition">Salvar na Nuvem</button>
             </div>
         </div>
     </div>
 
     <!-- MODAL: DELETE -->
-    <div id="modal-delete" class="modal-overlay">
-        <div class="modal-content bg-white rounded-3xl shadow-2xl w-full max-w-sm p-8 border border-slate-200 text-center">
+    <div class="modal-overlay" id="modal-delete">
+        <div class="modal-content bg-white rounded-2xl shadow-2xl p-8 border border-gray-200 text-center">
             <div class="mb-5 text-red-500 bg-red-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto"><i class="fas fa-trash-alt text-2xl"></i></div>
-            <h3 class="text-xl font-black text-slate-900 mb-2">Excluir Item?</h3>
-            <p class="text-sm text-slate-500 mb-8">Esta ação removerá a tarefa. Pode desfazer usando Ctrl+Z.</p>
+            <h3 class="text-xl font-black text-gray-900 mb-2">Excluir Item?</h3>
+            <p class="text-sm text-gray-500 mb-8">Esta ação removerá a tarefa. Pode desfazer usando o atalho da lixeira.</p>
             <div class="flex gap-3 justify-center">
-                <button onclick="window.closeModal('delete')" class="px-6 py-3 rounded-xl font-bold text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 transition flex-1">Cancelar</button>
-                <button id="confirm-delete-btn" class="px-6 py-3 rounded-xl font-bold text-sm bg-red-600 text-white hover:bg-red-700 transition flex-1 shadow-md shadow-red-500/30">Excluir</button>
+                <button onclick="window.closeModal('delete')" class="px-6 py-3 rounded-xl font-bold text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition flex-1">Cancelar</button>
+                <button id="confirm-delete-btn" class="px-6 py-3 rounded-xl font-bold text-sm bg-red-600 text-white hover:bg-red-700 transition flex-1 shadow-md">Sim, Excluir</button>
             </div>
         </div>
     </div>
 
     <!-- MODAL: REMANEJO -->
-    <div id="modal-remanejo" class="modal-overlay">
-        <div class="modal-content bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 border border-slate-200 text-left">
+    <div class="modal-overlay" id="modal-remanejo">
+        <div class="modal-content bg-white rounded-2xl shadow-2xl p-8 border border-gray-200 text-left">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-black text-slate-900 flex items-center gap-2"><i class="fas fa-magic text-purple-600"></i> Remanejamento IA</h3>
-                <button onclick="window.closeModal('remanejo')" class="text-slate-400 hover:text-black w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition"><i class="fas fa-times"></i></button>
+                <h3 class="text-xl font-black text-gray-900 flex items-center gap-2"><i class="fas fa-magic text-purple-600"></i> Remanejamento IA</h3>
+                <button onclick="window.closeModal('remanejo')" class="text-gray-400 hover:text-black w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition"><i class="fas fa-times"></i></button>
             </div>
-            <p class="text-sm text-slate-500 mb-6">O sistema detectou tarefas atrasadas de semanas anteriores. Como quer reorganizar o seu estudo?</p>
+            <p class="text-sm text-gray-500 mb-6">O sistema detectou tarefas atrasadas de semanas anteriores. Como quer reorganizar o seu estudo?</p>
             
             <div id="remanejo-options" class="space-y-3">
-                <button onclick="window.applyRemanejo('dilute')" class="w-full text-left p-4 rounded-xl border border-slate-200 hover:border-purple-400 hover:bg-purple-50 transition group shadow-sm">
+                <button onclick="window.applyRemanejo('dilute')" class="w-full text-left p-4 rounded-xl border border-gray-200 hover:border-purple-400 hover:bg-purple-50 transition group shadow-sm">
                     <div class="font-bold text-slate-800 group-hover:text-purple-700">Diluir Suavemente</div>
-                    <div class="text-xs text-slate-500 mt-1">Redistribui os atrasos pelas próximas 4 semanas.</div>
+                    <div class="text-xs text-gray-500 mt-1">Redistribui os atrasos pelas próximas semanas de forma equilibrada.</div>
                 </button>
-                <button onclick="window.applyRemanejo('cut')" class="w-full text-left p-4 rounded-xl border border-slate-200 hover:border-red-400 hover:bg-red-50 transition group shadow-sm">
+                <button onclick="window.applyRemanejo('cut')" class="w-full text-left p-4 rounded-xl border border-gray-200 hover:border-red-400 hover:bg-red-50 transition group shadow-sm">
                     <div class="font-bold text-slate-800 group-hover:text-red-700">Corte de Gordura (Intensivo)</div>
-                    <div class="text-xs text-slate-500 mt-1">Elimina atrasos de Prioridade Baixa, mantendo o essencial.</div>
+                    <div class="text-xs text-gray-500 mt-1">Elimina atrasos de Prioridade Baixa, mantendo apenas o essencial.</div>
                 </button>
             </div>
             
             <div id="remanejo-empty" class="hidden text-center py-8">
-                <i class="fas fa-check-circle text-4xl text-emerald-500 mb-3"></i>
+                <i class="fas fa-check-circle text-4xl text-green-500 mb-3"></i>
                 <div class="font-bold text-slate-800">Não há atrasos!</div>
-                <div class="text-sm text-slate-500">O seu cronograma está em dia.</div>
+                <div class="text-sm text-gray-500">O seu cronograma está perfeitamente em dia.</div>
             </div>
         </div>
     </div>
 
     <!-- MODAL: REVISÃO -->
-    <div id="modal-review" class="modal-overlay">
-        <div class="modal-content bg-white rounded-3xl shadow-2xl w-full max-w-sm p-8 border border-slate-200 text-center">
+    <div class="modal-overlay" id="modal-review">
+        <div class="modal-content bg-white rounded-2xl shadow-2xl p-8 border border-gray-200 text-center">
             <div class="mb-5 text-blue-600 bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto"><i class="fas fa-calendar-check text-2xl"></i></div>
-            <h3 class="text-xl font-black text-slate-900 mb-2">Tarefa Concluída!</h3>
-            <p class="text-sm text-slate-500 mb-6">Deseja agendar uma revisão espaçada?</p>
+            <h3 class="text-xl font-black text-gray-900 mb-2">Tarefa Concluída!</h3>
+            <p class="text-sm text-gray-500 mb-6">Deseja agendar uma revisão espaçada para este tema?</p>
             <div class="grid gap-3">
                 <button onclick="window.scheduleReview(10)" class="w-full py-3.5 rounded-xl font-bold text-sm bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 transition flex justify-between px-6"><span>Difícil</span> <span>10 dias</span></button>
                 <button onclick="window.scheduleReview(15)" class="w-full py-3.5 rounded-xl font-bold text-sm bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 transition flex justify-between px-6"><span>Médio</span> <span>15 dias</span></button>
-                <button onclick="window.scheduleReview(20)" class="w-full py-3.5 rounded-xl font-bold text-sm bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition flex justify-between px-6"><span>Fácil</span> <span>20 dias</span></button>
-                <button onclick="window.closeModal('review')" class="w-full py-3 rounded-xl font-bold text-xs text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition mt-2">Não agendar</button>
+                <button onclick="window.scheduleReview(20)" class="w-full py-3.5 rounded-xl font-bold text-sm bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 transition flex justify-between px-6"><span>Fácil</span> <span>20 dias</span></button>
+                <button onclick="window.closeModal('review')" class="w-full py-3 rounded-xl font-bold text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition mt-2">Não agendar</button>
             </div>
         </div>
     </div>
@@ -392,16 +380,16 @@
     <!-- REMINDERS (BALÃO FLUTUANTE) -->
     <div class="reminder-balloon z-[150]">
         <div id="reminder-panel" class="reminder-panel bg-white">
-            <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-3">
                 <h4 class="font-black text-sm text-slate-800 flex items-center gap-2"><i class="fas fa-bell text-amber-500"></i> Seus Lembretes</h4>
-                <button onclick="window.toggleReminderPanel()" class="text-slate-400 hover:text-slate-800 transition w-6 h-6 rounded-full hover:bg-slate-100 flex items-center justify-center"><i class="fas fa-times"></i></button>
+                <button onclick="window.toggleReminderPanel()" class="text-gray-400 hover:text-gray-800 transition w-6 h-6 rounded-full hover:bg-gray-100 flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
             <div id="reminder-list" class="mb-4 max-h-48 overflow-y-auto custom-scrollbar"></div>
-            <div class="space-y-3 pt-4 border-t border-slate-100">
-                <input type="text" id="reminder-text" placeholder="O que não pode esquecer?" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs outline-none focus:border-emerald-500 transition">
+            <div class="space-y-3 pt-4 border-t border-gray-100">
+                <input type="text" id="reminder-text" placeholder="O que não pode esquecer?" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-xs outline-none focus:border-blue-500 transition">
                 <div class="flex gap-2">
-                    <input type="date" id="reminder-date" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-2 py-2.5 text-xs outline-none focus:border-emerald-500">
-                    <select id="reminder-type" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-2 py-2.5 text-[10px] font-bold uppercase outline-none focus:border-emerald-500">
+                    <input type="date" id="reminder-date" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-2 py-2.5 text-xs outline-none focus:border-blue-500">
+                    <select id="reminder-type" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-2 py-2.5 text-[10px] font-bold uppercase outline-none focus:border-blue-500">
                         <option value="day">Para Hoje</option><option value="week">Esta Semana</option><option value="future">Outra Data</option>
                     </select>
                 </div>
@@ -414,15 +402,15 @@
     <!-- MINI PLAYER POMODORO FLUTUANTE -->
     <div id="mini-player" class="mini-player">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-cm-mid flex items-center justify-center text-emerald-600 animate-pulse"><i class="fas fa-clock"></i></div>
+            <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-cm-mid flex items-center justify-center text-blue-600 animate-pulse"><i class="fas fa-clock"></i></div>
             <div class="flex flex-col">
-                <span class="text-[10px] font-bold uppercase text-slate-500 tracking-widest leading-none mb-1" id="mp-phase">Foco: Aula</span>
+                <span class="text-[10px] font-bold uppercase text-gray-500 tracking-widest leading-none mb-1" id="mp-phase">Foco: Aula</span>
                 <span class="font-mono font-black text-lg text-slate-800 dark:text-white leading-none" id="mp-time">50:00</span>
             </div>
         </div>
-        <div class="flex items-center gap-2 border-l border-slate-200 dark:border-gray-700 pl-3">
-            <button onclick="window.togglePomo()" class="w-10 h-10 rounded-full bg-slate-900 text-white dark:bg-emerald-600 dark:text-cm-dark flex items-center justify-center hover:scale-105 transition shadow-md" id="mp-play-btn"><i class="fas fa-pause"></i></button>
-            <button onclick="window.stopPomo()" class="w-8 h-8 rounded-full text-slate-400 hover:text-red-500 hover:bg-slate-100 dark:hover:bg-cm-mid transition flex items-center justify-center"><i class="fas fa-times"></i></button>
+        <div class="flex items-center gap-2 border-l border-gray-200 dark:border-gray-700 pl-3">
+            <button onclick="window.togglePomo()" class="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center hover:scale-105 transition shadow-md" id="mp-play-btn"><i class="fas fa-pause"></i></button>
+            <button onclick="window.stopPomo()" class="w-8 h-8 rounded-full text-gray-400 hover:text-red-500 hover:bg-gray-100 transition flex items-center justify-center"><i class="fas fa-times"></i></button>
         </div>
     </div>
 
@@ -434,7 +422,7 @@
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // EMBEDDED BANCO DE MATÉRIAS (~240 tarefas)
+        // EMBEDDED BANCO DE MATÉRIAS (Garante 100% que as 240 matérias vão carregar)
         const bancoDeMaterias = [
             { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Hipertensão Arterial Sistêmica", "peso_prova": 10, "frequencia_prova": 95, "score": 36.5, "prioridade": 1 },
             { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Síndrome Coronariana Aguda", "peso_prova": 10, "frequencia_prova": 95, "score": 36.5, "prioridade": 1 },
@@ -680,18 +668,20 @@
         
         // Estado Global Modificado para Window (Resolve o Bug de Navegação)
         window.state = { weeks: [], progress: {}, dailyStats: {}, timeTracking: {}, simulados: [] };
-        window.weekFilter = 'all'; 
-        window.expandedCards = {}; 
         
         const areaMapping = { "Cirurgia": "Cirurgia", "Urologia": "Cirurgia", "Ortopedia": "Cirurgia", "Trauma": "Cirurgia", "Cirurgia Pediátrica": "Cirurgia", "Cirurgia Plástica": "Cirurgia", "Cirurgia Vascular": "Cirurgia", "Cirurgia Torácica": "Cirurgia", "Clínica": "Clínica Médica", "Clínica Médica": "Clínica Médica", "Cardiologia": "Clínica Médica", "Endocrino": "Clínica Médica", "Gastro": "Clínica Médica", "Hemato": "Clínica Médica", "Infecto": "Clínica Médica", "Nefrologia": "Clínica Médica", "Neuro": "Clínica Médica", "Pneumo": "Clínica Médica", "Psiquiatria": "Clínica Médica", "Reumato": "Clínica Médica", "Dermato": "Clínica Médica", "Hepato": "Clínica Médica", "Oftalmo": "Clínica Médica", "Otorrino": "Clínica Médica", "Ginecologia": "Ginecologia e Obstetrícia", "Obstetrícia": "Ginecologia e Obstetrícia", "Ginecologia e Obstetrícia": "Ginecologia e Obstetrícia", "Pediatria": "Pediatria", "Preventiva": "Preventiva" };
         const mainCategories = ["Cirurgia", "Clínica Médica", "Ginecologia e Obstetrícia", "Pediatria", "Preventiva"];
         
-        window.pendingDeleteAction = null; window.pendingReviewTaskId = null; window.activeNotesTaskId = null; window.currentCalendarDate = new Date(); window.activeView = 'homepage'; window.activeWeek = 1; window.undoStack = []; window.redoStack = [];
+        window.pendingDeleteAction = null; window.pendingReviewTaskId = null; window.activeNotesTaskId = null; window.currentCalendarDate = new Date(); 
+        
+        window.activeView = 'homepage'; // FORÇANDO A PÁGINA INICIAL SEMPRE
+        window.activeWeek = 1; 
+        window.undoStack = []; window.redoStack = [];
         window.isFocusMode = false;
         
         // Variáveis de Filtro de Busca (Cascata)
         window.searchFilterArea = 'Todas';
-        window.searchFilterSubArea = 'Todas';
+        window.searchFilterSub = 'Todas';
         window.searchFilterPrio = 'Todas';
 
         // Pomodoro Multi-fase e Lo-Fi Audio
@@ -700,7 +690,7 @@
         window.rainAudio = new Audio('https://actions.google.com/sounds/v1/weather/thunderstorm.ogg'); window.rainAudio.loop = true;
 
         window.changeLoFiType = function(type) { window.lofiType = type; if (window.isLoFiPlaying) { window.stopLoFi(); window.startLoFi(); } }
-        window.toggleLoFi = function() { window.lofiEnabled = !window.lofiEnabled; const btn = document.getElementById('lofi-btn'); if (window.lofiEnabled) { if (btn) btn.classList.replace('text-gray-400', 'text-blue-500'); if (window.isPomoRunning && window.pomoPhase !== 'descanso') window.startLoFi(); } else { if (btn) btn.classList.replace('text-blue-500', 'text-gray-400'); window.stopLoFi(); } window.showToast(window.lofiEnabled ? 'Lo-Fi Ativado 🎧' : 'Lo-Fi Desativado', 'success'); }
+        window.toggleLoFi = function() { window.lofiEnabled = !window.lofiEnabled; const btn = document.getElementById('lofi-btn'); if (window.lofiEnabled) { if (btn) btn.classList.replace('text-slate-400', 'text-blue-500'); if (window.isPomoRunning && window.pomoPhase !== 'descanso') window.startLoFi(); } else { if (btn) btn.classList.replace('text-blue-500', 'text-slate-400'); window.stopLoFi(); } window.showToast(window.lofiEnabled ? 'Lo-Fi Ativado 🎧' : 'Lo-Fi Desativado', 'success'); }
         window.startLoFi = function() {
             if (window.lofiType === 'temporal') { window.rainAudio.volume = 0.6; window.rainAudio.play().catch(e => console.log('Áudio bloqueado:', e)); window.isLoFiPlaying = true; return; }
             if (!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -777,7 +767,7 @@
             if (window.state && window.state.startDate) return new Date(window.state.startDate);
             return new Date();
         }
-        window.getAccuracyColorClass = function(percentage) { if (percentage >= 90) return 'text-emerald-800'; if (percentage >= 80) return 'text-emerald-500'; if (percentage >= 60) return 'text-amber-500'; return 'text-red-500'; }
+        window.getAccuracyColorClass = function(percentage) { if (percentage >= 90) return 'text-emerald-500'; if (percentage >= 80) return 'text-emerald-400'; if (percentage >= 60) return 'text-amber-500'; return 'text-red-500'; }
         window.calculateAccuracy = function(done, correct) { if (!done || done <= 0) return 0; return Math.min(100, Math.round((correct / done) * 100)); }
         window.getWeekDateRange = function(weekIndex) { if (weekIndex < 1) return ""; const start = window.getStartDate(); start.setDate(start.getDate() + (weekIndex - 1) * 7); const end = new Date(start); end.setDate(start.getDate() + 6); const fmt = d => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }); return `${fmt(start)} a ${fmt(end)}`; }
         window.getWeekDates = function(weekIdx) { const start = window.getStartDate(); const baseDate = new Date(start); baseDate.setDate(baseDate.getDate() + ((weekIdx - 1) * 7) - 1); const days = []; const dayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]; for(let i=0; i<7; i++) { const d = new Date(baseDate); d.setDate(baseDate.getDate() + i); days.push({ name: dayNames[i], date: d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }), key: `d${i}` }); } return days; }
@@ -898,7 +888,7 @@
             newWeeks.forEach(w => { delete w._start; delete w._end; w.tasks.sort((a,b) => b.score - a.score); });
 
             window.state.weeks = newWeeks; window.state.progress = {}; window.state.dailyStats = {};
-            window.state.startDate = start.toISOString(); // Armazenando a data inicial no banco
+            window.state.startDate = start.toISOString();
 
             await window.saveToCloud();
             finishLoading();
@@ -950,7 +940,7 @@
         window.toggleOledMode = function(on) { document.body.classList.toggle('oled-mode', on); localStorage.setItem('oledMode', on ? '1' : '0'); }
 
         // ----------------------------------------------------------------------
-        // AÇÕES NAS TAREFAS E MÓDULOS (AGENDA, REMANEJO, ANOTAÇÕES)
+        // AÇÕES NAS TAREFAS
         // ----------------------------------------------------------------------
         window.ensureProgress = function(id) { if (!window.state.progress[id]) window.state.progress[id] = {}; }
         window.toggleTask = function(id) { 
@@ -960,24 +950,23 @@
         }
         window.toggleCrucial = function(taskId) { window.pushState(); window.ensureProgress(taskId); window.state.progress[taskId].crucial = !window.state.progress[taskId].crucial; window.triggerSave(); window.updateUI(); if(window.state.progress[taskId].crucial) window.showToast('Marcado como Crucial 🔥');}
         
-        window.updateTaskQuestions = function(taskId, newVal) { 
+        window.updateTaskQuestions = function(taskId, type, newVal) { 
             window.pushState(); 
-            const val = parseInt(newVal) || 0; 
             window.ensureProgress(taskId); 
-            const diff = val - (parseInt(window.state.progress[taskId].done) || 0); 
-            window.state.progress[taskId].done = val; 
-            if (diff > 0) { 
-                const today = window.getTodayStr(); 
-                window.state.dailyStats[today] = (window.state.dailyStats[today] || 0) + diff; 
-            } 
-            window.triggerSave(); window.updateUI(); 
-        }
-        
-        window.updateScore = function(taskId, type, newVal) {
-            window.pushState(); 
             const val = parseInt(newVal) || 0; 
-            window.ensureProgress(taskId); 
-            window.state.progress[taskId][type] = val; 
+            
+            if(type === 'done') {
+                const oldVal = parseInt(window.state.progress[taskId].done) || 0; 
+                const diff = val - oldVal; 
+                window.state.progress[taskId].done = val; 
+                if (diff > 0) { 
+                    const today = window.getTodayStr(); 
+                    window.state.dailyStats[today] = (window.state.dailyStats[today] || 0) + diff; 
+                } 
+            } else if (type === 'correct') {
+                window.state.progress[taskId].correct = val; 
+            }
+            
             window.triggerSave(); window.updateUI(); 
         }
 
@@ -1174,7 +1163,7 @@
         window.renderWeek = function() {
             const w = window.state.weeks.find(d => d.week === window.activeWeek); const content = document.getElementById('content-area'); if(!w) return; const days = window.getWeekDates(window.activeWeek);
             
-            let agendaHtml = `<div class="mb-12 fade-enter"><div class="flex justify-between items-center mb-6"><div><h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Semana ${w.week}</h2><span class="text-sm font-bold text-slate-500 dark:text-emerald-500">${w.phase}</span></div><button onclick="window.openModal('replica-agenda')" class="text-xs font-bold bg-white dark:bg-cm-mid border border-slate-200 dark:border-gray-700 px-4 py-2 rounded-xl shadow-sm hover:border-blue-500 transition"><i class="fas fa-copy mr-1 text-blue-500"></i> Configurar Grade</button></div><div class="overflow-x-auto rounded-xl shadow-lg border border-slate-200 dark:border-gray-800 bg-white dark:bg-cm-dark2"><table class="agenda-table min-w-[700px]"><thead><tr><th class="p-3 w-24 bg-slate-900 text-white border-none">Horário</th>${days.map(d=>`<th class="p-3 bg-slate-900 text-white border-l border-slate-700 text-center"><div class="font-bold text-sm uppercase tracking-widest">${d.name}</div><div class="text-[10px] text-slate-400 font-mono mt-1">${d.date}</div></th>`).join('')}</tr></thead><tbody>`;
+            let agendaHtml = `<div class="mb-12 fade-enter"><div class="flex justify-between items-center mb-6"><div><h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Semana ${w.week}</h2><span class="text-sm font-bold text-slate-500 dark:text-emerald-500">${w.phase}</span></div><button onclick="window.openModal('replica-agenda')" class="text-xs font-bold bg-white dark:bg-cm-mid border border-slate-200 dark:border-gray-700 px-4 py-2 rounded-xl shadow-sm hover:border-blue-500 transition"><i class="fas fa-copy mr-1 text-blue-500"></i> Configurar Grade</button></div><div class="overflow-x-auto rounded-xl shadow-md border border-slate-200 dark:border-gray-800 bg-white dark:bg-cm-dark2"><table class="agenda-table min-w-[700px]"><thead><tr><th class="p-3 w-24 bg-slate-900 text-white border-none">Horário</th>${days.map(d=>`<th class="p-3 bg-slate-900 text-white border-l border-slate-700 text-center"><div class="font-bold text-sm uppercase tracking-widest">${d.name}</div><div class="text-[10px] text-slate-400 font-mono mt-1">${d.date}</div></th>`).join('')}</tr></thead><tbody>`;
             w.timeSlots.forEach((slot, sIdx) => {
                 agendaHtml += `<tr><td class="p-0 w-24 align-middle time-col relative border-r border-slate-100 dark:border-gray-800 bg-slate-50/50 dark:bg-cm-mid/30"><div class="w-full text-center font-mono text-[10px] font-bold outline-none p-3" contenteditable="true" onblur="window.updateTimeSlot(${window.activeWeek}, ${sIdx}, this.innerText)">${slot}</div><div class="row-controls"><button onclick="window.addAgendaRowAt(${window.activeWeek}, ${sIdx})" class="text-[10px] text-blue-600 hover:bg-blue-50 py-1"><i class="fas fa-plus"></i></button><button onclick="window.requestRemoveAgendaRow(${window.activeWeek}, ${sIdx})" class="text-[10px] text-red-600 hover:bg-red-50 py-1"><i class="fas fa-minus"></i></button></div></td>`;
                 days.forEach((d, dIdx) => { const c = w.agenda[`${d.key}_s${sIdx}`] || {}; const bgColor = c.color || '#ffffff'; agendaHtml += `<td class="p-0 h-16 relative"><div class="agenda-cell w-full h-full p-2 outline-none flex items-center justify-center text-xs font-medium text-slate-700 dark:text-white" style="background-color: ${bgColor}; --agenda-color: ${bgColor};" contenteditable="true" onblur="window.updateAgendaCell(${window.activeWeek}, '${d.key}', ${sIdx}, this.innerText)">${c.text||''}</div></td>`; }); agendaHtml += `</tr>`;
@@ -1196,7 +1185,7 @@
                 
                 let isPomoActiveForThis = (window.activePomoTaskId === t.id);
                 const isExpanded = window.expandedCards[t.id] || isPomoActiveForThis;
-                const accColor = doneVal > 0 ? window.getAccuracyColorClass(acc) : 'text-slate-300';
+                const accColor = doneVal > 0 ? window.getAccuracyColorClass(acc) : 'text-slate-400';
                 
                 let pomoUI = '';
                 if (isPomoActiveForThis) {
@@ -1205,7 +1194,7 @@
                     pomoUI = `<div class="mt-4 bg-slate-50 dark:bg-cm-mid border border-slate-200 dark:border-gray-800 p-5 rounded-2xl w-full shadow-inner"><div class="flex justify-between text-[9px] font-black uppercase tracking-widest mb-3"><span id="pomo-lbl-1-${t.id}" class="${window.pomoPhase === 'aula' ? 'text-blue-600' : 'text-slate-400'}"><i class="fas fa-book-open"></i> Aula</span><span id="pomo-lbl-2-${t.id}" class="${window.pomoPhase === 'descanso' ? 'text-amber-500' : 'text-slate-400'}"><i class="fas fa-coffee"></i> Pausa</span><span id="pomo-lbl-3-${t.id}" class="${window.pomoPhase === 'questoes' ? 'text-emerald-600' : 'text-slate-400'}"><i class="fas fa-pen"></i> Questões</span></div><div class="flex gap-2 h-2 mb-5"><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="pomo-bar-1-${t.id}" class="h-full bg-blue-500 transition-all duration-1000" style="width: ${pct1}%"></div></div><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="pomo-bar-2-${t.id}" class="h-full bg-amber-400 transition-all duration-1000" style="width: ${pct2}%"></div></div><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="pomo-bar-3-${t.id}" class="h-full bg-emerald-500 transition-all duration-1000" style="width: ${pct3}%"></div></div></div><div class="flex justify-between items-center"><div id="pomo-display-${t.id}" class="font-mono font-black text-4xl text-slate-800 dark:text-white tracking-tight">${displayTime}</div><div class="flex gap-2 items-center"><button id="pomo-btn-play-${t.id}" onclick="window.pomoToggle('${t.id}')" class="w-10 h-10 flex items-center justify-center text-white rounded-xl shadow-md ${window.isPomoRunning ? 'bg-red-500' : 'bg-slate-900 dark:bg-cm-green'}">${window.isPomoRunning ? '<i class="fas fa-pause text-xs"></i>' : '<i class="fas fa-play text-xs ml-0.5"></i>'}</button><button onclick="window.pomoSkip()" class="px-4 py-2.5 bg-white dark:bg-cm-dark2 border border-slate-200 text-slate-700 dark:text-gray-300 rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-slate-50 transition shadow-sm">Pular <i class="fas fa-forward"></i></button><button onclick="window.pomoStop()" class="px-4 py-2.5 bg-red-50 border border-red-200 text-red-600 rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-red-100 transition shadow-sm"><i class="fas fa-times"></i> Fechar</button></div></div></div>`;
                 }
 
-                tasksHtml += `<div class="card-ui p-5 flex flex-col lg:flex-row gap-5 ${prioClass} ${isChecked?'done bg-slate-50/80 opacity-90 border-slate-200':''} relative group draggable-item shadow-sm" draggable="true" ondragstart="window.handleDragStart(event, ${window.activeWeek}, ${idx})" ondragover="window.handleDragOverTask(event)" ondragleave="window.handleDragLeaveTask(event)" ondrop="window.handleDropTask(event, ${idx})">
+                tasksHtml += `<div class="card-ui p-5 flex flex-col lg:flex-row gap-5 ${prioClass} ${isChecked?'done bg-slate-50 opacity-90 border-slate-200':''} relative group draggable-item shadow-sm" draggable="true" ondragstart="window.handleDragStart(event, ${window.activeWeek}, ${idx})" ondragover="window.handleDragOverTask(event)" ondragleave="window.handleDragLeaveTask(event)" ondrop="window.handleDropTask(event, ${idx})">
                     <div class="flex items-center gap-4 flex-1 min-w-0">
                         <div class="cursor-move text-slate-300 hover:text-blue-500 drag-handle transition shrink-0"><i class="fas fa-grip-vertical text-lg"></i></div>
                         <div class="relative shrink-0"><input type="checkbox" class="peer appearance-none w-6 h-6 border-2 border-slate-300 rounded-lg checked:bg-black checked:border-black transition cursor-pointer" ${isChecked?'checked':''} onchange="window.toggleTask('${t.id}')"><i class="fas fa-check text-white absolute top-1 left-1 pointer-events-none opacity-0 peer-checked:opacity-100 text-xs transition"></i></div>
@@ -1220,22 +1209,22 @@
                     </div>
                     
                     <div class="flex items-center gap-4 shrink-0 flex-wrap lg:flex-nowrap">
-                        <div class="flex items-center gap-3 bg-slate-50 dark:bg-cm-dark2 p-2.5 rounded-xl border border-slate-200 dark:border-gray-800 shadow-inner">
-                            <div class="text-center"><span class="text-[9px] font-bold text-slate-400 uppercase block tracking-wider mb-1">Feitas</span><input type="number" value="${doneVal || ''}" onchange="window.updateTaskQuestions('${t.id}', this.value)" class="w-10 bg-transparent text-center font-bold text-slate-800 dark:text-white outline-none border-b-2 border-slate-300 dark:border-gray-700 focus:border-blue-500 py-0.5 transition" placeholder="-"></div>
-                            <div class="text-center"><span class="text-[9px] font-bold text-slate-400 uppercase block tracking-wider mb-1">Acertos</span><input type="number" value="${correctVal || ''}" onchange="window.updateScore('${t.id}', 'correct', this.value)" class="w-10 bg-transparent text-center font-bold text-slate-800 dark:text-white outline-none border-b-2 border-slate-300 dark:border-gray-700 focus:border-blue-500 py-0.5 transition" placeholder="-"></div>
-                            <div class="pl-3 border-l border-slate-200 dark:border-gray-800 text-center min-w-[3.5rem]"><span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">%</span><span class="text-base font-black ${accColor}">${acc}%</span></div>
+                        <div class="flex items-center gap-3 bg-gray-50 dark:bg-slate-800 p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 shadow-inner">
+                            <div class="text-center"><span class="text-[9px] font-bold text-slate-500 uppercase block tracking-wider mb-1">Feitas</span><input type="number" value="${doneVal || ''}" onchange="window.updateTaskQuestions('${t.id}', 'done', this.value)" class="w-12 bg-transparent text-center font-bold text-slate-800 dark:text-white outline-none border-b-2 border-gray-300 focus:border-green-500 py-0.5 transition" placeholder="-"></div>
+                            <div class="text-center"><span class="text-[9px] font-bold text-slate-500 uppercase block tracking-wider mb-1">Acertos</span><input type="number" value="${correctVal || ''}" onchange="window.updateTaskQuestions('${t.id}', 'correct', this.value)" class="w-12 bg-transparent text-center font-bold text-slate-800 dark:text-white outline-none border-b-2 border-gray-300 focus:border-green-500 py-0.5 transition" placeholder="-"></div>
+                            <div class="pl-3 border-l border-gray-200 dark:border-gray-700 text-center min-w-[3.5rem]"><span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">%</span><span class="text-base font-black ${accColor}">${acc}%</span></div>
                         </div>
                         
-                        <div class="flex items-center gap-2 border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-gray-800 pt-3 lg:pt-0 lg:pl-4 w-full lg:w-auto">
-                            <button onclick="window.openNotesModal('${t.id}')" class="w-9 h-9 rounded-full bg-slate-100 dark:bg-cm-mid text-slate-500 hover:bg-blue-100 hover:text-blue-600 transition flex items-center justify-center shadow-sm" title="Anotações e Links"><i class="fas fa-book-open"></i></button>
-                            <button onclick="window.requestDeleteTask(${window.activeWeek}, ${idx})" class="w-9 h-9 rounded-full bg-slate-100 dark:bg-cm-mid text-slate-500 hover:bg-red-100 hover:text-red-600 transition flex items-center justify-center shadow-sm" title="Excluir"><i class="fas fa-trash-alt"></i></button>
+                        <div class="flex items-center gap-2 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-gray-800 pt-3 lg:pt-0 lg:pl-4 w-full lg:w-auto">
+                            <button onclick="window.openNotesModal('${t.id}')" class="w-9 h-9 rounded-full bg-white border border-gray-200 dark:border-gray-700 dark:bg-cm-mid text-slate-500 hover:bg-blue-100 hover:text-blue-600 transition flex items-center justify-center shadow-sm" title="Anotações e Links"><i class="fas fa-book-open"></i></button>
+                            <button onclick="window.requestDeleteTask(${window.activeWeek}, ${idx})" class="w-9 h-9 rounded-full bg-white border border-gray-200 dark:border-gray-700 dark:bg-cm-mid text-slate-500 hover:bg-red-100 hover:text-red-600 transition flex items-center justify-center shadow-sm" title="Excluir"><i class="fas fa-trash-alt"></i></button>
                             <button onclick="window.startPomoForTask('${t.id}')" class="px-4 py-2 rounded-full bg-slate-900 dark:bg-cm-mid text-white text-[10px] font-bold uppercase tracking-wider hover:bg-slate-700 transition shadow-md flex items-center gap-2 ml-auto ${isPomoActiveForThis ? 'hidden' : ''}"><i class="fas fa-stopwatch text-emerald-400"></i> Focar</button>
                         </div>
                     </div>
                     ${pomoUI}
                 </div>`;
             });
-            tasksHtml += `<button onclick="window.openAddTaskModal(${window.activeWeek})" class="w-full py-8 border-2 border-dashed border-slate-300 dark:border-gray-700 rounded-3xl text-slate-400 hover:text-blue-600 hover:border-blue-400 hover:bg-blue-50/50 transition font-bold text-sm mt-2 flex items-center justify-center gap-3 group"><span class="w-10 h-10 rounded-full bg-slate-100 dark:bg-cm-mid flex items-center justify-center group-hover:bg-blue-100 transition shadow-sm text-lg"><i class="fas fa-plus"></i></span> Inserir Tema Avulso</button></div>`;
+            tasksHtml += `<button onclick="window.openAddTaskModal(${window.activeWeek})" class="w-full py-8 border-2 border-dashed border-slate-300 dark:border-gray-700 rounded-3xl text-slate-400 hover:text-blue-600 hover:border-blue-400 hover:bg-blue-50 transition font-bold text-sm mt-2 flex items-center justify-center gap-3 group"><span class="w-10 h-10 rounded-full bg-white dark:bg-cm-mid border border-slate-200 flex items-center justify-center group-hover:bg-blue-100 transition shadow-sm text-lg"><i class="fas fa-plus"></i></span> Inserir Tema Avulso</button></div>`;
             content.innerHTML = agendaHtml + tasksHtml;
         }
 
@@ -1383,31 +1372,40 @@
 
             const filterButtonsArea = ['Todas', ...mainCategories].map(area => {
                 const label = area === 'Clínica' ? 'Clínica Médica' : area; const count = counts[area] || 0;
-                return `<button onclick="window.toggleSearchArea('${area}')" class="filter-chip shadow-sm ${window.searchFilterArea === area ? 'active' : ''}"><span>${label}</span> <span class="filter-badge">${count}</span></button>`;
+                const activeClass = window.searchFilterArea === area ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-gray-200 hover:bg-gray-50';
+                const badgeClass = window.searchFilterArea === area ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500';
+                return `<button onclick="window.toggleSearchArea('${area}')" class="px-4 py-2 rounded-full border text-xs font-bold transition flex items-center gap-1.5 shadow-sm ${activeClass}"><span>${label}</span> <span class="px-2 py-0.5 rounded-full text-[10px] font-black ${badgeClass}">${count}</span></button>`;
             }).join('');
 
-            // Sub-áreas e Prioridades (Filtro Cascata)
+            // Sub-áreas (Filtro Cascata)
             let subAreaHtml = '';
             if (window.searchFilterArea !== 'Todas') {
                 const subAreas = [...new Set(bancoDeMaterias.filter(t => (areaMapping[t.area] || 'Outros') === window.searchFilterArea).map(t => t.subarea))].sort();
                 if(subAreas.length > 0) {
-                    const subButtons = ['Todas', ...subAreas].map(sub => `<button onclick="window.toggleSearchSubArea('${sub}')" class="filter-chip text-[10px] shadow-sm ${window.searchFilterSubArea === sub ? 'active' : ''}">${sub}</button>`).join('');
-                    subAreaHtml = `<div class="flex flex-wrap gap-2 mt-3 pl-2 border-l-2 border-slate-200">${subButtons}</div>`;
+                    const subButtons = ['Todas', ...subAreas].map(sub => {
+                        const activeClass = window.searchFilterSub === sub ? 'bg-slate-700 text-white border-slate-700' : 'bg-white text-slate-500 border-gray-200 hover:bg-gray-50';
+                        return `<button onclick="window.toggleSearchSub('${sub}')" class="px-3 py-1 rounded-full border text-[10px] font-bold transition shadow-sm ${activeClass}">${sub}</button>`;
+                    }).join('');
+                    subAreaHtml = `<div class="flex flex-wrap gap-2 mt-4 pl-4 border-l-2 border-gray-200 dark:border-gray-700">${subButtons}</div>`;
                 }
             }
 
+            // Prioridades
             const prios = [{l:'Todas', v:'Todas'}, {l:'Alta (1)', v:1}, {l:'Média (2)', v:2}, {l:'Baixa (3)', v:3}, {l:'Opcional (4)', v:4}];
-            const prioHtml = `<div class="flex items-center gap-2 mt-4 text-xs font-bold text-slate-500 uppercase tracking-widest"><i class="fas fa-filter"></i> Prioridade: ` + prios.map(p => `<button onclick="window.toggleSearchPrio('${p.v}')" class="filter-chip text-[10px] shadow-sm ${window.searchFilterPrio === p.v ? 'active' : ''}">${p.l}</button>`).join('') + `</div>`;
+            const prioHtml = `<div class="flex flex-wrap items-center gap-2 mt-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest"><i class="fas fa-filter mr-1"></i> Prioridade: ` + prios.map(p => {
+                const activeClass = window.searchFilterPrio === p.v ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-500 border-gray-200 hover:bg-gray-50';
+                return `<button onclick="window.toggleSearchPrio('${p.v}')" class="px-3 py-1 rounded-full border text-[10px] font-bold transition shadow-sm ${activeClass}">${p.l}</button>`;
+            }).join('') + `</div>`;
 
-            const html = `<div class="bg-white dark:bg-cm-dark2 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-gray-800 min-h-[600px]"><div class="mb-10"><h2 class="text-3xl font-black text-slate-800 dark:text-white mb-6 tracking-tight">Buscar Tarefas</h2><input type="text" id="global-search-input" placeholder="Digite o tema, categoria ou palavra-chave..." class="w-full text-lg p-5 border border-slate-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none bg-slate-50 dark:bg-cm-mid transition shadow-sm mb-6 font-medium dark:text-white"><div class="flex flex-col gap-2"><div class="flex flex-wrap gap-2">${filterButtonsArea}</div>${subAreaHtml}${prioHtml}</div></div><div id="search-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div></div>`;
+            const html = `<div class="bg-white dark:bg-cm-dark2 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-gray-800 min-h-[600px]"><div class="mb-10"><h2 class="text-3xl font-black text-slate-800 dark:text-white mb-6 tracking-tight">Buscar Tarefas</h2><input type="text" id="global-search-input" placeholder="Digite o tema, categoria ou palavra-chave..." class="w-full text-lg p-5 border border-slate-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none bg-slate-50 dark:bg-cm-mid transition shadow-sm mb-6 font-medium dark:text-white"><div class="flex flex-col"><div class="flex flex-wrap gap-2">${filterButtonsArea}</div>${subAreaHtml}${prioHtml}</div></div><div id="search-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div></div>`;
             content.innerHTML = html; 
             setTimeout(() => content.classList.remove('fade-enter'), 500); 
             
             const searchInput = document.getElementById('global-search-input'); 
             const resultsContainer = document.getElementById('search-results');
             
-            window.toggleSearchArea = function(area) { window.searchFilterArea = area; window.searchFilterSubArea = 'Todas'; filterAndRender(searchInput.value); }
-            window.toggleSearchSubArea = function(sub) { window.searchFilterSubArea = sub; filterAndRender(searchInput.value); }
+            window.toggleSearchArea = function(area) { window.searchFilterArea = area; window.searchFilterSub = 'Todas'; filterAndRender(searchInput.value); }
+            window.toggleSearchSub = function(sub) { window.searchFilterSub = sub; filterAndRender(searchInput.value); }
             window.toggleSearchPrio = function(prio) { window.searchFilterPrio = prio; filterAndRender(searchInput.value); }
             
             function filterAndRender(query) {
@@ -1415,13 +1413,12 @@
                 const filtered = bancoDeMaterias.filter(t => {
                     const textMatch = t.tema.toLowerCase().includes(lowerQ) || t.area.toLowerCase().includes(lowerQ);
                     let areaMatch = true; if (window.searchFilterArea !== 'Todas') areaMatch = (areaMapping[t.area] || "Outros") === window.searchFilterArea;
-                    let subMatch = true; if (window.searchFilterSubArea !== 'Todas') subMatch = t.subarea === window.searchFilterSubArea;
+                    let subMatch = true; if (window.searchFilterSub !== 'Todas') subMatch = t.subarea === window.searchFilterSub;
                     let prioMatch = true; if (window.searchFilterPrio !== 'Todas') prioMatch = t.prioridade === window.searchFilterPrio;
                     return textMatch && areaMatch && subMatch && prioMatch;
                 });
                 window._currentFilteredBank = filtered;
                 
-                // Read current agenda text to see what is already used
                 const scheduledIds = new Set();
                 window.state.weeks.forEach(w => w.tasks.forEach(t => scheduledIds.add(t.subject)));
 
@@ -1434,12 +1431,14 @@
                     }).join(''); 
                 }
                 
-                // Re-render filters to update active states without full redraw
+                // Re-render filter row 1
                 const areaContainer = document.querySelector('.filter-chip').parentElement;
                 if(areaContainer) {
                     areaContainer.innerHTML = ['Todas', ...mainCategories].map(area => {
-                        const label = area === 'Clínica' ? 'Clínica Médica' : area; const count = counts[area] || 0;
-                        return `<button onclick="window.toggleSearchArea('${area}')" class="filter-chip shadow-sm ${window.searchFilterArea === area ? 'active' : ''}"><span>${label}</span> <span class="filter-badge">${count}</span></button>`;
+                        const count = counts[area] || 0;
+                        const activeClass = window.searchFilterArea === area ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-gray-200 hover:bg-gray-50';
+                        const badgeClass = window.searchFilterArea === area ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500';
+                        return `<button onclick="window.toggleSearchArea('${area}')" class="px-3 py-1.5 rounded-full border text-xs font-bold transition flex items-center gap-1.5 shadow-sm ${activeClass}"><span>${area === 'Clínica' ? 'Clínica Médica' : area}</span> <span class="px-1.5 py-0.5 rounded-full text-[9px] font-black ${badgeClass}">${count}</span></button>`;
                     }).join('');
                 }
             }
