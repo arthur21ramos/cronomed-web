@@ -137,6 +137,13 @@
 
         .task-details-wrapper { transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out; max-height: 0; opacity: 0; overflow: hidden; }
         .task-details-wrapper.expanded { max-height: 600px; opacity: 1; }
+        
+        /* Prioridades Fixes */
+        .prio-1 { border-left: 4px solid #ef4444 !important; }
+        .prio-2 { border-left: 4px solid #f59e0b !important; }
+        .prio-3 { border-left: 4px solid #3b82f6 !important; }
+        .prio-4 { border-left: 4px solid #94a3b8 !important; }
+        .prio-rev { border-left: 4px dashed #10b981 !important; }
     </style>
 </head>
 <body class="bg-gray-50 text-slate-800 overflow-hidden" onkeydown="handleGlobalKeydown(event)">
@@ -192,7 +199,7 @@
                     <button onclick="switchView('search')" id="nav-search" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-white border border-gray-200 text-gray-600 hover:bg-gray-100 text-left">
                         <i class="fas fa-search text-lg w-5 text-center"></i><span>Busca de Tarefas</span>
                     </button>
-                    <button onclick="openModal('remanejo')" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-purple-50 border border-purple-200 text-purple-700 hover:bg-purple-100 text-left">
+                    <button onclick="openRemanejoModal()" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-purple-50 border border-purple-200 text-purple-700 hover:bg-purple-100 text-left">
                         <i class="fas fa-wand-magic-sparkles text-lg w-5 text-center"></i><span>Remanejamento IA</span>
                     </button>
                 </div>
@@ -227,8 +234,8 @@
         <div class="p-6 space-y-6">
             <div>
                 <h4 class="text-xs font-bold uppercase text-gray-400 tracking-widest mb-4">Conta</h4>
-                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-3">
-                    <div class="font-bold text-sm text-slate-800 truncate" id="user-name">Usuário</div>
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-3 dark:bg-cm-dark2">
+                    <div class="font-bold text-sm text-slate-800 dark:text-white truncate" id="user-name">Usuário</div>
                     <div class="text-[10px] text-gray-500 truncate" id="user-email">email@email.com</div>
                 </div>
                 <button onclick="window.recalculateRoute()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 bg-white hover:bg-blue-50 text-blue-700 font-bold text-sm transition card-shadow mb-2"><i class="fas fa-sync-alt"></i> Recalcular Rota (Novo Ano)</button>
@@ -237,21 +244,15 @@
             <div>
                 <h4 class="text-xs font-bold uppercase text-gray-400 tracking-widest mb-4">Aparência</h4>
                 <div class="space-y-3">
-                    <div class="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50">
-                        <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white"><i class="fas fa-moon text-sm"></i></div><div><div class="font-bold text-sm text-slate-800">Modo Noturno</div></div></div>
+                    <div class="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:bg-cm-dark2">
+                        <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white"><i class="fas fa-moon text-sm"></i></div><div><div class="font-bold text-sm text-slate-800 dark:text-white">Modo Noturno</div></div></div>
                         <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="dark-mode-toggle" class="sr-only peer" onchange="toggleDarkMode(this.checked)"><div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-slate-900"></div></label>
                     </div>
-                    <div class="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50">
-                        <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-black flex items-center justify-center text-white"><i class="fas fa-circle text-sm"></i></div><div><div class="font-bold text-sm text-slate-800">True Black (OLED)</div></div></div>
+                    <div class="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 dark:bg-cm-dark2">
+                        <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-black flex items-center justify-center text-white"><i class="fas fa-circle text-sm"></i></div><div><div class="font-bold text-sm text-slate-800 dark:text-white">True Black (OLED)</div></div></div>
                         <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="oled-mode-toggle" class="sr-only peer" onchange="toggleOledMode(this.checked)"><div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div></label>
                     </div>
                 </div>
-            </div>
-            <div>
-                <h4 class="text-xs font-bold uppercase text-gray-400 tracking-widest mb-4">Avançado</h4>
-                <button onclick="closeSettingsSidebar(); openModal('backup');" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-bold text-sm transition card-shadow">
-                    <i class="fas fa-file-code text-gray-500"></i> Backup Manual Texto
-                </button>
             </div>
         </div>
     </div>
@@ -324,31 +325,6 @@
             <div class="flex gap-3 mt-6 pt-4 border-t border-gray-100">
                 <button onclick="closeNotesModal()" class="flex-1 py-3 rounded-xl font-bold text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition">Fechar</button>
                 <button onclick="saveNotes()" class="flex-1 py-3 rounded-xl font-bold text-sm bg-black text-white hover:bg-gray-800 transition">Salvar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL: BACKUP MANUAL (TEXTO) -->
-    <div id="modal-backup" class="modal-overlay">
-        <div class="modal-content bg-white">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-black text-gray-900">Backup Manual</h3>
-                <button onclick="closeModal('backup')" class="text-gray-400 hover:text-black transition"><i class="fas fa-times"></i></button>
-            </div>
-            <p class="text-sm text-gray-500 mb-6">Seus dados estão seguros no Firebase, mas você pode exportar ou importar manualmente.</p>
-            <div class="space-y-6">
-                <div class="bg-gray-50 p-5 rounded-xl border border-gray-200">
-                    <label class="block text-xs font-bold uppercase mb-2 text-gray-500">1. Exportar Código</label>
-                    <div class="flex gap-2">
-                        <input type="text" id="export-data" readonly class="w-full bg-white border border-gray-300 text-gray-500 text-xs p-3 rounded-lg font-mono focus:outline-none shadow-inner" value="...">
-                        <button onclick="copyToClipboard()" class="bg-black text-white px-5 rounded-lg text-xs font-bold hover:bg-gray-800 transition">Copiar</button>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold uppercase mb-2 text-gray-500">2. Importar Código</label>
-                    <textarea id="import-data" rows="3" class="w-full border border-gray-300 p-3 rounded-lg text-xs font-mono outline-none shadow-sm transition focus:border-blue-500"></textarea>
-                    <button onclick="importData()" class="mt-4 w-full bg-blue-600 text-white py-3.5 rounded-lg font-bold text-sm hover:bg-blue-700 transition shadow-lg"><i class="fas fa-sync-alt"></i> Restaurar Dados</button>
-                </div>
             </div>
         </div>
     </div>
@@ -438,9 +414,238 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        
-        // 📥 IMPORTANDO O BANCO DE TAREFAS (Requer o arquivo banco.js no GitHub)
-        import { bancoDeMaterias } from './banco.js';
+
+        // EMBEDDED BANCO DE MATÉRIAS
+        // Para evitar erros de carregamento externo (CORS/MIME/404), os dados foram embutidos diretamente.
+        const bancoDeMaterias = [
+            { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Hipertensão Arterial Sistêmica", "peso_prova": 10, "frequencia_prova": 95, "score": 36.5, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Síndrome Coronariana Aguda", "peso_prova": 10, "frequencia_prova": 95, "score": 36.5, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Insuficiência Cardíaca", "peso_prova": 10, "frequencia_prova": 90, "score": 35, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Arritmias Cardíacas", "peso_prova": 9, "frequencia_prova": 85, "score": 32.5, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Parada Cardiorrespiratória", "peso_prova": 9, "frequencia_prova": 85, "score": 32.5, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Endocrinologia", "tema": "Diabetes Mellitus (diagnóstico, tratamento e complicações)", "peso_prova": 10, "frequencia_prova": 95, "score": 36.5, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Endocrinologia", "tema": "Doenças da Tireoide", "peso_prova": 9, "frequencia_prova": 90, "score": 33.3, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Endocrinologia", "tema": "Dislipidemia", "peso_prova": 9, "frequencia_prova": 85, "score": 32.5, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Pneumologia", "tema": "Pneumonia", "peso_prova": 10, "frequencia_prova": 95, "score": 36.5, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Pneumologia", "tema": "Asma", "peso_prova": 9, "frequencia_prova": 90, "score": 33.3, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Pneumologia", "tema": "DPOC", "peso_prova": 9, "frequencia_prova": 85, "score": 32.5, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Pneumologia", "tema": "Tromboembolismo Pulmonar", "peso_prova": 9, "frequencia_prova": 85, "score": 32.5, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Neurologia", "tema": "Acidente Vascular Cerebral", "peso_prova": 10, "frequencia_prova": 95, "score": 36.5, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Neurologia", "tema": "Epilepsia", "peso_prova": 9, "frequencia_prova": 80, "score": 31, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Nefrologia", "tema": "Lesão Renal Aguda", "peso_prova": 10, "frequencia_prova": 90, "score": 35, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Nefrologia", "tema": "Doença Renal Crônica", "peso_prova": 10, "frequencia_prova": 85, "score": 33.5, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Nefrologia", "tema": "Distúrbios Hidroeletrolíticos", "peso_prova": 10, "frequencia_prova": 90, "score": 35, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Gastroenterologia", "tema": "Hemorragia Digestiva Alta", "peso_prova": 10, "frequencia_prova": 90, "score": 35, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Gastroenterologia", "tema": "Doença Hepática Crônica", "peso_prova": 9, "frequencia_prova": 85, "score": 32.5, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Infectologia", "tema": "Sepse e Choque Séptico", "peso_prova": 10, "frequencia_prova": 95, "score": 36.5, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Infectologia", "tema": "Infecção do Trato Urinário", "peso_prova": 9, "frequencia_prova": 85, "score": 32.5, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Hematologia", "tema": "Anemias", "peso_prova": 9, "frequencia_prova": 85, "score": 32.5, "prioridade": 1 },
+            { "area": "Cirurgia", "subarea": "Trauma", "tema": "ATLS e Avaliação Inicial do Trauma", "peso_prova": 10, "frequencia_prova": 95, "score": 36.5, "prioridade": 1 },
+            { "area": "Cirurgia", "subarea": "Cirurgia Geral", "tema": "Abdome Agudo", "peso_prova": 10, "frequencia_prova": 95, "score": 36.5, "prioridade": 1 },
+            { "area": "Cirurgia", "subarea": "Cirurgia Geral", "tema": "Apendicite Aguda", "peso_prova": 9, "frequencia_prova": 90, "score": 33.3, "prioridade": 1 },
+            { "area": "Cirurgia", "subarea": "Cirurgia Geral", "tema": "Colecistite e Colelitíase", "peso_prova": 9, "frequencia_prova": 85, "score": 32.5, "prioridade": 1 },
+            { "area": "Pediatria", "subarea": "Neonatologia", "tema": "Reanimação Neonatal", "peso_prova": 10, "frequencia_prova": 95, "score": 36.5, "prioridade": 1 },
+            { "area": "Pediatria", "subarea": "Geral", "tema": "Puericultura", "peso_prova": 10, "frequencia_prova": 95, "score": 36.5, "prioridade": 1 },
+            { "area": "Ginecologia e Obstetrícia", "subarea": "Obstetrícia", "tema": "Doença Hipertensiva da Gestação", "peso_prova": 10, "frequencia_prova": 95, "score": 36.5, "prioridade": 1 },
+            { "area": "Preventiva", "subarea": "Saúde Pública", "tema": "Princípios do SUS", "peso_prova": 10, "frequencia_prova": 95, "score": 36.5, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Síndromes Aórticas Agudas", "peso_prova": 9, "frequencia_prova": 80, "score": 31, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Valvopatias", "peso_prova": 8, "frequencia_prova": 75, "score": 28.5, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Endocrinologia", "tema": "Obesidade", "peso_prova": 8, "frequencia_prova": 75, "score": 28.5, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Endocrinologia", "tema": "Síndrome Metabólica", "peso_prova": 8, "frequencia_prova": 70, "score": 27, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Pneumologia", "tema": "Derrame Pleural", "peso_prova": 8, "frequencia_prova": 70, "score": 27, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Neurologia", "tema": "Cefaleias", "peso_prova": 8, "frequencia_prova": 75, "score": 28.5, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Nefrologia", "tema": "Distúrbios Ácido-Base", "peso_prova": 9, "frequencia_prova": 80, "score": 31, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Gastroenterologia", "tema": "Pancreatite Aguda", "peso_prova": 8, "frequencia_prova": 75, "score": 28.5, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Gastroenterologia", "tema": "Diarreia Aguda", "peso_prova": 8, "frequencia_prova": 70, "score": 27, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Infectologia", "tema": "Endocardite Infecciosa", "peso_prova": 9, "frequencia_prova": 80, "score": 31, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Infectologia", "tema": "Pneumonias Atípicas", "peso_prova": 8, "frequencia_prova": 70, "score": 27, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Reumatologia", "tema": "Lúpus Eritematoso Sistêmico", "peso_prova": 9, "frequencia_prova": 80, "score": 31, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Reumatologia", "tema": "Artrite Reumatoide", "peso_prova": 9, "frequencia_prova": 80, "score": 31, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Psiquiatria", "tema": "Depressão", "peso_prova": 9, "frequencia_prova": 85, "score": 32.5, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Psiquiatria", "tema": "Transtornos de Ansiedade", "peso_prova": 9, "frequencia_prova": 80, "score": 31, "prioridade": 1 },
+            { "area": "Cirurgia", "subarea": "Cirurgia Geral", "tema": "Hérnias da Parede Abdominal", "peso_prova": 8, "frequencia_prova": 75, "score": 28.5, "prioridade": 2 },
+            { "area": "Cirurgia", "subarea": "Cirurgia Geral", "tema": "Perfuração de Víscera Oca", "peso_prova": 8, "frequencia_prova": 75, "score": 28.5, "prioridade": 2 },
+            { "area": "Cirurgia", "subarea": "Vascular", "tema": "Trombose Venosa Profunda", "peso_prova": 9, "frequencia_prova": 85, "score": 32.5, "prioridade": 1 },
+            { "area": "Cirurgia", "subarea": "Vascular", "tema": "Tromboembolismo Pulmonar Cirúrgico", "peso_prova": 8, "frequencia_prova": 75, "score": 28.5, "prioridade": 2 },
+            { "area": "Cirurgia", "subarea": "Urologia", "tema": "Litíase Urinária", "peso_prova": 9, "frequencia_prova": 85, "score": 32.5, "prioridade": 1 },
+            { "area": "Cirurgia", "subarea": "Urologia", "tema": "Hiperplasia Prostática Benigna", "peso_prova": 8, "frequencia_prova": 75, "score": 28.5, "prioridade": 2 },
+            { "area": "Pediatria", "subarea": "Geral", "tema": "Infecções Respiratórias Agudas", "peso_prova": 10, "frequencia_prova": 95, "score": 36.5, "prioridade": 1 },
+            { "area": "Pediatria", "subarea": "Geral", "tema": "Bronquiolite", "peso_prova": 9, "frequencia_prova": 90, "score": 33.3, "prioridade": 1 },
+            { "area": "Pediatria", "subarea": "Geral", "tema": "Otite Média Aguda", "peso_prova": 9, "frequencia_prova": 85, "score": 32.5, "prioridade": 1 },
+            { "area": "Ginecologia e Obstetrícia", "subarea": "Obstetrícia", "tema": "Trabalho de Parto Prematuro", "peso_prova": 10, "frequencia_prova": 90, "score": 35, "prioridade": 1 },
+            { "area": "Ginecologia e Obstetrícia", "subarea": "Ginecologia", "tema": "Infecções Sexualmente Transmissíveis", "peso_prova": 10, "frequencia_prova": 90, "score": 35, "prioridade": 1 },
+            { "area": "Preventiva", "subarea": "Epidemiologia", "tema": "Medidas de Associação e Risco", "peso_prova": 10, "frequencia_prova": 95, "score": 36.5, "prioridade": 1 },
+            { "area": "Preventiva", "subarea": "Epidemiologia", "tema": "Tipos de Estudo", "peso_prova": 10, "frequencia_prova": 95, "score": 36.5, "prioridade": 1 },
+            { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Pericardite e Miocardite", "peso_prova": 7, "frequencia_prova": 65, "score": 24.5, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Doença Arterial Coronariana Crônica", "peso_prova": 8, "frequencia_prova": 70, "score": 26, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Endocrinologia", "tema": "Hipoglicemia", "peso_prova": 8, "frequencia_prova": 70, "score": 26, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Endocrinologia", "tema": "Doenças da Hipófise", "peso_prova": 7, "frequencia_prova": 60, "score": 23, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Pneumologia", "tema": "Doenças Intersticiais Pulmonares", "peso_prova": 7, "frequencia_prova": 60, "score": 23, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Neurologia", "tema": "Doença de Parkinson", "peso_prova": 7, "frequencia_prova": 65, "score": 24.5, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Neurologia", "tema": "Esclerose Múltipla", "peso_prova": 7, "frequencia_prova": 60, "score": 23, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Nefrologia", "tema": "Síndrome Nefrótica", "peso_prova": 8, "frequencia_prova": 70, "score": 26, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Nefrologia", "tema": "Síndrome Nefrítica", "peso_prova": 8, "frequencia_prova": 70, "score": 26, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Gastroenterologia", "tema": "Doença Inflamatória Intestinal", "peso_prova": 8, "frequencia_prova": 70, "score": 26, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Gastroenterologia", "tema": "Doença do Refluxo Gastroesofágico", "peso_prova": 7, "frequencia_prova": 65, "score": 24.5, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Infectologia", "tema": "Tuberculose", "peso_prova": 9, "frequencia_prova": 80, "score": 31, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Infectologia", "tema": "HIV", "peso_prova": 9, "frequencia_prova": 80, "score": 31, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Hematologia", "tema": "Coagulopatias", "peso_prova": 7, "frequencia_prova": 65, "score": 24.5, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Reumatologia", "tema": "Espondiloartrites", "peso_prova": 7, "frequencia_prova": 60, "score": 23, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Reumatologia", "tema": "Gota", "peso_prova": 7, "frequencia_prova": 65, "score": 24.5, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Psiquiatria", "tema": "Transtorno Bipolar", "peso_prova": 8, "frequencia_prova": 75, "score": 28.5, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Psiquiatria", "tema": "Esquizofrenia", "peso_prova": 8, "frequencia_prova": 75, "score": 28.5, "prioridade": 2 },
+            { "area": "Cirurgia", "subarea": "Cirurgia Geral", "tema": "Obstrução Intestinal", "peso_prova": 8, "frequencia_prova": 75, "score": 28.5, "prioridade": 2 },
+            { "area": "Cirurgia", "subarea": "Cirurgia Geral", "tema": "Diverticulite", "peso_prova": 8, "frequencia_prova": 75, "score": 28.5, "prioridade": 2 },
+            { "area": "Cirurgia", "subarea": "Vascular", "tema": "Doença Arterial Obstrutiva Periférica", "peso_prova": 7, "frequencia_prova": 65, "score": 24.5, "prioridade": 2 },
+            { "area": "Cirurgia", "subarea": "Proctologia", "tema": "Hemorroidas", "peso_prova": 7, "frequencia_prova": 65, "score": 24.5, "prioridade": 2 },
+            { "area": "Cirurgia", "subarea": "Urologia", "tema": "Câncer de Próstata", "peso_prova": 7, "frequencia_prova": 60, "score": 23, "prioridade": 3 },
+            { "area": "Pediatria", "subarea": "Geral", "tema": "Infecção do Trato Urinário", "peso_prova": 9, "frequencia_prova": 85, "score": 32.5, "prioridade": 2 },
+            { "area": "Pediatria", "subarea": "Geral", "tema": "Doenças Exantemáticas", "peso_prova": 9, "frequencia_prova": 85, "score": 32.5, "prioridade": 2 },
+            { "area": "Pediatria", "subarea": "Geral", "tema": "Anemias na Infância", "peso_prova": 8, "frequencia_prova": 75, "score": 28.5, "prioridade": 2 },
+            { "area": "Ginecologia e Obstetrícia", "subarea": "Ginecologia", "tema": "Doença Inflamatória Pélvica", "peso_prova": 9, "frequencia_prova": 80, "score": 31, "prioridade": 2 },
+            { "area": "Ginecologia e Obstetrícia", "subarea": "Ginecologia", "tema": "Endometriose", "peso_prova": 8, "frequencia_prova": 75, "score": 28.5, "prioridade": 2 },
+            { "area": "Preventiva", "subarea": "Epidemiologia", "tema": "Rastreamento", "peso_prova": 9, "frequencia_prova": 90, "score": 33.3, "prioridade": 2 },
+            { "area": "Preventiva", "subarea": "Saúde Pública", "tema": "Atenção Primária à Saúde", "peso_prova": 9, "frequencia_prova": 90, "score": 33.3, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Hipertensão Secundária", "peso_prova": 7, "frequencia_prova": 65, "score": 24.5, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Cardiomiopatias", "peso_prova": 7, "frequencia_prova": 60, "score": 23, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Endocrinologia", "tema": "Doenças da Adrenal (Cushing e Addison)", "peso_prova": 7, "frequencia_prova": 65, "score": 24.5, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Endocrinologia", "tema": "Distúrbios do Crescimento", "peso_prova": 6, "frequencia_prova": 55, "score": 21.5, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Pneumologia", "tema": "Câncer de Pulmão", "peso_prova": 7, "frequencia_prova": 65, "score": 24.5, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Pneumologia", "tema": "Apneia Obstrutiva do Sono", "peso_prova": 6, "frequencia_prova": 50, "score": 20, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Neurologia", "tema": "Demências", "peso_prova": 7, "frequencia_prova": 65, "score": 24.5, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Neurologia", "tema": "Neuropatias Periféricas", "peso_prova": 6, "frequencia_prova": 55, "score": 21.5, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Nefrologia", "tema": "Glomerulonefrites", "peso_prova": 7, "frequencia_prova": 65, "score": 24.5, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Gastroenterologia", "tema": "Colelitíase e Complicações", "peso_prova": 7, "frequencia_prova": 65, "score": 24.5, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Gastroenterologia", "tema": "Doença Celíaca", "peso_prova": 6, "frequencia_prova": 55, "score": 21.5, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Infectologia", "tema": "Leptospirose", "peso_prova": 7, "frequencia_prova": 60, "score": 23, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Infectologia", "tema": "Febre Amarela", "peso_prova": 6, "frequencia_prova": 55, "score": 21.5, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Hematologia", "tema": "Anemia Hemolítica", "peso_prova": 7, "frequencia_prova": 60, "score": 23, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Reumatologia", "tema": "Vasculites", "peso_prova": 7, "frequencia_prova": 60, "score": 23, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Psiquiatria", "tema": "Transtornos Alimentares", "peso_prova": 6, "frequencia_prova": 50, "score": 20, "prioridade": 3 },
+            { "area": "Cirurgia", "subarea": "Cirurgia Geral", "tema": "Infecções Cirúrgicas", "peso_prova": 8, "frequencia_prova": 75, "score": 28.5, "prioridade": 2 },
+            { "area": "Cirurgia", "subarea": "Cirurgia Geral", "tema": "Antibioticoprofilaxia", "peso_prova": 7, "frequencia_prova": 70, "score": 26, "prioridade": 2 },
+            { "area": "Cirurgia", "subarea": "Proctologia", "tema": "Fissura Anal", "peso_prova": 6, "frequencia_prova": 55, "score": 21.5, "prioridade": 3 },
+            { "area": "Cirurgia", "subarea": "Urologia", "tema": "Câncer de Bexiga", "peso_prova": 6, "frequencia_prova": 55, "score": 21.5, "prioridade": 3 },
+            { "area": "Cirurgia", "subarea": "Vascular", "tema": "Insuficiência Venosa Crônica", "peso_prova": 6, "frequencia_prova": 55, "score": 21.5, "prioridade": 3 },
+            { "area": "Pediatria", "subarea": "Neonatologia", "tema": "Prematuridade", "peso_prova": 9, "frequencia_prova": 85, "score": 32.5, "prioridade": 2 },
+            { "area": "Pediatria", "subarea": "Neonatologia", "tema": "Distúrbios Respiratórios Neonatais", "peso_prova": 9, "frequencia_prova": 80, "score": 31, "prioridade": 2 },
+            { "area": "Pediatria", "subarea": "Geral", "tema": "Crescimento e Desenvolvimento", "peso_prova": 9, "frequencia_prova": 85, "score": 32.5, "prioridade": 2 },
+            { "area": "Pediatria", "subarea": "Geral", "tema": "Parasitoses Intestinais", "peso_prova": 7, "frequencia_prova": 60, "score": 23, "prioridade": 3 },
+            { "area": "Ginecologia e Obstetrícia", "subarea": "Obstetrícia", "tema": "Rotura Prematura de Membranas", "peso_prova": 9, "frequencia_prova": 85, "score": 32.5, "prioridade": 2 },
+            { "area": "Ginecologia e Obstetrícia", "subarea": "Obstetrícia", "tema": "Restrição de Crescimento Intrauterino", "peso_prova": 9, "frequencia_prova": 80, "score": 31, "prioridade": 2 },
+            { "area": "Preventiva", "subarea": "Saúde Pública", "tema": "Estratégia Saúde da Família", "peso_prova": 9, "frequencia_prova": 90, "score": 33.3, "prioridade": 2 },
+            { "area": "Preventiva", "subarea": "Epidemiologia", "tema": "Sensibilidade e Especificidade", "peso_prova": 9, "frequencia_prova": 85, "score": 32.5, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Doenças do Pericárdio", "peso_prova": 6, "frequencia_prova": 55, "score": 21.5, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Síncope", "peso_prova": 6, "frequencia_prova": 50, "score": 20, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Endocrinologia", "tema": "Hipercalcemia e Hipocalcemia", "peso_prova": 6, "frequencia_prova": 55, "score": 21.5, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Endocrinologia", "tema": "Distúrbios da Paratireoide", "peso_prova": 5, "frequencia_prova": 45, "score": 18.5, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Pneumologia", "tema": "Bronquiectasias", "peso_prova": 6, "frequencia_prova": 50, "score": 20, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Pneumologia", "tema": "Pneumotórax", "peso_prova": 7, "frequencia_prova": 60, "score": 23, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Neurologia", "tema": "Síndromes Cerebelares", "peso_prova": 5, "frequencia_prova": 45, "score": 18.5, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Neurologia", "tema": "Miopatias", "peso_prova": 5, "frequencia_prova": 45, "score": 18.5, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Nefrologia", "tema": "Doença Policística Renal", "peso_prova": 5, "frequencia_prova": 45, "score": 18.5, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Gastroenterologia", "tema": "Síndrome do Intestino Irritável", "peso_prova": 6, "frequencia_prova": 50, "score": 20, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Gastroenterologia", "tema": "Constipação Crônica", "peso_prova": 5, "frequencia_prova": 45, "score": 18.5, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Infectologia", "tema": "Dengue", "peso_prova": 8, "frequencia_prova": 75, "score": 28.5, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Infectologia", "tema": "Zika e Chikungunya", "peso_prova": 6, "frequencia_prova": 55, "score": 21.5, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Hematologia", "tema": "Leucemias", "peso_prova": 7, "frequencia_prova": 60, "score": 23, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Reumatologia", "tema": "Síndrome de Sjögren", "peso_prova": 5, "frequencia_prova": 45, "score": 18.5, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Psiquiatria", "tema": "Transtornos de Personalidade", "peso_prova": 6, "frequencia_prova": 50, "score": 20, "prioridade": 3 },
+            { "area": "Cirurgia", "subarea": "Cirurgia Geral", "tema": "Queimaduras", "peso_prova": 8, "frequencia_prova": 75, "score": 28.5, "prioridade": 3 },
+            { "area": "Cirurgia", "subarea": "Cirurgia Geral", "tema": "Choque no Trauma", "peso_prova": 8, "frequencia_prova": 75, "score": 28.5, "prioridade": 3 },
+            { "area": "Cirurgia", "subarea": "Proctologia", "tema": "Abscesso Anorretal", "peso_prova": 6, "frequencia_prova": 50, "score": 20, "prioridade": 3 },
+            { "area": "Cirurgia", "subarea": "Urologia", "tema": "Infecção Urinária Complicada", "peso_prova": 7, "frequencia_prova": 60, "score": 23, "prioridade": 3 },
+            { "area": "Cirurgia", "subarea": "Vascular", "tema": "Aneurisma de Aorta Abdominal", "peso_prova": 7, "frequencia_prova": 60, "score": 23, "prioridade": 3 },
+            { "area": "Pediatria", "subarea": "Geral", "tema": "Desidratação", "peso_prova": 9, "frequencia_prova": 85, "score": 32.5, "prioridade": 2 },
+            { "area": "Pediatria", "subarea": "Geral", "tema": "Aleitamento Materno", "peso_prova": 8, "frequencia_prova": 75, "score": 28.5, "prioridade": 3 },
+            { "area": "Pediatria", "subarea": "Neonatologia", "tema": "Icterícia Neonatal", "peso_prova": 9, "frequencia_prova": 85, "score": 32.5, "prioridade": 2 },
+            { "area": "Ginecologia e Obstetrícia", "subarea": "Obstetrícia", "tema": "Placenta Prévia", "peso_prova": 8, "frequencia_prova": 75, "score": 28.5, "prioridade": 2 },
+            { "area": "Ginecologia e Obstetrícia", "subarea": "Obstetrícia", "tema": "Descolamento Prematuro de Placenta", "peso_prova": 8, "frequencia_prova": 75, "score": 28.5, "prioridade": 2 },
+            { "area": "Preventiva", "subarea": "Epidemiologia", "tema": "Valor P e Intervalo de Confiança", "peso_prova": 8, "frequencia_prova": 75, "score": 28.5, "prioridade": 3 },
+            { "area": "Preventiva", "subarea": "Saúde Pública", "tema": "Vigilância Epidemiológica", "peso_prova": 8, "frequencia_prova": 75, "score": 28.5, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Doença de Chagas (forma cardíaca)", "peso_prova": 6, "frequencia_prova": 55, "score": 21.5, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Cardiopatia Congênita no Adulto", "peso_prova": 5, "frequencia_prova": 45, "score": 18.5, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Endocrinologia", "tema": "Cetoacidose Diabética", "peso_prova": 9, "frequencia_prova": 80, "score": 31, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Endocrinologia", "tema": "Estado Hiperosmolar Hiperglicêmico", "peso_prova": 8, "frequencia_prova": 70, "score": 26, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Pneumologia", "tema": "Aspergilose", "peso_prova": 5, "frequencia_prova": 45, "score": 18.5, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Pneumologia", "tema": "Doenças Ocupacionais Pulmonares", "peso_prova": 5, "frequencia_prova": 45, "score": 18.5, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Neurologia", "tema": "Síndrome de Guillain-Barré", "peso_prova": 7, "frequencia_prova": 60, "score": 23, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Neurologia", "tema": "Miastenia Gravis", "peso_prova": 7, "frequencia_prova": 60, "score": 23, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Nefrologia", "tema": "Nefropatia Diabética", "peso_prova": 8, "frequencia_prova": 70, "score": 26, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Nefrologia", "tema": "Nefrite Lúpica", "peso_prova": 7, "frequencia_prova": 60, "score": 23, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Gastroenterologia", "tema": "Hepatites Virais", "peso_prova": 9, "frequencia_prova": 80, "score": 31, "prioridade": 2 },
+            { "area": "Clínica Médica", "subarea": "Gastroenterologia", "tema": "Colangite e Colestase", "peso_prova": 6, "frequencia_prova": 55, "score": 21.5, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Infectologia", "tema": "Malária", "peso_prova": 7, "frequencia_prova": 60, "score": 23, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Infectologia", "tema": "Parasitoses Sistêmicas", "peso_prova": 5, "frequencia_prova": 45, "score": 18.5, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Hematologia", "tema": "Linfomas", "peso_prova": 7, "frequencia_prova": 60, "score": 23, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Reumatologia", "tema": "Polimialgia Reumática", "peso_prova": 5, "frequencia_prova": 45, "score": 18.5, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Psiquiatria", "tema": "Abuso de Substâncias", "peso_prova": 7, "frequencia_prova": 65, "score": 24.5, "prioridade": 3 },
+            { "area": "Cirurgia", "subarea": "Cirurgia Geral", "tema": "Câncer Gástrico", "peso_prova": 7, "frequencia_prova": 60, "score": 23, "prioridade": 3 },
+            { "area": "Cirurgia", "subarea": "Cirurgia Geral", "tema": "Câncer Colorretal", "peso_prova": 8, "frequencia_prova": 70, "score": 26, "prioridade": 2 },
+            { "area": "Cirurgia", "subarea": "Proctologia", "tema": "Fístula Anal", "peso_prova": 6, "frequencia_prova": 55, "score": 21.5, "prioridade": 3 },
+            { "area": "Cirurgia", "subarea": "Urologia", "tema": "Torção Testicular", "peso_prova": 8, "frequencia_prova": 70, "score": 26, "prioridade": 2 },
+            { "area": "Cirurgia", "subarea": "Vascular", "tema": "Dissecção de Aorta", "peso_prova": 8, "frequencia_prova": 70, "score": 26, "prioridade": 2 },
+            { "area": "Pediatria", "subarea": "Geral", "tema": "Crises Convulsivas na Infância", "peso_prova": 8, "frequencia_prova": 75, "score": 28.5, "prioridade": 2 },
+            { "area": "Pediatria", "subarea": "Geral", "tema": "Obesidade Infantil", "peso_prova": 7, "frequencia_prova": 65, "score": 24.5, "prioridade": 3 },
+            { "area": "Pediatria", "subarea": "Neonatologia", "tema": "Sepse Neonatal", "peso_prova": 9, "frequencia_prova": 85, "score": 32.5, "prioridade": 2 },
+            { "area": "Ginecologia e Obstetrícia", "subarea": "Ginecologia", "tema": "Mioma Uterino", "peso_prova": 8, "frequencia_prova": 75, "score": 28.5, "prioridade": 2 },
+            { "area": "Ginecologia e Obstetrícia", "subarea": "Ginecologia", "tema": "Câncer de Colo do Útero", "peso_prova": 9, "frequencia_prova": 85, "score": 32.5, "prioridade": 2 },
+            { "area": "Preventiva", "subarea": "Saúde Pública", "tema": "Promoção da Saúde", "peso_prova": 7, "frequencia_prova": 65, "score": 24.5, "prioridade": 3 },
+            { "area": "Preventiva", "subarea": "Epidemiologia", "tema": "Curvas Epidêmicas", "peso_prova": 6, "frequencia_prova": 55, "score": 21.5, "prioridade": 3 },
+            { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Tumores Cardíacos", "peso_prova": 4, "frequencia_prova": 30, "score": 14, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Doença de Kawasaki (repercussões cardíacas)", "peso_prova": 5, "frequencia_prova": 40, "score": 17, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Endocrinologia", "tema": "Síndromes Genéticas Endócrinas", "peso_prova": 4, "frequencia_prova": 35, "score": 15.5, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Endocrinologia", "tema": "Tumores Endócrinos", "peso_prova": 5, "frequencia_prova": 40, "score": 17, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Pneumologia", "tema": "Doenças Pleuropulmonares Raras", "peso_prova": 4, "frequencia_prova": 35, "score": 15.5, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Neurologia", "tema": "Doenças Desmielinizantes Raras", "peso_prova": 4, "frequencia_prova": 35, "score": 15.5, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Nefrologia", "tema": "Doenças Tubulointersticiais", "peso_prova": 5, "frequencia_prova": 40, "score": 17, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Gastroenterologia", "tema": "Doenças Hepáticas Raras", "peso_prova": 4, "frequencia_prova": 35, "score": 15.5, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Infectologia", "tema": "Doenças Tropicais Raras", "peso_prova": 4, "frequencia_prova": 35, "score": 15.5, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Hematologia", "tema": "Doenças Mieloproliferativas Raras", "peso_prova": 4, "frequencia_prova": 35, "score": 15.5, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Reumatologia", "tema": "Doenças Autoimunes Raras", "peso_prova": 4, "frequencia_prova": 35, "score": 15.5, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Psiquiatria", "tema": "Transtornos Dissociativos", "peso_prova": 5, "frequencia_prova": 40, "score": 17, "prioridade": 4 },
+            { "area": "Cirurgia", "subarea": "Cirurgia Geral", "tema": "Tumores Raros do Trato Digestivo", "peso_prova": 4, "frequencia_prova": 35, "score": 15.5, "prioridade": 4 },
+            { "area": "Cirurgia", "subarea": "Cirurgia Geral", "tema": "Complicações Pós-operatórias Raras", "peso_prova": 5, "frequencia_prova": 40, "score": 17, "prioridade": 4 },
+            { "area": "Cirurgia", "subarea": "Proctologia", "tema": "Doenças Anorretais Raras", "peso_prova": 4, "frequencia_prova": 35, "score": 15.5, "prioridade": 4 },
+            { "area": "Cirurgia", "subarea": "Urologia", "tema": "Tumores Testiculares Raros", "peso_prova": 4, "frequencia_prova": 35, "score": 15.5, "prioridade": 4 },
+            { "area": "Cirurgia", "subarea": "Vascular", "tema": "Doenças Vasculares Raras", "peso_prova": 4, "frequencia_prova": 35, "score": 15.5, "prioridade": 4 },
+            { "area": "Pediatria", "subarea": "Neonatologia", "tema": "Doenças Metabólicas Neonatais Raras", "peso_prova": 4, "frequencia_prova": 35, "score": 15.5, "prioridade": 4 },
+            { "area": "Pediatria", "subarea": "Geral", "tema": "Doenças Genéticas Raras", "peso_prova": 4, "frequencia_prova": 35, "score": 15.5, "prioridade": 4 },
+            { "area": "Pediatria", "subarea": "Geral", "tema": "Erros Inatos do Metabolismo", "peso_prova": 5, "frequencia_prova": 40, "score": 17, "prioridade": 4 },
+            { "area": "Ginecologia e Obstetrícia", "subarea": "Ginecologia", "tema": "Tumores Ginecológicos Raros", "peso_prova": 4, "frequencia_prova": 35, "score": 15.5, "prioridade": 4 },
+            { "area": "Ginecologia e Obstetrícia", "subarea": "Obstetrícia", "tema": "Complicações Obstétricas Raras", "peso_prova": 4, "frequencia_prova": 35, "score": 15.5, "prioridade": 4 },
+            { "area": "Preventiva", "subarea": "Epidemiologia", "tema": "Modelos Estatísticos Avançados", "peso_prova": 4, "frequencia_prova": 35, "score": 15.5, "prioridade": 4 },
+            { "area": "Preventiva", "subarea": "Saúde Pública", "tema": "Políticas Públicas Específicas", "peso_prova": 4, "frequencia_prova": 35, "score": 15.5, "prioridade": 4 },
+            { "area": "Preventiva", "subarea": "Saúde Pública", "tema": "Sistemas Internacionais de Saúde", "peso_prova": 4, "frequencia_prova": 30, "score": 14, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Doenças do Nó Sinusal", "peso_prova": 4, "frequencia_prova": 30, "score": 14, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Cardiologia", "tema": "Doenças do Sistema de Condução", "peso_prova": 4, "frequencia_prova": 30, "score": 14, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Endocrinologia", "tema": "Hipogonadismo", "peso_prova": 4, "frequencia_prova": 30, "score": 14, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Endocrinologia", "tema": "Síndrome dos Ovários Policísticos (visão clínica)", "peso_prova": 5, "frequencia_prova": 40, "score": 17, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Pneumologia", "tema": "Doenças Restritivas Raras", "peso_prova": 4, "frequencia_prova": 30, "score": 14, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Pneumologia", "tema": "Doenças da Pleura Raras", "peso_prova": 4, "frequencia_prova": 30, "score": 14, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Neurologia", "tema": "Doenças do Neurônio Motor", "peso_prova": 5, "frequencia_prova": 40, "score": 17, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Neurologia", "tema": "Ataxias Hereditárias", "peso_prova": 4, "frequencia_prova": 30, "score": 14, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Nefrologia", "tema": "Doenças Glomerulares Raras", "peso_prova": 4, "frequencia_prova": 30, "score": 14, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Gastroenterologia", "tema": "Doenças do Intestino Delgado Raras", "peso_prova": 4, "frequencia_prova": 30, "score": 14, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Gastroenterologia", "tema": "Distúrbios da Motilidade Esofágica", "peso_prova": 5, "frequencia_prova": 40, "score": 17, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Infectologia", "tema": "Infecções Fúngicas Sistêmicas Raras", "peso_prova": 4, "frequencia_prova": 30, "score": 14, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Hematologia", "tema": "Doenças Hematológicas Raras", "peso_prova": 4, "frequencia_prova": 30, "score": 14, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Reumatologia", "tema": "Síndromes Paraneoplásicas Reumatológicas", "peso_prova": 4, "frequencia_prova": 30, "score": 14, "prioridade": 4 },
+            { "area": "Clínica Médica", "subarea": "Psiquiatria", "tema": "Transtornos Somatoformes", "peso_prova": 5, "frequencia_prova": 40, "score": 17, "prioridade": 4 },
+            { "area": "Cirurgia", "subarea": "Cirurgia Geral", "tema": "Tumores Neuroendócrinos Digestivos", "peso_prova": 4, "frequencia_prova": 30, "score": 14, "prioridade": 4 },
+            { "area": "Cirurgia", "subarea": "Cirurgia Geral", "tema": "Doenças Raras do Esôfago", "peso_prova": 4, "frequencia_prova": 30, "score": 14, "prioridade": 4 },
+            { "area": "Cirurgia", "subarea": "Proctologia", "tema": "Tumores Anorretais Raros", "peso_prova": 4, "frequencia_prova": 30, "score": 14, "prioridade": 4 },
+            { "area": "Cirurgia", "subarea": "Urologia", "tema": "Doenças Congênitas Urológicas no Adulto", "peso_prova": 4, "frequencia_prova": 30, "score": 14, "prioridade": 4 },
+            { "area": "Cirurgia", "subarea": "Vascular", "tema": "Vasculites Cirúrgicas Raras", "peso_prova": 4, "frequencia_prova": 30, "score": 14, "prioridade": 4 },
+            { "area": "Pediatria", "subarea": "Neonatologia", "tema": "Síndromes Genéticas Neonatais", "peso_prova": 4, "frequencia_prova": 30, "score": 14, "prioridade": 4 },
+            { "area": "Pediatria", "subarea": "Geral", "tema": "Doenças Autoimunes Pediátricas Raras", "peso_prova": 4, "frequencia_prova": 30, "score": 14, "prioridade": 4 },
+            { "area": "Pediatria", "subarea": "Geral", "tema": "Doenças Endócrinas Pediátricas Raras", "peso_prova": 4, "frequencia_prova": 30, "score": 14, "prioridade": 4 },
+            { "area": "Ginecologia e Obstetrícia", "subarea": "Ginecologia", "tema": "Síndromes Endócrinas Ginecológicas Raras", "peso_prova": 4, "frequencia_prova": 30, "score": 14, "prioridade": 4 },
+            { "area": "Ginecologia e Obstetrícia", "subarea": "Obstetrícia", "tema": "Doenças Raras na Gestação", "peso_prova": 4, "frequencia_prova": 30, "score": 14, "prioridade": 4 },
+            { "area": "Preventiva", "subarea": "Epidemiologia", "tema": "Métodos Avançados de Análise Epidemiológica", "peso_prova": 4, "frequencia_prova": 30, "score": 14, "prioridade": 4 },
+            { "area": "Preventiva", "subarea": "Saúde Pública", "tema": "Gestão Avançada em Saúde Pública", "peso_prova": 4, "frequencia_prova": 30, "score": 14, "prioridade": 4 },
+            { "area": "Preventiva", "subarea": "Saúde Pública", "tema": "Economia da Saúde", "peso_prova": 4, "frequencia_prova": 30, "score": 14, "prioridade": 4 }
+        ];
 
         // ⚠️ SUAS CHAVES DO FIREBASE 
         const firebaseConfig = {
@@ -456,35 +661,117 @@
         let app, auth, db, currentUser;
         
         // Estado Global
-        window.state = { weeks: [], progress: {}, dailyStats: {}, timeTracking: {} };
-        window.activeView = 'homepage';
-        window.activeWeek = 1;
-        window.expandedCards = {};
+        window.state = { weeks: [], progress: {}, dailyStats: {}, timeTracking: {}, simulados: [] };
+        window.weekFilter = 'all'; 
+        window.expandedCards = {}; 
         
-        // Lo-Fi e Pomo
-        window.isFocusMode = false;
-        window.pomoTime = 50 * 60;
-        window.pomoTotalTime = 50 * 60;
-        window.isPomoRunning = false;
-        window.activePomoId = null;
-        window.pomoPhase = 'aula';
-        window.sessionStudySeconds = 0;
-        window.pomoLastTick = 0;
-        window.lofiEnabled = false;
-        window.lofiType = 'temporal';
-        window.audioCtx = null; window.noiseNode = null; window.isLoFiPlaying = false;
-        window.rainAudio = new Audio('https://actions.google.com/sounds/v1/weather/thunderstorm.ogg');
-        window.rainAudio.loop = true;
+        const areaMapping = { "Cirurgia": "Cirurgia", "Urologia": "Cirurgia", "Ortopedia": "Cirurgia", "Trauma": "Cirurgia", "Cirurgia Pediátrica": "Cirurgia", "Cirurgia Plástica": "Cirurgia", "Cirurgia Vascular": "Cirurgia", "Cirurgia Torácica": "Cirurgia", "Clínica": "Clínica Médica", "Clínica Médica": "Clínica Médica", "Cardiologia": "Clínica Médica", "Endocrino": "Clínica Médica", "Gastro": "Clínica Médica", "Hemato": "Clínica Médica", "Infecto": "Clínica Médica", "Nefrologia": "Clínica Médica", "Neuro": "Clínica Médica", "Pneumo": "Clínica Médica", "Psiquiatria": "Clínica Médica", "Reumato": "Clínica Médica", "Dermato": "Clínica Médica", "Hepato": "Clínica Médica", "Oftalmo": "Clínica Médica", "Otorrino": "Clínica Médica", "Ginecologia": "Ginecologia e Obstetrícia", "Obstetrícia": "Ginecologia e Obstetrícia", "Ginecologia e Obstetrícia": "Ginecologia e Obstetrícia", "Pediatria": "Pediatria", "Preventiva": "Preventiva" };
+        const mainCategories = ["Cirurgia", "Clínica Médica", "Ginecologia e Obstetrícia", "Pediatria", "Preventiva"];
+        
+        let pendingDeleteAction = null; let pendingReviewTaskId = null; let activeNotesTaskId = null; let currentCalendarDate = new Date(); let searchFilterArea = 'Todas'; let activeView = 'homepage'; let activeWeek = 0; let undoStack = []; let redoStack = [];
+        let isFocusMode = false;
 
-        // Utilitários de Undo/Redo Local
-        let undoStack = []; let redoStack = [];
+        // Pomodoro Multi-fase e Lo-Fi Audio
+        window.activePomoTaskId = null; window.pomoPhase = 'aula'; window.pomoTime = 50 * 60; window.pomoTotalTime = 50 * 60; window.pomoTimer = null; window.isPomoRunning = false; window.pomoLastTick = 0; window.sessionStudySeconds = 0;
+        window.audioCtx = null; window.noiseNode = null; window.isLoFiPlaying = false; window.lofiEnabled = false; window.lofiType = 'temporal';
+        window.rainAudio = new Audio('https://actions.google.com/sounds/v1/weather/thunderstorm.ogg'); window.rainAudio.loop = true;
+
+        window.changeLoFiType = function(type) { window.lofiType = type; if (window.isLoFiPlaying) { window.stopLoFi(); window.startLoFi(); } }
+        window.toggleLoFi = function() { window.lofiEnabled = !window.lofiEnabled; const btn = document.getElementById('lofi-btn'); if (window.lofiEnabled) { if (btn) btn.classList.replace('text-gray-400', 'text-blue-500'); if (window.isPomoRunning && window.pomoPhase !== 'descanso') window.startLoFi(); } else { if (btn) btn.classList.replace('text-blue-500', 'text-gray-400'); window.stopLoFi(); } window.showToast(window.lofiEnabled ? 'Lo-Fi Ativado 🎧' : 'Lo-Fi Desativado', 'success'); }
+        window.startLoFi = function() {
+            if (window.lofiType === 'temporal') { window.rainAudio.volume = 0.6; window.rainAudio.play().catch(e => console.log('Áudio bloqueado:', e)); window.isLoFiPlaying = true; return; }
+            if (!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
+            if (window.noiseNode) return; 
+            const bufferSize = 2 * window.audioCtx.sampleRate; const noiseBuffer = window.audioCtx.createBuffer(1, bufferSize, window.audioCtx.sampleRate); const output = noiseBuffer.getChannelData(0);
+            if (window.lofiType === 'brown') { let lastOut = 0; for (let i = 0; i < bufferSize; i++) { let white = Math.random() * 2 - 1; output[i] = (lastOut + (0.02 * white)) / 1.02; lastOut = output[i]; output[i] *= 3.5; } } 
+            else if (window.lofiType === 'pink') { let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0; for (let i = 0; i < bufferSize; i++) { let white = Math.random() * 2 - 1; b0 = 0.99886 * b0 + white * 0.0555179; b1 = 0.99332 * b1 + white * 0.0750759; b2 = 0.96900 * b2 + white * 0.1538520; b3 = 0.86650 * b3 + white * 0.3104856; b4 = 0.55000 * b4 + white * 0.5329522; b5 = -0.7616 * b5 - white * 0.0168980; output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362; output[i] *= 0.15; b6 = white * 0.115926; } }
+            window.noiseNode = window.audioCtx.createBufferSource(); window.noiseNode.buffer = noiseBuffer; window.noiseNode.loop = true;
+            const filter = window.audioCtx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = window.lofiType === 'brown' ? 800 : 1200; 
+            const gain = window.audioCtx.createGain(); gain.gain.value = window.lofiType === 'brown' ? 1.5 : 0.8; 
+            window.noiseNode.connect(filter); filter.connect(gain); gain.connect(window.audioCtx.destination); window.noiseNode.start(0); window.isLoFiPlaying = true;
+        }
+        window.stopLoFi = function() { if (window.noiseNode) { window.noiseNode.stop(); window.noiseNode.disconnect(); window.noiseNode = null; } if (window.rainAudio) { window.rainAudio.pause(); window.rainAudio.currentTime = 0; } window.isLoFiPlaying = false; }
+
+        window.playBeep = function(type) { try { const ctx = new (window.AudioContext || window.webkitAudioContext)(); const playTone = (freq, startTime, duration) => { const osc = ctx.createOscillator(); const gain = ctx.createGain(); osc.type = 'sine'; osc.frequency.setValueAtTime(freq, ctx.currentTime + startTime); gain.gain.setValueAtTime(0.1, ctx.currentTime + startTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + startTime + duration); osc.connect(gain); gain.connect(ctx.destination); osc.start(ctx.currentTime + startTime); osc.stop(ctx.currentTime + startTime + duration); }; if (type === 'descanso') { playTone(440, 0, 0.4); playTone(349, 0.4, 0.6); } else if (type === 'questoes') { playTone(523, 0, 0.2); playTone(659, 0.2, 0.4); playTone(783, 0.4, 0.6); } else if (type === 'conquista') { playTone(523, 0, 0.15); playTone(659, 0.15, 0.15); playTone(783, 0.3, 0.15); playTone(1046, 0.45, 0.6); } } catch(e) {} }
+
+        window.showToast = function(msg, type='success') { const container = document.getElementById('toast-container'); const t = document.createElement('div'); t.className = `p-4 rounded-2xl shadow-xl text-white font-bold text-sm flex items-center gap-3 toast-enter ${type==='success'?'bg-emerald-500':'bg-red-500'}`; t.innerHTML = `<i class="fas ${type==='success'?'fa-check-circle':'fa-exclamation-circle'} text-lg"></i> ${msg}`; container.appendChild(t); setTimeout(() => { t.classList.remove('toast-enter'); t.classList.add('toast-exit'); setTimeout(()=>t.remove(), 300); }, 3000); }
+
+        window.pomoUpdateUI = function() {
+            if(!window.activePomoTaskId) return;
+            const disp = document.getElementById(`pomo-display-${window.activePomoTaskId}`); const btn = document.getElementById(`pomo-btn-play-${window.activePomoTaskId}`);
+            const bar1 = document.getElementById(`pomo-bar-1-${window.activePomoTaskId}`); const bar2 = document.getElementById(`pomo-bar-2-${window.activePomoTaskId}`); const bar3 = document.getElementById(`pomo-bar-3-${window.activePomoTaskId}`);
+            const lbl1 = document.getElementById(`pomo-lbl-1-${window.activePomoTaskId}`); const lbl2 = document.getElementById(`pomo-lbl-2-${window.activePomoTaskId}`); const lbl3 = document.getElementById(`pomo-lbl-3-${window.activePomoTaskId}`);
+            const miniPomo = document.getElementById('mini-pomo');
+            
+            if(!disp) return; 
+            const min = Math.floor(window.pomoTime / 60); const sec = window.pomoTime % 60;
+            const timeStr = `${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+            disp.innerText = timeStr;
+            
+            if (btn) { btn.innerHTML = window.isPomoRunning ? '<i class="fas fa-pause text-xs"></i>' : '<i class="fas fa-play text-xs ml-0.5"></i>'; btn.className = window.isPomoRunning ? "w-10 h-10 flex items-center justify-center text-white rounded-xl transition shadow-md bg-red-500 hover:bg-red-600" : "w-10 h-10 flex items-center justify-center text-white rounded-xl transition shadow-md bg-slate-900 hover:bg-slate-700"; }
+            
+            let pct1 = 0, pct2 = 0, pct3 = 0;
+            if (window.pomoPhase === 'aula') pct1 = ((window.pomoTotalTime - window.pomoTime) / window.pomoTotalTime) * 100;
+            else if (window.pomoPhase === 'descanso') { pct1 = 100; pct2 = ((window.pomoTotalTime - window.pomoTime) / window.pomoTotalTime) * 100; }
+            else if (window.pomoPhase === 'questoes') { pct1 = 100; pct2 = 100; pct3 = ((window.pomoTotalTime - window.pomoTime) / window.pomoTotalTime) * 100; }
+            
+            if(bar1) bar1.style.width = `${pct1}%`; if(bar2) bar2.style.width = `${pct2}%`; if(bar3) bar3.style.width = `${pct3}%`;
+            if(lbl1) lbl1.className = window.pomoPhase === 'aula' ? 'text-blue-600 transition-colors' : 'text-slate-400 transition-colors';
+            if(lbl2) lbl2.className = window.pomoPhase === 'descanso' ? 'text-amber-500 transition-colors' : 'text-slate-400 transition-colors';
+            if(lbl3) lbl3.className = window.pomoPhase === 'questoes' ? 'text-emerald-600 transition-colors' : 'text-slate-400 transition-colors';
+
+            if(miniPomo && window.activeView !== 'week') { if(window.isPomoRunning || window.activePomoTaskId) { miniPomo.classList.remove('hidden'); miniPomo.classList.add('flex'); document.getElementById('mini-pomo-time').innerText = timeStr; let icon = 'fa-book-open text-blue-400'; if (window.pomoPhase === 'descanso') icon = 'fa-coffee text-amber-400'; if (window.pomoPhase === 'questoes') icon = 'fa-pen text-emerald-400'; document.getElementById('mini-pomo-icon').className = `fas ${icon} ${window.isPomoRunning?'animate-pulse':''}`; } else { miniPomo.classList.add('hidden'); miniPomo.classList.remove('flex'); } } 
+            else if(miniPomo) { miniPomo.classList.add('hidden'); miniPomo.classList.remove('flex'); }
+        }
+
+        window.pomoNextPhase = function() {
+            if (window.pomoPhase === 'aula') { window.pomoPhase = 'descanso'; window.pomoTotalTime = 5 * 60; window.pomoTime = 5 * 60; if(window.isPomoRunning) window.pomoLastTick = Date.now(); window.playBeep('descanso'); window.showToast("Aula concluída! Hora de relaxar (5 min).", "success"); } 
+            else if (window.pomoPhase === 'descanso') { window.pomoPhase = 'questoes'; window.pomoTotalTime = 25 * 60; window.pomoTime = 25 * 60; if(window.isPomoRunning) window.pomoLastTick = Date.now(); window.playBeep('questoes'); window.showToast("Pausa acabou! Foco nas questões (25 min).", "success"); } 
+            else if (window.pomoPhase === 'questoes') { window.isPomoRunning = false; window.playBeep('conquista'); confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 }, colors: ['#10b981', '#3b82f6', '#f59e0b'] }); window.showToast("Ciclo Completo! Excelente trabalho.", "success"); window.activePomoTaskId = null; window.updateUI(); return; }
+            window.pomoUpdateUI();
+        }
+        window.pomoToggle = function(taskId) { if(window.isPomoRunning) window.isPomoRunning = false; else { window.isPomoRunning = true; window.pomoLastTick = Date.now(); } window.pomoUpdateUI(); }
+        window.pomoSkip = function() { window.pomoNextPhase(); }
+        window.pomoStop = function() { window.isPomoRunning = false; window.activePomoTaskId = null; window.updateUI(); }
+        
+        window.startPomoForTask = function(taskId) {
+            if(window.activePomoTaskId && window.activePomoTaskId !== taskId) { window.isPomoRunning = false; const oldStartBtn = document.getElementById(`pomo-start-btn-${window.activePomoTaskId}`); const oldControls = document.getElementById(`pomo-controls-${window.activePomoTaskId}`); if(oldStartBtn) { oldStartBtn.classList.remove('hidden'); oldStartBtn.classList.add('flex'); } if(oldControls) { oldControls.classList.remove('flex'); oldControls.classList.add('hidden'); } }
+            window.activePomoTaskId = taskId; window.pomoPhase = 'aula'; window.pomoTotalTime = 50 * 60; window.pomoTime = 50 * 60; window.isPomoRunning = false;
+            const startBtn = document.getElementById(`pomo-start-btn-${taskId}`); const controls = document.getElementById(`pomo-controls-${taskId}`);
+            if(startBtn) { startBtn.classList.remove('flex'); startBtn.classList.add('hidden'); } if(controls) { controls.classList.remove('hidden'); controls.classList.add('flex'); }
+            window.pomoToggle();
+        }
+
+        // Utils locais de Undo/Redo
         window.pushState = function() { undoStack.push(JSON.stringify(window.state)); if(undoStack.length > 50) undoStack.shift(); redoStack = []; }
         window.undo = function() { if(undoStack.length === 0) return; redoStack.push(JSON.stringify(window.state)); window.state = JSON.parse(undoStack.pop()); window.triggerSave(); window.updateUI(); window.showToast('Ação desfeita');}
         window.redo = function() { if(redoStack.length === 0) return; undoStack.push(JSON.stringify(window.state)); window.state = JSON.parse(redoStack.pop()); window.triggerSave(); window.updateUI(); window.showToast('Ação refeita');}
         window.handleGlobalKeydown = function(e) { if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); window.undo(); } if ((e.ctrlKey || e.metaKey) && e.key === 'y') { e.preventDefault(); window.redo(); } }
 
+        // Utils
+        window.getAccuracyColorClass = function(percentage) { if (percentage >= 90) return 'text-emerald-800'; if (percentage >= 80) return 'text-emerald-500'; if (percentage >= 60) return 'text-amber-500'; return 'text-red-500'; }
+        window.calculateAccuracy = function(done, correct) { if (!done || done <= 0) return 0; return Math.min(100, Math.round((correct / done) * 100)); }
+        window.getWeekDateRange = function(weekIndex) { if (weekIndex < 1) return ""; const start = new Date(2026, 1, 1); start.setDate(start.getDate() + (weekIndex - 1) * 7); const end = new Date(start); end.setDate(start.getDate() + 6); const fmt = d => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }); return `${fmt(start)} a ${fmt(end)}`; }
+        window.getWeekDates = function(weekIdx) { const start = new Date(2026, 1, 1); const baseDate = new Date(start); baseDate.setDate(baseDate.getDate() + ((weekIdx - 1) * 7) - 1); const days = []; const dayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]; for(let i=0; i<7; i++) { const d = new Date(baseDate); d.setDate(baseDate.getDate() + i); days.push({ name: dayNames[i], date: d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }), key: `d${i}` }); } return days; }
+        window.getTodayStr = function() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+        window.getCategoryColor = function(category) { const map = { "Cirurgia": "bg-red-50 text-red-600 border-red-200", "Clínica Médica": "bg-blue-50 text-blue-600 border-blue-200", "Ginecologia e Obstetrícia": "bg-pink-50 text-pink-600 border-pink-200", "Pediatria": "bg-yellow-50 text-yellow-700 border-yellow-200", "Preventiva": "bg-emerald-50 text-emerald-600 border-emerald-200" }; const mapped = areaMapping[category] || "Clínica Médica"; return map[mapped] || map["Clínica Médica"]; }
+        window.getPrioClass = function(prio, tipo) { if(tipo === 'revisao') return 'prio-rev'; if(prio === 1) return 'prio-1'; if(prio === 2) return 'prio-2'; if(prio === 3) return 'prio-3'; return 'prio-4'; }
+        window.getPrioLabel = function(prio, tipo, custom) { if(tipo === 'revisao') return 'REVISÃO'; if(custom) return 'CUSTOMIZADO'; if(prio===1) return 'ALTA'; if(prio===2) return 'MÉDIA'; if(prio===3) return 'BAIXA'; return 'OPCIONAL'; }
+
+        window.updateStreak = function() {
+            let streak = 0; let d = new Date();
+            while(true) {
+                let s = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                if (window.state.dailyStats[s] && window.state.dailyStats[s] > 0) { streak++; d.setDate(d.getDate() - 1); } 
+                else if (s === window.getTodayStr()) d.setDate(d.getDate() - 1); 
+                else break;
+            }
+            const el = document.getElementById('streak-count'); if(el) el.innerText = streak;
+        }
+
         // ----------------------------------------------------------------------
-        // INICIALIZAÇÃO E AUTENTICAÇÃO
+        // INICIALIZAÇÃO E FIREBASE
         // ----------------------------------------------------------------------
         try {
             app = initializeApp(firebaseConfig);
@@ -505,13 +792,11 @@
                         if (!data.acesso_liberado) { window.location.href = "index.html"; return; }
                         if (!data.has_onboarded) { window.location.href = "onboarding.html"; return; }
                         
-                        // Verifica se já tem cronograma gerado
                         if (data.app_state && data.app_state.weeks && data.app_state.weeks.length > 0) {
                             window.state = data.app_state;
                             if(!window.state.timeTracking) window.state.timeTracking = {};
                             finishLoading();
                         } else {
-                            // Gera o cronograma
                             generateSchedule(data.onboarding_data);
                         }
                     } else { window.location.href = "index.html"; }
@@ -519,17 +804,13 @@
             });
         } catch(e) {
             console.error("Firebase Initialization Error:", e);
-            document.getElementById('loader-text').innerText = "Rodando em modo local (Firebase Offline).";
+            document.getElementById('loader-text').innerText = "Rodando em modo offline...";
             finishLoading();
         }
 
-        // ----------------------------------------------------------------------
-        // ALGORITMO GERADOR INTELIGENTE (MAX 15 TAREFAS/SEMANA)
-        // ----------------------------------------------------------------------
         async function generateSchedule(obData) {
             document.getElementById('loader-text').innerText = "A processar matriz de prioridades (Limite 15/sem)...";
             
-            // Lógica Básica de Datas
             const startStr = obData.dataInicio || new Date().toISOString();
             const endStr = obData.dataProva || new Date(new Date().setMonth(new Date().getMonth() + 10)).toISOString();
             const start = new Date(startStr.split('T')[0] + 'T12:00:00');
@@ -539,101 +820,55 @@
             const MAX_TASKS_PER_WEEK = 15;
             const maxTasksAllowed = totalSemanas * MAX_TASKS_PER_WEEK;
 
-            // Filtros no Banco
             let filteredDB = [...bancoDeMaterias].sort((a, b) => b.score - a.score);
             if (obData.horas === '2h') filteredDB = filteredDB.filter(t => t.prioridade <= 2);
             else if (obData.horas === '4h') filteredDB = filteredDB.filter(t => t.prioridade <= 3);
             
-            if (filteredDB.length > maxTasksAllowed) {
-                filteredDB = filteredDB.slice(0, maxTasksAllowed);
-            }
+            if (filteredDB.length > maxTasksAllowed) filteredDB = filteredDB.slice(0, maxTasksAllowed);
             
-            // Prepara Semanas e Agenda Padrão
             const newWeeks = [];
             for(let i=0; i<totalSemanas; i++) {
                 const wStart = new Date(start); wStart.setDate(start.getDate() + (i*7));
                 const wEnd = new Date(wStart); wEnd.setDate(wStart.getDate() + 6);
-                newWeeks.push({
-                    week: i+1,
-                    _start: wStart,
-                    _end: wEnd,
-                    phase: "Estudo Misto",
-                    timeSlots: ["08:00 - 12:00", "14:00 - 18:00", "18:00 - 22:00"], 
-                    agenda: {},
-                    tasks: []
-                });
+                newWeeks.push({ week: i+1, _start: wStart, _end: wEnd, phase: "Estudo Misto", timeSlots: ["08:00 - 12:00", "14:00 - 18:00", "18:00 - 22:00"], agenda: {}, tasks: [] });
             }
 
             const spreadTasks = (tasks, targetWeeks, isRevision = false) => {
                 if(targetWeeks.length === 0) targetWeeks = newWeeks;
-                tasks.forEach((t, i) => {
-                    const wIdx = i % targetWeeks.length;
-                    targetWeeks[wIdx].tasks.push({
-                        id: `gen_${Date.now()}_${Math.random().toString(36).substr(2,6)}`,
-                        category: t.area,
-                        subject: t.tema,
-                        prioridade: t.prioridade,
-                        tipo: isRevision ? 'revisao' : 'materia_nova',
-                        score: t.score
-                    });
-                });
+                tasks.forEach((t, i) => { const wIdx = i % targetWeeks.length; targetWeeks[wIdx].tasks.push({ id: `gen_${Date.now()}_${Math.random().toString(36).substr(2,6)}`, category: t.area, subject: t.tema, prioridade: t.prioridade, tipo: isRevision ? 'revisao' : 'materia_nova', score: t.score }); });
             };
 
-            // Distribuição (Internato vs Livre)
             if (obData.internato === 'sim' && obData.datasRodizios) {
                 const mapArea = { 'Cirurgia': 'cirurgia', 'Clínica Médica': 'clinica', 'Ginecologia e Obstetrícia': 'go', 'Pediatria': 'ped' };
-                
                 newWeeks.forEach(w => {
                     let phaseStr = [];
                     Object.keys(obData.datasRodizios).forEach(rKey => {
                         const r = obData.datasRodizios[rKey];
                         if (!r.concluido && r.in && r.fim) {
-                            const rStart = new Date(r.in + 'T12:00:00');
-                            const rEnd = new Date(r.fim + 'T12:00:00'); rEnd.setMonth(rEnd.getMonth() + 1);
+                            const rStart = new Date(r.in + 'T12:00:00'); const rEnd = new Date(r.fim + 'T12:00:00'); rEnd.setMonth(rEnd.getMonth() + 1);
                             if (w._start >= rStart && w._start <= rEnd) phaseStr.push(rKey);
                         }
                     });
                     if(phaseStr.length > 0) w.phase = "Internato " + phaseStr.join('/').toUpperCase();
                 });
-
                 const tasksByArea = { 'Cirurgia': [], 'Clínica Médica': [], 'Ginecologia e Obstetrícia': [], 'Pediatria': [], 'Preventiva': [] };
                 filteredDB.forEach(t => { if(tasksByArea[t.area]) tasksByArea[t.area].push(t); else tasksByArea['Clínica Médica'].push(t); });
-
                 Object.keys(tasksByArea).forEach(area => {
-                    const tasks = tasksByArea[area];
-                    const rKey = mapArea[area];
+                    const tasks = tasksByArea[area]; const rKey = mapArea[area];
                     if (rKey) {
                         const r = obData.datasRodizios[rKey];
-                        if (r && r.concluido) {
-                            spreadTasks(tasks.filter(t => t.prioridade === 1), newWeeks, true);
-                        } else if (r && r.in && r.fim) {
-                            const rStart = new Date(r.in + 'T12:00:00'); const rEnd = new Date(r.fim + 'T12:00:00'); rEnd.setMonth(rEnd.getMonth() + 1);
-                            const validWeeks = newWeeks.filter(w => w._start >= rStart && w._start <= rEnd);
-                            spreadTasks(tasks, validWeeks.length > 0 ? validWeeks : newWeeks);
-                        } else {
-                            spreadTasks(tasks, newWeeks);
-                        }
-                    } else {
-                        spreadTasks(tasks, newWeeks); // Preventiva e outros espalham geral
-                    }
+                        if (r && r.concluido) { spreadTasks(tasks.filter(t => t.prioridade === 1), newWeeks, true); } 
+                        else if (r && r.in && r.fim) { const rStart = new Date(r.in + 'T12:00:00'); const rEnd = new Date(r.fim + 'T12:00:00'); rEnd.setMonth(rEnd.getMonth() + 1); const validWeeks = newWeeks.filter(w => w._start >= rStart && w._start <= rEnd); spreadTasks(tasks, validWeeks.length > 0 ? validWeeks : newWeeks); } 
+                        else spreadTasks(tasks, newWeeks);
+                    } else spreadTasks(tasks, newWeeks);
                 });
             } else {
-                // Estudo Livre
-                filteredDB.forEach((task, index) => {
-                    const wIdx = index % totalSemanas;
-                    newWeeks[wIdx].tasks.push({ id: `gen_${index}_${Date.now()}`, category: task.area, subject: task.tema, prioridade: task.prioridade, tipo: "materia_nova", score: task.score });
-                });
+                filteredDB.forEach((task, index) => { const wIdx = index % totalSemanas; newWeeks[wIdx].tasks.push({ id: `gen_${index}_${Date.now()}`, category: task.area, subject: task.tema, prioridade: task.prioridade, tipo: "materia_nova", score: task.score }); });
             }
 
-            // Limpeza e ordenação
-            newWeeks.forEach(w => {
-                delete w._start; delete w._end;
-                w.tasks.sort((a,b) => b.score - a.score); // Ordena pelo que mais cai primeiro
-            });
+            newWeeks.forEach(w => { delete w._start; delete w._end; w.tasks.sort((a,b) => b.score - a.score); });
 
-            window.state.weeks = newWeeks;
-            window.state.progress = {};
-            window.state.dailyStats = {};
+            window.state.weeks = newWeeks; window.state.progress = {}; window.state.dailyStats = {};
 
             await window.saveToCloud();
             finishLoading();
@@ -643,34 +878,22 @@
             document.getElementById('loader-overlay').style.display = 'none';
             if(localStorage.getItem('darkMode') === '1') window.toggleDarkMode(true);
             if(localStorage.getItem('oledMode') === '1') window.toggleOledMode(true);
-            
-            // Load Reminders
             window._reminders = JSON.parse(localStorage.getItem('reminders_v2') || '[]');
             window.renderReminderList();
-
             window.updateUI();
         }
 
-        // SALVAMENTO COM DEBOUNCE (NUVEM)
-        window.saveToCloud = async function() {
-            try { if(currentUser) await updateDoc(doc(db, "profiles", currentUser.uid), { app_state: window.state }); } 
-            catch(e) { console.error("Erro ao salvar:", e); }
-        }
-        let saveTimeout;
-        window.triggerSave = function() {
-            clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(() => { window.saveToCloud(); }, 3000); 
-        }
+        window.saveToCloud = async function() { try { if(currentUser) await updateDoc(doc(db, "profiles", currentUser.uid), { app_state: window.state }); } catch(e) {} }
+        let saveTimeout; window.triggerSave = function() { clearTimeout(saveTimeout); saveTimeout = setTimeout(() => { window.saveToCloud(); }, 3000); }
 
-        // Recalcular Rota -> Deleta o app_state do Firebase
         window.recalculateRoute = async function() {
-            if(currentUser && confirm("Isso apagará o cronograma atual e criará um novo com base no questionário. Confirma?")) {
-                document.getElementById('loader-text').innerText = "Apagando histórico e reiniciando...";
+            if(confirm("ATENÇÃO: Isto apagará o seu cronograma atual e criará um novo a partir do seu Onboarding. Confirma a exclusão de todo o progresso atual?")) {
+                document.getElementById('loader-text').innerText = "A apagar histórico e reiniciar...";
                 document.getElementById('loader-overlay').style.display = 'flex';
                 try {
                     await updateDoc(doc(db, "profiles", currentUser.uid), { app_state: null, has_onboarded: false });
                     window.location.href = "onboarding.html";
-                } catch(e) { alert("Erro ao reiniciar. Tente novamente."); document.getElementById('loader-overlay').style.display = 'none'; }
+                } catch(e) { alert("Erro ao reiniciar."); document.getElementById('loader-overlay').style.display = 'none'; }
             }
         }
         window.handleLogout = async function() { if(auth) await signOut(auth); window.location.href = "index.html"; }
@@ -683,45 +906,25 @@
         window.openSettingsSidebar = function() { document.getElementById('settings-sidebar').classList.add('open'); document.getElementById('settings-overlay').classList.add('open'); }
         window.closeSettingsSidebar = function() { document.getElementById('settings-sidebar').classList.remove('open'); document.getElementById('settings-overlay').classList.remove('open'); }
         window.toggleSidebar = function() { document.getElementById('main-sidebar').classList.toggle('sidebar-hidden'); }
-        
         window.toggleDarkMode = function(on) { document.body.classList.toggle('dark-mode', on); localStorage.setItem('darkMode', on ? '1' : '0'); }
         window.toggleOledMode = function(on) { document.body.classList.toggle('oled-mode', on); localStorage.setItem('oledMode', on ? '1' : '0'); }
 
-        window.showToast = function(msg, type='success') {
-            const container = document.getElementById('toast-container'); const t = document.createElement('div');
-            t.className = `px-6 py-3.5 rounded-xl shadow-xl font-bold text-sm flex items-center gap-3 fade-enter text-white ${type==='success'?'bg-emerald-500':'bg-red-500'}`;
-            t.innerHTML = `<i class="fas ${type==='success'?'fa-check-circle':'fa-exclamation-circle'}"></i> ${msg}`;
-            container.appendChild(t); setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(()=>t.remove(), 300); }, 3000);
-        }
-
-        window.getTodayStr = function() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
-        window.getCategoryColor = function(cat) {
-            const map = { "Cirurgia": "bg-red-50 text-red-600 border-red-200", "Clínica Médica": "bg-blue-50 text-blue-600 border-blue-200", "Ginecologia e Obstetrícia": "bg-pink-50 text-pink-600 border-pink-200", "Pediatria": "bg-yellow-50 text-yellow-700 border-yellow-200", "Preventiva": "bg-emerald-50 text-emerald-600 border-emerald-200" };
-            return map[cat] || "bg-gray-50 text-gray-600 border-gray-200";
-        }
-        window.getPrioClass = function(prio, tipo) { if(tipo === 'revisao') return 'prio-rev'; if(prio === 1) return 'prio-1'; if(prio === 2) return 'prio-2'; if(prio === 3) return 'prio-3'; return 'prio-4'; }
-        window.getPrioLabel = function(prio, tipo, custom) { if(tipo === 'revisao') return 'REVISÃO'; if(custom) return 'CUSTOMIZADO'; if(prio===1) return 'ALTA'; if(prio===2) return 'MÉDIA'; if(prio===3) return 'BAIXA'; return 'OPCIONAL'; }
-
         // ----------------------------------------------------------------------
-        // AÇÕES NAS TAREFAS
+        // AÇÕES NAS TAREFAS E MÓDULOS (AGENDA, REMANEJO, ANOTAÇÕES)
         // ----------------------------------------------------------------------
         window.ensureProgress = function(id) { if (!window.state.progress[id]) window.state.progress[id] = {}; }
         window.toggleTask = function(id) { 
             window.pushState(); window.ensureProgress(id); const p = window.state.progress[id]; p.doneStatus = !p.doneStatus; 
-            if(p.doneStatus) { p.completedDate = window.getTodayStr(); confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }}); window.openReviewModal(id); } else { delete p.completedDate; delete p.nextReview; }
-            window.triggerSave(); window.updateUI(); 
+            if(p.doneStatus) { p.completedDate = window.getTodayStr(); confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 }, colors: ['#10b981', '#34d399', '#f59e0b'] }); window.openReviewModal(id); } 
+            else { delete p.completedDate; delete p.nextReview; } window.triggerSave(); window.updateUI(); 
         }
-        window.toggleCrucial = function(taskId) { window.pushState(); window.ensureProgress(taskId); window.state.progress[taskId].crucial = !window.state.progress[taskId].crucial; window.triggerSave(); window.updateUI(); }
+        window.toggleCrucial = function(taskId) { window.pushState(); window.ensureProgress(taskId); window.state.progress[taskId].crucial = !window.state.progress[taskId].crucial; window.triggerSave(); window.updateUI(); if(window.state.progress[taskId].crucial) window.showToast('Marcado como Crucial 🔥');}
         window.updateTaskQuestions = function(taskId, newVal, isCorrect = false) { 
             window.pushState(); const val = parseInt(newVal) || 0; window.ensureProgress(taskId); 
             if(isCorrect) window.state.progress[taskId].correct = val; 
-            else { const diff = val - (parseInt(window.state.progress[taskId].done) || 0); window.state.progress[taskId].done = val; if (diff > 0) { const today = window.getTodayStr(); window.state.dailyStats[today] = (window.state.dailyStats[today] || 0) + diff; } }
-            window.triggerSave(); window.updateUI(); 
+            else { const diff = val - (parseInt(window.state.progress[taskId].done) || 0); window.state.progress[taskId].done = val; if (diff > 0) { const today = window.getTodayStr(); window.state.dailyStats[today] = (window.state.dailyStats[today] || 0) + diff; } } window.triggerSave(); window.updateUI(); 
         }
-        window.toggleTaskDetails = function(taskId, event) {
-            if(event && (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || event.target.closest('button') || event.target.closest('.custom-checkbox') || event.target.closest('.task-edit-subject'))) return;
-            window.expandedCards[taskId] = !window.expandedCards[taskId]; window.updateUI();
-        }
+        window.toggleTaskDetails = function(taskId, event) { if(event && (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || event.target.closest('button') || event.target.closest('.custom-checkbox') || event.target.closest('.task-edit-subject') || event.target.closest('.drag-handle'))) return; window.expandedCards[taskId] = !window.expandedCards[taskId]; window.updateUI(); }
         window.updateTaskName = function(weekIdx, taskIdx, newName) { window.pushState(); const week = window.state.weeks.find(w => w.week === weekIdx); if(week && week.tasks[taskIdx]) { week.tasks[taskIdx].subject = newName; window.triggerSave(); } };
         window.toggleSubTask = function(idSuffix) { window.pushState(); const parts = idSuffix.split('_'); const type = 'sub_' + parts.pop(); const id = parts.join('_'); window.ensureProgress(id); window.state.progress[id][type] = !window.state.progress[id][type]; window.triggerSave(); window.updateUI(); }
         
@@ -731,25 +934,16 @@
             if(!nome) return alert("Insira o nome da tarefa."); const week = window.state.weeks.find(w => w.week === activeWeek);
             if(week) { week.tasks.push({ id: `cstm_${Date.now()}`, category: area, subject: nome, prioridade: prio, customizado: true, tipo: 'materia_nova' }); window.triggerSave(); window.updateUI(); window.showToast("Tema adicionado!"); window.closeModal('add-task'); }
         }
-        let taskToDelete = null;
-        window.requestDeleteTask = function(weekIdx, taskIdx) { taskToDelete = {weekIdx, taskIdx}; window.openModal('delete'); }
-        document.getElementById('confirm-delete-btn').onclick = function() {
-            if(taskToDelete) { window.pushState(); const week = window.state.weeks.find(w => w.week === taskToDelete.weekIdx); if(week) { week.tasks.splice(taskToDelete.taskIdx, 1); window.triggerSave(); window.updateUI(); window.showToast("Tarefa removida."); } taskToDelete = null; window.closeModal('delete'); }
-        };
+        let taskToDelete = null; window.requestDeleteTask = function(weekIdx, taskIdx) { taskToDelete = {weekIdx, taskIdx}; window.openModal('delete'); }
+        document.getElementById('confirm-delete-btn').onclick = function() { if(taskToDelete) { window.pushState(); const week = window.state.weeks.find(w => w.week === taskToDelete.weekIdx); if(week) { week.tasks.splice(taskToDelete.taskIdx, 1); window.triggerSave(); window.updateUI(); window.showToast("Tarefa removida."); } taskToDelete = null; window.closeModal('delete'); } };
 
-        // Notas / Anki
-        window.parseNotesLinks = function() {
-            const text = document.getElementById('notes-textarea').value; const links = text.match(/(https?:\/\/[^\s]+)/g); const container = document.getElementById('notes-links-container');
-            if (links && links.length > 0) { container.innerHTML = '<p class="text-[10px] font-bold uppercase text-gray-400 tracking-widest mb-2">Links Detectados</p><div class="flex flex-col gap-2">' + links.map(l => `<a href="${l}" target="_blank" class="bg-green-50 text-green-700 border border-green-200 px-3 py-2 rounded-xl text-xs font-bold truncate"><i class="fas fa-external-link-alt"></i> ${l}</a>`).join('') + '</div>'; container.classList.remove('hidden'); } 
-            else { container.innerHTML = ''; container.classList.add('hidden'); }
-        }
+        // Notas e Anki
+        window.parseNotesLinks = function() { const text = document.getElementById('notes-textarea').value; const links = text.match(/(https?:\/\/[^\s]+)/g); const container = document.getElementById('notes-links-container'); if (links && links.length > 0) { container.innerHTML = '<p class="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-2">Links Detectados</p><div class="flex flex-col gap-2">' + links.map(l => `<a href="${l}" target="_blank" class="bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 truncate"><i class="fas fa-external-link-alt"></i> ${l}</a>`).join('') + '</div>'; container.classList.remove('hidden'); } else { container.innerHTML = ''; container.classList.add('hidden'); } }
         window.openNotesModal = function(taskId) { window.activeNotesTaskId = taskId; window.ensureProgress(taskId); document.getElementById('notes-textarea').value = window.state.progress[taskId].notes || ''; window.parseNotesLinks(); window.openModal('notes'); }
         window.closeNotesModal = function() { window.activeNotesTaskId = null; window.closeModal('notes'); }
         window.saveNotes = function() { window.pushState(); if(window.activeNotesTaskId) { window.state.progress[window.activeNotesTaskId].notes = document.getElementById('notes-textarea').value; window.triggerSave(); window.showToast('Anotação salva'); } window.closeNotesModal(); }
 
-        // ----------------------------------------------------------------------
-        // AGENDA EDITÁVEL
-        // ----------------------------------------------------------------------
+        // Agenda Editável
         window.updateTimeSlot = function(weekIdx, slotIdx, val) { window.pushState(); const w = window.state.weeks.find(w => w.week === weekIdx); if(w) { w.timeSlots[slotIdx] = val; window.triggerSave(); } }
         window.updateAgendaCell = function(weekIdx, dayKey, slotIdx, text) { window.pushState(); const w = window.state.weeks.find(w => w.week === weekIdx); if(w) { const k = `${dayKey}_s${slotIdx}`; if(!w.agenda) w.agenda={}; if(!w.agenda[k]) w.agenda[k]={}; w.agenda[k].text = text; window.triggerSave(); } }
         window.addAgendaRowAt = function(weekIdx, index) { window.pushState(); const week = window.state.weeks.find(w => w.week === weekIdx); week.timeSlots.splice(index + 1, 0, "00:00 - 00:00"); const newAgenda = {}; Object.keys(week.agenda).forEach(key => { const [d, sStr] = key.split('_'); const s = parseInt(sStr.substring(1)); if (s > index) newAgenda[`${d}_s${s+1}`] = week.agenda[key]; else newAgenda[key] = week.agenda[key]; }); week.agenda = newAgenda; window.triggerSave(); window.updateUI(); }
@@ -758,13 +952,11 @@
         window.executeReplicaAgenda = function() {
             const weeksAhead = parseInt(document.getElementById('replica-weeks-input').value) || 4;
             window.pushState(); const sourceW = window.state.weeks.find(w => w.week === activeWeek); if(!sourceW) return;
-            window.state.weeks.forEach(w => { if(w.week > activeWeek && w.week < activeWeek + weeksAhead) { w.timeSlots = [...sourceW.timeSlots]; w.agenda = JSON.parse(JSON.stringify(sourceW.agenda)); } });
+            window.state.weeks.forEach(w => { if(w.week > activeWeek && w.week <= activeWeek + weeksAhead) { w.timeSlots = [...sourceW.timeSlots]; w.agenda = JSON.parse(JSON.stringify(sourceW.agenda)); } });
             window.triggerSave(); window.showToast(`Grade copiada para as próximas ${weeksAhead} semanas!`); window.closeModal('replica-agenda');
         }
 
-        // ----------------------------------------------------------------------
-        // REMANEJAMENTO INTELIGENTE
-        // ----------------------------------------------------------------------
+        // Remanejamento Inteligente
         window.openRemanejoModal = function() {
             let delayedCount = 0; let curW = 1; const today = new Date();
             window.state.weeks.forEach(w => { const s = new Date(startDate); s.setDate(startDate.getDate() + (w.week - 1) * 7); if (today >= s) curW = w.week; });
@@ -773,12 +965,10 @@
             if(delayedCount === 0) { btnOpts.classList.add('hidden'); btnEmp.classList.remove('hidden'); } else { btnOpts.classList.remove('hidden'); btnEmp.classList.add('hidden'); }
             window.openModal('remanejo');
         }
-
         window.applyRemanejo = function(strategy) {
             window.pushState(); const delayedTasks = []; let curW = 1; const today = new Date();
             window.state.weeks.forEach(w => { const s = new Date(startDate); s.setDate(startDate.getDate() + (w.week - 1) * 7); if (today >= s) curW = w.week; });
             window.state.weeks.forEach(w => { if (w.week < curW) { for (let i = w.tasks.length - 1; i >= 0; i--) { const t = w.tasks[i]; if (!(window.state.progress[t.id] || {}).doneStatus) { delayedTasks.push(t); w.tasks.splice(i, 1); } } } });
-            
             if (strategy === 'cut') {
                 const savedTasks = delayedTasks.filter(t => t.prioridade <= 2);
                 const targetW = window.state.weeks.find(w => w.week === curW); if(targetW) targetW.tasks.push(...savedTasks);
@@ -793,74 +983,13 @@
         }
 
         // ----------------------------------------------------------------------
-        // LO-FI, POMO E MODO FOCO
+        // RENDERIZADORES UI E GRÁFICOS
         // ----------------------------------------------------------------------
-        window.changeLoFiType = function(type) { window.lofiType = type; if (window.isLoFiPlaying) { window.stopLoFi(); window.startLoFi(); } }
-        window.toggleLoFi = function() {
-            window.lofiEnabled = !window.lofiEnabled; const btn = document.getElementById('lofi-btn');
-            if (window.lofiEnabled) { if (btn) btn.classList.replace('text-gray-400', 'text-blue-500'); if (window.isPomoRunning && window.pomoPhase !== 'descanso') window.startLoFi(); } 
-            else { if (btn) btn.classList.replace('text-blue-500', 'text-gray-400'); window.stopLoFi(); }
-            window.showToast(window.lofiEnabled ? 'Lo-Fi Ativado 🎧' : 'Lo-Fi Desativado');
-        }
-        window.startLoFi = function() {
-            if (window.lofiType === 'temporal') { window.rainAudio.volume = 0.6; window.rainAudio.play().catch(e=>{}); window.isLoFiPlaying = true; return; }
-            if (!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
-            if (window.noiseNode) return; 
-            const bufferSize = 2 * window.audioCtx.sampleRate; const noiseBuffer = window.audioCtx.createBuffer(1, bufferSize, window.audioCtx.sampleRate); const output = noiseBuffer.getChannelData(0);
-            if (window.lofiType === 'brown') { let lastOut = 0; for (let i = 0; i < bufferSize; i++) { let white = Math.random() * 2 - 1; output[i] = (lastOut + (0.02 * white)) / 1.02; lastOut = output[i]; output[i] *= 3.5; } } 
-            else if (window.lofiType === 'pink') { let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0; for (let i = 0; i < bufferSize; i++) { let white = Math.random() * 2 - 1; b0 = 0.99886 * b0 + white * 0.0555179; b1 = 0.99332 * b1 + white * 0.0750759; b2 = 0.96900 * b2 + white * 0.1538520; b3 = 0.86650 * b3 + white * 0.3104856; b4 = 0.55000 * b4 + white * 0.5329522; b5 = -0.7616 * b5 - white * 0.0168980; output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362; output[i] *= 0.15; b6 = white * 0.115926; } }
-            window.noiseNode = window.audioCtx.createBufferSource(); window.noiseNode.buffer = noiseBuffer; window.noiseNode.loop = true;
-            const filter = window.audioCtx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = window.lofiType === 'brown' ? 800 : 1200; 
-            const gain = window.audioCtx.createGain(); gain.gain.value = window.lofiType === 'brown' ? 1.5 : 0.8; 
-            window.noiseNode.connect(filter); filter.connect(gain); gain.connect(window.audioCtx.destination);
-            window.noiseNode.start(0); window.isLoFiPlaying = true;
-        }
-        window.stopLoFi = function() { if (window.noiseNode) { window.noiseNode.stop(); window.noiseNode.disconnect(); window.noiseNode = null; } if (window.rainAudio) { window.rainAudio.pause(); window.rainAudio.currentTime = 0; } window.isLoFiPlaying = false; }
-        
-        window.toggleFocusMode = function() { window.isFocusMode = !window.isFocusMode; document.body.classList.toggle('focus-mode', window.isFocusMode); if(window.isFocusMode) window.showToast("Modo foco ativado"); }
-
-        window.togglePomo = function() {
-            if (window.isPomoRunning) { window.isPomoRunning = false; document.getElementById('mp-play-btn').innerHTML = '<i class="fas fa-play ml-1"></i>'; if(window.lofiEnabled) window.stopLoFi(); } 
-            else { window.isPomoRunning = true; document.getElementById('mp-play-btn').innerHTML = '<i class="fas fa-pause"></i>'; if(window.lofiEnabled && window.pomoPhase !== 'descanso') window.startLoFi(); window.pomoLastTick = Date.now(); }
-            window.updateUI();
-        }
-        window.stopPomo = function() { window.isPomoRunning = false; window.activePomoId = null; window.stopLoFi(); document.getElementById('mini-player').classList.remove('show'); window.updateUI(); }
-        window.startPomoTask = function(taskId, phase) {
-            window.activePomoId = taskId; window.pomoTotalTime = phase === 'aula' ? 50*60 : (phase === 'questoes' ? 25*60 : 5*60); window.pomoTime = window.pomoTotalTime; window.isPomoRunning = true; window.pomoPhase = phase; window.pomoLastTick = Date.now();
-            document.getElementById('mp-phase').innerText = `Foco: ${phase}`; document.getElementById('mp-play-btn').innerHTML = '<i class="fas fa-pause"></i>'; document.getElementById('mini-player').classList.add('show');
-            if(window.lofiEnabled && phase !== 'descanso') window.startLoFi();
-            window.updateUI();
-        }
-        window.pomoNextPhase = function() {
-            if(window.lofiEnabled) window.stopLoFi();
-            if (window.pomoPhase === 'aula') { window.pomoPhase = 'descanso'; window.pomoTotalTime = 5 * 60; window.pomoTime = 5 * 60; window.showToast("Hora de relaxar (5 min)."); } 
-            else if (window.pomoPhase === 'descanso') { window.pomoPhase = 'questoes'; window.pomoTotalTime = 25 * 60; window.pomoTime = 25 * 60; window.showToast("Foco nas questões (25 min)."); if(window.lofiEnabled) window.startLoFi(); } 
-            else if (window.pomoPhase === 'questoes') { window.isPomoRunning = false; window.activePomoId = null; document.getElementById('mini-player').classList.remove('show'); confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 }}); window.showToast("Ciclo Completo!"); window.updateUI(); return; }
-            if(window.isPomoRunning) window.pomoLastTick = Date.now();
-            document.getElementById('mp-phase').innerText = `Foco: ${window.pomoPhase}`;
-            window.updateUI();
-        }
-        window.pomoSkip = function() { window.pomoNextPhase(); }
-
-        // Lembretes
-        window.renderReminderList = function() { const list = document.getElementById('reminder-list'); const badge = document.getElementById('reminder-badge'); if (!list) return; const today = window.getTodayStr(); if (badge) { if(window._reminders.length > 0) { badge.textContent = window._reminders.length; badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); } } if (window._reminders.length === 0) { list.innerHTML = `<div class="text-xs text-gray-400 italic text-center py-4">Tudo tranquilo.</div>`; return; } list.innerHTML = window._reminders.map((r, i) => `<div class="reminder-item"><div><div class="font-bold text-slate-700">${r.text}</div><div class="rm-date">${r.type === 'day' ? 'Hoje' : r.type === 'week' ? 'Esta semana' : r.date}</div></div><button onclick="window.deleteReminder(${i})" class="text-gray-300 hover:text-red-500 ml-2 transition w-6 h-6 rounded hover:bg-red-50"><i class="fas fa-times text-xs"></i></button></div>`).join(''); }
-        window.addReminder = function() { const text = document.getElementById('reminder-text').value.trim(); const date = document.getElementById('reminder-date').value; const type = document.getElementById('reminder-type').value; if (!text) return; window._reminders.push({ text, date: date || window.getTodayStr(), type }); localStorage.setItem('reminders_v2', JSON.stringify(window._reminders)); document.getElementById('reminder-text').value = ''; window.renderReminderList(); window.showToast('Lembrete salvo'); }
-        window.deleteReminder = function(idx) { window._reminders.splice(idx, 1); localStorage.setItem('reminders_v2', JSON.stringify(window._reminders)); window.renderReminderList(); }
-        window.toggleReminderPanel = function() { document.getElementById('reminder-panel').classList.toggle('open'); window.renderReminderList(); }
-
-        // Revisão
-        window.openReviewModal = function(taskId) { pendingReviewTaskId = taskId; window.openModal('review'); }
-        window.scheduleReview = function(days) { if(pendingReviewTaskId) { window.pushState(); const date = new Date(); date.setDate(date.getDate() + days); const dateStr = date.toISOString().split('T')[0]; window.ensureProgress(pendingReviewTaskId); window.state.progress[pendingReviewTaskId].nextReview = dateStr; window.triggerSave(); window.updateUI(); window.showToast('Revisão agendada!');} window.closeModal('review'); pendingReviewTaskId = null; }
-
-        // ----------------------------------------------------------------------
-        // RENDERIZADORES UI
-        // ----------------------------------------------------------------------
-        window.switchView = function(view) {
-            activeView = view;
-            ['nav-dashboard', 'nav-search', 'nav-homepage', 'nav-week'].forEach(id => { const el = document.getElementById(id); if (el) el.className = el.className.replace('bg-black text-white shadow-sm', 'text-gray-600 hover:bg-gray-100 bg-white shadow-sm border border-gray-200'); });
-            const activeEl = document.getElementById(`nav-${view}`); if (activeEl) activeEl.className = activeEl.className.replace('text-gray-600 hover:bg-gray-100 bg-white border border-gray-200', 'bg-black text-white border-transparent');
-            window.updateUI();
+        window.switchView = function(viewName) {
+            activeView = viewName;
+            ['nav-dashboard', 'nav-search', 'nav-homepage'].forEach(id => { const el = document.getElementById(id); if (el) { el.classList.remove('bg-black', 'text-white', 'border-transparent'); el.classList.add('bg-white', 'text-gray-600', 'border-gray-200'); } });
+            const activeEl = document.getElementById(`nav-${viewName}`); if (activeEl) { activeEl.classList.remove('bg-white', 'text-gray-600', 'border-gray-200'); activeEl.classList.add('bg-black', 'text-white', 'border-transparent'); }
+            if(viewName !== 'week') activeWeek = 0; window.updateUI();
         }
 
         window.renderNav = function() {
@@ -896,36 +1025,39 @@
         window.renderWeek = function() {
             const w = window.state.weeks.find(d => d.week === activeWeek); const content = document.getElementById('content-area'); if(!w) return; const days = window.getWeekDates(activeWeek);
             
-            let agendaHtml = `<div class="mb-12 fade-enter"><div class="flex justify-between items-center mb-6"><div><h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Semana ${w.week}</h2><span class="text-sm font-bold text-gray-500 dark:text-cm-green">${w.phase}</span></div><button onclick="window.openModal('replica-agenda')" class="text-xs font-bold bg-white dark:bg-cm-mid border border-gray-200 dark:border-gray-700 px-4 py-2 rounded-xl shadow-sm hover:border-blue-500 transition"><i class="fas fa-copy mr-1 text-blue-500"></i> Configurar Grade</button></div><div class="overflow-x-auto rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-cm-dark2"><table class="agenda-table min-w-[700px]"><thead><tr><th class="p-3 w-24">Horário</th>${days.map(d=>`<th class="p-3 text-xs font-bold">${d.name}</th>`).join('')}</tr></thead><tbody>`;
+            let agendaHtml = `<div class="mb-12 fade-enter"><div class="flex justify-between items-center mb-6"><div><h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Semana ${w.week}</h2><span class="text-sm font-bold text-gray-500 dark:text-emerald-500">${w.phase}</span></div><button onclick="window.openModal('replica-agenda')" class="text-xs font-bold bg-white dark:bg-cm-mid border border-gray-200 dark:border-gray-700 px-4 py-2 rounded-xl shadow-sm hover:border-blue-500 transition"><i class="fas fa-copy mr-1 text-blue-500"></i> Configurar Grade</button></div><div class="overflow-x-auto rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-cm-dark2"><table class="agenda-table min-w-[700px]"><thead><tr><th class="p-3 w-24">Horário</th>${days.map(d=>`<th class="p-3 text-xs font-bold">${d.name}</th>`).join('')}</tr></thead><tbody>`;
             w.timeSlots.forEach((slot, sIdx) => {
                 agendaHtml += `<tr><td class="p-0 w-24 align-middle time-col relative border-r border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-cm-mid/30"><div class="w-full text-center font-mono text-[10px] font-bold outline-none p-3" contenteditable="true" onblur="window.updateTimeSlot(${activeWeek}, ${sIdx}, this.innerText)">${slot}</div><div class="row-controls"><button onclick="window.addAgendaRowAt(${activeWeek}, ${sIdx})" class="text-[10px] text-blue-600 hover:bg-blue-50 py-1"><i class="fas fa-plus"></i></button><button onclick="window.requestRemoveAgendaRow(${activeWeek}, ${sIdx})" class="text-[10px] text-red-600 hover:bg-red-50 py-1"><i class="fas fa-minus"></i></button></div></td>`;
                 days.forEach((d, dIdx) => { const c = w.agenda[`${d.key}_s${sIdx}`] || {}; agendaHtml += `<td class="p-0 h-16 relative"><div class="agenda-cell w-full h-full p-2 outline-none flex items-center justify-center text-xs font-medium text-slate-700 dark:text-white" contenteditable="true" onblur="window.updateAgendaCell(${activeWeek}, '${d.key}', ${sIdx}, this.innerText)">${c.text||''}</div></td>`; }); agendaHtml += `</tr>`;
             });
             agendaHtml += `</tbody></table></div><p class="text-[10px] text-gray-400 mt-2"><i class="fas fa-info-circle text-blue-400"></i> Edite a tabela acima para configurar as suas aulas. As alterações são guardadas na nuvem.</p></div>`;
 
-            let tasksHtml = `<div class="mb-4 flex justify-between items-center"><h3 class="text-sm font-bold uppercase tracking-widest text-gray-500"><i class="fas fa-bullseye text-green-500 mr-1"></i> Tarefas da Semana (${w.tasks.length})</h3></div><div class="grid gap-4 fade-enter">`;
-            w.tasks.forEach((t, idx) => {
+            let filtersHtml = `<div class="flex flex-wrap gap-2 mb-4"><button onclick="window.setWeekFilter('all')" class="px-4 py-2 rounded-xl text-xs font-bold border transition ${window.weekFilter==='all'?'bg-slate-900 text-white border-slate-900':'bg-white text-slate-500 border-gray-200 hover:bg-gray-50 dark:bg-cm-dark2'}">Todas</button><button onclick="window.setWeekFilter('pending')" class="px-4 py-2 rounded-xl text-xs font-bold border transition ${window.weekFilter==='pending'?'bg-slate-900 text-white border-slate-900':'bg-white text-slate-500 border-gray-200 hover:bg-gray-50 dark:bg-cm-dark2'}">Pendentes</button><button onclick="window.setWeekFilter('done')" class="px-4 py-2 rounded-xl text-xs font-bold border transition ${window.weekFilter==='done'?'bg-emerald-600 text-white border-emerald-600':'bg-white text-slate-500 border-gray-200 hover:bg-gray-50 dark:bg-cm-dark2'}">Concluídas</button></div>`;
+
+            let tasksHtml = `<div class="mb-4 flex justify-between items-center"><h3 class="text-sm font-bold uppercase tracking-widest text-gray-500"><i class="fas fa-bullseye text-green-500 mr-1"></i> Tarefas da Semana (${w.tasks.length})</h3><div class="flex items-center gap-1 bg-white p-1 rounded-xl shadow-sm border border-gray-200 dark:bg-cm-dark2 dark:border-gray-800"><button onclick="window.toggleLoFi()" id="lofi-btn" class="text-gray-400 font-bold text-sm px-3 py-1.5 rounded-lg hover:text-blue-500 transition flex items-center gap-2"><i class="fas fa-headphones-alt"></i> Lo-Fi</button></div></div>${filtersHtml}<div class="grid gap-4 fade-enter">`;
+            
+            let tasksToRender = w.tasks;
+            if(window.weekFilter === 'pending') tasksToRender = tasksToRender.filter(t => !window.state.progress[t.id]?.doneStatus);
+            if(window.weekFilter === 'done') tasksToRender = tasksToRender.filter(t => window.state.progress[t.id]?.doneStatus);
+            
+            tasksToRender.forEach((t, idx) => {
                 const p = window.state.progress[t.id] || {}; const isChecked = p.doneStatus; const prioClass = window.getPrioClass(t.prioridade, t.tipo);
                 const labels = window.getPrioLabel(t.prioridade, t.tipo, t.customizado);
-                const acc = Math.round(((parseInt(p.correct)||0) / (parseInt(p.done)||1)) * 100) || 0;
+                const doneVal = p.done || ''; const correctVal = p.correct || ''; const acc = Math.round(((parseInt(p.correct)||0) / (parseInt(p.done)||1)) * 100) || 0;
                 
-                let isPomoActiveForThis = (window.activePomoId === t.id);
+                let isPomoActiveForThis = (window.activePomoTaskId === t.id);
                 const isExpanded = window.expandedCards[t.id] || isPomoActiveForThis;
                 
                 let pomoUI = '';
                 if (isPomoActiveForThis) {
                     let displayTime = "50:00"; const m = Math.floor(window.pomoTime / 60); const s = window.pomoTime % 60; displayTime = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-                    let pct1 = 0, pct2 = 0, pct3 = 0;
-                    if (window.pomoPhase === 'aula') pct1 = ((window.pomoTotalTime - window.pomoTime) / window.pomoTotalTime) * 100;
-                    else if (window.pomoPhase === 'descanso') { pct1 = 100; pct2 = ((window.pomoTotalTime - window.pomoTime) / window.pomoTotalTime) * 100; }
-                    else if (window.pomoPhase === 'questoes') { pct1 = 100; pct2 = 100; pct3 = ((window.pomoTotalTime - window.pomoTime) / window.pomoTotalTime) * 100; }
-                    
-                    pomoUI = `<div class="mt-4 bg-slate-50 dark:bg-cm-mid border border-slate-200 dark:border-gray-800 p-5 rounded-2xl w-full shadow-inner"><div class="flex justify-between text-[9px] font-black uppercase tracking-widest mb-3"><span class="${window.pomoPhase === 'aula' ? 'text-blue-600' : 'text-slate-400'}"><i class="fas fa-book-open"></i> Aula</span><span class="${window.pomoPhase === 'descanso' ? 'text-amber-500' : 'text-slate-400'}"><i class="fas fa-coffee"></i> Pausa</span><span class="${window.pomoPhase === 'questoes' ? 'text-emerald-600' : 'text-slate-400'}"><i class="fas fa-pen"></i> Questões</span></div><div class="flex gap-2 h-2 mb-5"><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div class="h-full bg-blue-500 transition-all duration-1000" style="width: ${pct1}%"></div></div><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div class="h-full bg-amber-400 transition-all duration-1000" style="width: ${pct2}%"></div></div><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div class="h-full bg-emerald-500 transition-all duration-1000" style="width: ${pct3}%"></div></div></div><div class="flex justify-between items-center"><div class="font-mono font-black text-4xl text-slate-800 dark:text-white tracking-tight">${displayTime}</div><div class="flex gap-2 items-center"><button onclick="window.togglePomo()" class="w-10 h-10 flex items-center justify-center text-white rounded-xl shadow-md ${window.isPomoRunning ? 'bg-red-500 hover:bg-red-600' : 'bg-slate-900 hover:bg-slate-700'}">${window.isPomoRunning ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play ml-1"></i>'}</button><button onclick="window.pomoNextPhase()" class="px-4 py-2.5 bg-white dark:bg-cm-dark2 border border-gray-200 text-gray-700 dark:text-gray-300 rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-gray-50 transition shadow-sm">Pular <i class="fas fa-forward"></i></button><button onclick="window.stopPomo()" class="px-4 py-2.5 bg-red-50 border border-red-200 text-red-600 rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-red-100 transition shadow-sm"><i class="fas fa-times"></i></button></div></div></div>`;
+                    let pct1 = 0, pct2 = 0, pct3 = 0; if (window.pomoPhase === 'aula') pct1 = ((window.pomoTotalTime - window.pomoTime) / window.pomoTotalTime) * 100; else if (window.pomoPhase === 'descanso') { pct1 = 100; pct2 = ((window.pomoTotalTime - window.pomoTime) / window.pomoTotalTime) * 100; } else if (window.pomoPhase === 'questoes') { pct1 = 100; pct2 = 100; pct3 = ((window.pomoTotalTime - window.pomoTime) / window.pomoTotalTime) * 100; }
+                    pomoUI = `<div class="mt-4 bg-slate-50 dark:bg-cm-mid border border-slate-200 dark:border-gray-800 p-5 rounded-2xl w-full shadow-inner"><div class="flex justify-between text-[9px] font-black uppercase tracking-widest mb-3"><span id="pomo-lbl-1-${t.id}" class="${window.pomoPhase === 'aula' ? 'text-blue-600' : 'text-slate-400'}"><i class="fas fa-book-open"></i> Aula</span><span id="pomo-lbl-2-${t.id}" class="${window.pomoPhase === 'descanso' ? 'text-amber-500' : 'text-slate-400'}"><i class="fas fa-coffee"></i> Pausa</span><span id="pomo-lbl-3-${t.id}" class="${window.pomoPhase === 'questoes' ? 'text-emerald-600' : 'text-slate-400'}"><i class="fas fa-pen"></i> Questões</span></div><div class="flex gap-2 h-2 mb-5"><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="pomo-bar-1-${t.id}" class="h-full bg-blue-500 transition-all duration-1000" style="width: ${pct1}%"></div></div><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="pomo-bar-2-${t.id}" class="h-full bg-amber-400 transition-all duration-1000" style="width: ${pct2}%"></div></div><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="pomo-bar-3-${t.id}" class="h-full bg-emerald-500 transition-all duration-1000" style="width: ${pct3}%"></div></div></div><div class="flex justify-between items-center"><div id="pomo-display-${t.id}" class="font-mono font-black text-4xl text-slate-800 dark:text-white tracking-tight">${displayTime}</div><div class="flex gap-2 items-center"><button id="pomo-btn-play-${t.id}" onclick="window.pomoToggle('${t.id}')" class="w-10 h-10 flex items-center justify-center text-white rounded-xl shadow-md ${window.isPomoRunning ? 'bg-red-500' : 'bg-slate-900 dark:bg-cm-green'}">${window.isPomoRunning ? '<i class="fas fa-pause text-xs"></i>' : '<i class="fas fa-play text-xs ml-0.5"></i>'}</button><button onclick="window.pomoSkip()" class="px-4 py-2.5 bg-white dark:bg-cm-dark2 border border-gray-200 text-gray-700 dark:text-gray-300 rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-gray-50 transition shadow-sm">Pular <i class="fas fa-forward"></i></button><button onclick="window.pomoStop()" class="px-4 py-2.5 bg-red-50 border border-red-200 text-red-600 rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-red-100 transition shadow-sm"><i class="fas fa-times"></i> Fechar</button></div></div></div>`;
                 }
 
-                tasksHtml += `<div class="card-ui p-5 flex flex-col md:flex-row gap-5 ${prioClass} ${isChecked?'done':''} relative group"><div class="flex items-start gap-4 flex-1 min-w-0"><div class="mt-1 relative shrink-0"><input type="checkbox" class="peer appearance-none w-6 h-6 border-2 border-gray-300 rounded-lg checked:bg-black checked:border-black transition cursor-pointer" ${isChecked?'checked':''} onchange="window.toggleTask('${t.id}')"><i class="fas fa-check text-white absolute top-1 left-1 pointer-events-none opacity-0 peer-checked:opacity-100 text-xs transition"></i></div><div class="flex-1 cursor-pointer min-w-0" onclick="window.toggleTaskDetails('${t.id}', event)"><div class="font-bold text-slate-800 dark:text-white text-lg leading-snug truncate outline-none task-edit-subject" contenteditable="true" onblur="window.updateTaskName(${activeWeek}, ${idx}, this.innerText)">${t.subject}</div><div class="flex items-center justify-between mt-2"><div class="flex gap-2 items-center"><button onclick="window.cycleTaskCategory(${activeWeek}, ${idx})" class="text-[10px] font-bold bg-slate-100 dark:bg-cm-mid px-2.5 py-1 rounded-md text-slate-600 dark:text-gray-300 hover:bg-slate-200 transition-colors uppercase tracking-wide">${t.category}</button><button onclick="window.toggleCrucial('${t.id}')" class="fire-btn ${p.crucial ? 'active' : ''} w-8 h-8 rounded-full hover:bg-red-50 flex items-center justify-center transition text-lg"><i class="fas fa-fire ${p.crucial ? 'text-red-500' : 'text-gray-400'}"></i></button></div><button onclick="window.requestDeleteTask(${activeWeek}, ${idx})" class="text-gray-300 hover:text-red-500 px-2 py-1 rounded transition text-xl"><i class="fas fa-trash-alt"></i></button></div><div class="flex gap-2 mt-4 flex-wrap"><button onclick="window.toggleSubTask('${t.id}_a')" class="px-3 py-1.5 rounded-lg border ${p.sub_a ? 'bg-slate-800 text-white' : 'bg-white text-slate-500 border-gray-200 dark:bg-cm-dark2 dark:text-gray-400'} text-[10px] font-bold uppercase transition hover:shadow-md flex items-center gap-1.5"><i class="fas fa-play"></i> Aula</button><button onclick="window.toggleSubTask('${t.id}_q')" class="px-3 py-1.5 rounded-lg border ${p.sub_q ? 'bg-slate-800 text-white' : 'bg-white text-slate-500 border-gray-200 dark:bg-cm-dark2 dark:text-gray-400'} text-[10px] font-bold uppercase transition hover:shadow-md flex items-center gap-1.5"><i class="fas fa-pen"></i> Questões</button><button onclick="window.toggleSubTask('${t.id}_k')" class="px-3 py-1.5 rounded-lg border ${p.sub_k ? 'bg-slate-800 text-white' : 'bg-white text-slate-500 border-gray-200 dark:bg-cm-dark2 dark:text-gray-400'} text-[10px] font-bold uppercase transition hover:shadow-md flex items-center gap-1.5"><i class="fas fa-bolt"></i> Anki</button><button onclick="window.startPomoTask('${t.id}', 'aula')" class="px-4 py-1.5 rounded-xl border bg-white dark:bg-cm-mid text-slate-700 dark:text-white border-gray-200 hover:bg-gray-50 text-[10px] font-black uppercase tracking-wider transition shadow-sm flex items-center gap-2 ml-auto ${isPomoActiveForThis ? 'hidden' : ''}"><i class="fas fa-stopwatch text-green-500 text-sm"></i> Sessão</button></div>${pomoUI}</div><button onclick="window.toggleTaskDetails('${t.id}', event)" class="text-gray-400 w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-cm-mid transition shrink-0"><i class="fas fa-chevron-down ${isExpanded?'rotate-180':''}"></i></button></div>`;
+                tasksHtml += `<div class="card-ui p-5 flex flex-col md:flex-row gap-5 ${prioClass} ${isChecked?'done bg-slate-50 opacity-60 grayscale-[0.5]':''} relative group"><div class="flex items-start gap-4 flex-1 min-w-0"><div class="mt-1 relative shrink-0"><input type="checkbox" class="peer appearance-none w-6 h-6 border-2 border-gray-300 rounded-lg checked:bg-black checked:border-black transition cursor-pointer" ${isChecked?'checked':''} onchange="window.toggleTask('${t.id}')"><i class="fas fa-check text-white absolute top-1 left-1 pointer-events-none opacity-0 peer-checked:opacity-100 text-xs transition"></i></div><div class="flex-1 cursor-pointer min-w-0" onclick="window.toggleTaskDetails('${t.id}', event)"><div class="font-bold text-slate-800 dark:text-white text-lg leading-snug truncate outline-none task-edit-subject" contenteditable="true" onblur="window.updateTaskName(${activeWeek}, ${idx}, this.innerText)">${t.subject}</div><div class="flex items-center justify-between mt-2"><div class="flex gap-2 items-center"><span class="text-[10px] font-bold bg-slate-100 dark:bg-cm-mid px-2.5 py-1 rounded-md text-slate-600 dark:text-gray-300 uppercase tracking-wide border border-transparent">${t.category}</span><button onclick="window.toggleCrucial('${t.id}')" class="fire-btn ${p.crucial ? 'active' : ''} w-8 h-8 rounded-full hover:bg-red-50 flex items-center justify-center transition text-lg"><i class="fas fa-fire ${p.crucial ? 'text-red-500' : 'text-gray-400'}"></i></button></div><button onclick="window.requestDeleteTask(${activeWeek}, ${idx})" class="text-gray-300 hover:text-red-500 px-2 py-1 rounded transition text-xl"><i class="fas fa-trash-alt"></i></button></div><div class="flex gap-2 mt-4 flex-wrap"><button onclick="window.toggleSubTask('${t.id}_a')" class="px-3 py-1.5 rounded-lg border ${p.sub_a ? 'bg-slate-800 text-white' : 'bg-white text-slate-500 border-gray-200 dark:bg-cm-dark2 dark:text-gray-400'} text-[10px] font-bold uppercase transition hover:shadow-md flex items-center gap-1.5"><i class="fas fa-play"></i> Aula</button><button onclick="window.toggleSubTask('${t.id}_q')" class="px-3 py-1.5 rounded-lg border ${p.sub_q ? 'bg-slate-800 text-white' : 'bg-white text-slate-500 border-gray-200 dark:bg-cm-dark2 dark:text-gray-400'} text-[10px] font-bold uppercase transition hover:shadow-md flex items-center gap-1.5"><i class="fas fa-pen"></i> Questões</button><button onclick="window.toggleSubTask('${t.id}_k')" class="px-3 py-1.5 rounded-lg border ${p.sub_k ? 'bg-slate-800 text-white' : 'bg-white text-slate-500 border-gray-200 dark:bg-cm-dark2 dark:text-gray-400'} text-[10px] font-bold uppercase transition hover:shadow-md flex items-center gap-1.5"><i class="fas fa-bolt"></i> Anki</button><button onclick="window.startPomoForTask('${t.id}')" class="px-4 py-1.5 rounded-xl border bg-white dark:bg-cm-mid text-slate-700 dark:text-white border-gray-200 hover:bg-gray-50 text-[10px] font-black uppercase tracking-wider transition shadow-sm flex items-center gap-2 ml-auto ${isPomoActiveForThis ? 'hidden' : ''}"><i class="fas fa-stopwatch text-green-500 text-sm"></i> Sessão</button></div>${pomoUI}</div><button onclick="window.toggleTaskDetails('${t.id}', event)" class="text-gray-400 w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-cm-mid transition shrink-0"><i class="fas fa-chevron-down ${isExpanded?'rotate-180':''}"></i></button></div>`;
                 if(isExpanded) {
-                    tasksHtml += `<div class="pt-4 mt-2 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row gap-5 fade-enter"><div class="flex-1 flex gap-2 items-center"><button onclick="window.openNotesModal('${t.id}')" class="text-gray-500 hover:text-blue-500 px-3 py-2 rounded-xl transition-colors text-sm bg-gray-100 dark:bg-cm-mid font-bold flex items-center gap-2"><i class="fas fa-book-open"></i> Anotações / Links</button></div><div class="flex items-center gap-3 bg-gray-50 dark:bg-cm-dark2 p-3 rounded-xl border border-gray-100 dark:border-gray-800 shrink-0 shadow-inner"><div class="text-center"><span class="text-[9px] font-bold text-gray-400 uppercase block tracking-wider mb-1">Feitas</span><input type="number" value="${p.done||''}" onchange="window.updateTaskQuestions('${t.id}', this.value)" class="w-12 bg-transparent text-center font-bold text-slate-800 dark:text-white outline-none border-b-2 border-gray-300 dark:border-gray-700 focus:border-green-500 py-1 transition" placeholder="-"></div><div class="text-center"><span class="text-[9px] font-bold text-gray-400 uppercase block tracking-wider mb-1">Acertos</span><input type="number" value="${p.correct||''}" onchange="window.updateTaskQuestions('${t.id}', this.value, true)" class="w-12 bg-transparent text-center font-bold text-slate-800 dark:text-white outline-none border-b-2 border-gray-300 dark:border-gray-700 focus:border-green-500 py-1 transition" placeholder="-"></div><div class="pl-3 border-l border-gray-200 dark:border-gray-800 text-center min-w-[3.5rem]"><span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">%</span><span class="text-lg font-black ${acc>0?'text-green-500':'text-gray-400'}">${acc}%</span></div></div></div>`;
+                    tasksHtml += `<div class="pt-4 mt-2 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row gap-5 fade-enter"><div class="flex-1 flex gap-2 items-center"><button onclick="window.openNotesModal('${t.id}')" class="text-gray-500 hover:text-blue-500 px-3 py-2 rounded-xl transition-colors text-sm bg-gray-100 dark:bg-cm-mid font-bold flex items-center gap-2"><i class="fas fa-book-open"></i> Anotações / Links</button></div><div class="flex items-center gap-3 bg-gray-50 dark:bg-cm-dark2 p-3 rounded-xl border border-gray-100 dark:border-gray-800 shrink-0 shadow-inner"><div class="text-center"><span class="text-[9px] font-bold text-gray-400 uppercase block tracking-wider mb-1">Feitas</span><input type="number" value="${doneVal}" onchange="window.updateTaskQuestions('${t.id}', this.value)" class="w-12 bg-transparent text-center font-bold text-slate-800 dark:text-white outline-none border-b-2 border-gray-300 dark:border-gray-700 focus:border-green-500 py-1 transition" placeholder="-"></div><div class="text-center"><span class="text-[9px] font-bold text-gray-400 uppercase block tracking-wider mb-1">Acertos</span><input type="number" value="${correctVal}" onchange="window.updateScore('${t.id}', 'correct', this.value)" class="w-12 bg-transparent text-center font-bold text-slate-800 dark:text-white outline-none border-b-2 border-gray-300 dark:border-gray-700 focus:border-green-500 py-1 transition" placeholder="-"></div><div class="pl-3 border-l border-gray-200 dark:border-gray-800 text-center min-w-[3.5rem]"><span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">%</span><span class="text-lg font-black ${acc>0?'text-green-500':'text-gray-400'}">${acc}%</span></div></div></div>`;
                 }
                 tasksHtml += `</div>`;
             });
@@ -983,12 +1115,39 @@
                     if(week) {
                         window.pushState();
                         week.tasks.push({ id: `cstm_${Date.now()}`, category: taskToAdd.area, subject: taskToAdd.tema, prioridade: taskToAdd.prioridade, customizado: true, tipo: 'materia_nova' });
-                        window.triggerSave(); window.showToast(`Adicionado à Semana ${targetWeek}!`);
+                        window.triggerSave(); window.showToast(`Adicionado à Semana ${targetWeek}!`); window.updateUI();
                     }
                 }
             }
         }
-        window.updateUI = function() { window.renderNav(); if(activeView === 'homepage') window.renderHomepage(); else if(activeView === 'dashboard') window.renderDashboard(); else if (activeView === 'search') window.renderSearch(); else window.renderWeek(); }
+        
+        window.updateGlobalProgress = function() { 
+            let totalTasks = 0; let completed = 0; 
+            window.state.weeks.forEach(w => { totalTasks += w.tasks.length; w.tasks.forEach(t => { if (window.state.progress[t.id] && window.state.progress[t.id].doneStatus) completed++; }); }); 
+            const percent = totalTasks > 0 ? (completed / totalTasks) * 100 : 0; 
+            const bar = document.getElementById('global-progress'); const text = document.getElementById('global-percent-text'); 
+            if(bar) bar.style.width = `${percent}%`; if(text) text.innerText = `${Math.round(percent)}%`; 
+            window.updateStreak(); 
+        }
+        
+        window.updateUI = function() { window.renderNav(); if(activeView === 'homepage') window.renderHomepage(); else if(activeView === 'dashboard') window.renderDashboard(); else if (activeView === 'search') window.renderSearch(); else window.renderWeek(); window.updateGlobalProgress(); window.pomoUpdateUI(); }
+        
+        // Loop principal para Tempo de Foco (Sessão)
+        setInterval(() => {
+            if(window.isPomoRunning) {
+                let now = Date.now(); let delta = Math.floor((now - window.pomoLastTick) / 1000);
+                if (delta > 0) {
+                    window.pomoTime -= delta; window.pomoLastTick = now;
+                    if (window.pomoPhase !== 'descanso') {
+                        window.sessionStudySeconds += delta;
+                        if (window.sessionStudySeconds >= 60) {
+                            const today = window.getTodayStr(); window.state.timeTracking[today] = (window.state.timeTracking[today] || 0) + window.sessionStudySeconds; window.sessionStudySeconds = 0;
+                        }
+                    }
+                    if(window.pomoTime <= 0) window.pomoNextPhase(); else window.pomoUpdateUI();
+                }
+            }
+        }, 1000);
     </script>
 </body>
 </html>
