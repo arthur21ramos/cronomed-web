@@ -3,10 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CronoMed — Meu Cronograma</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,700&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <title>CronoMED 2026 - O seu Cronograma Inteligente</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -14,224 +11,267 @@
 
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        cm: {
-                            dark: '#0a0f0d',
-                            dark2: '#111a15',
-                            mid: '#1e2e25',
-                            green: '#00c27a',
-                            greenD: '#009f64',
-                            text: '#e8f0eb',
-                            muted: '#7a9e8a'
+                        medical: {
+                            50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1',
+                            400: '#94a3b8', 500: '#64748b', 600: '#475569', 700: '#334155',
+                            800: '#1e293b', 900: '#0f172a',
                         }
                     },
-                    fontFamily: { sans: ['DM Sans', 'sans-serif'], serif: ['Fraunces', 'serif'] }
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
                 }
             }
         }
     </script>
 
     <style>
-        html, body { height: 100%; overflow: hidden; -webkit-tap-highlight-color: transparent; }
-        
-        /* Tema Claro (Padrão Premium) */
-        body { background-color: #f8fafc; color: #1e293b; }
-        .glass-header { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; }
-        .sidebar { background: #ffffff; border-right: 1px solid #e2e8f0; }
-        .card-ui { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 1.5rem; transition: all 0.3s ease; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-        .card-ui:hover { border-color: #cbd5e1; transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
-        
-        /* Tema Escuro (Ativado via .dark) */
-        .dark body { background-color: #0a0f0d; color: #e8f0eb; }
-        .dark .glass-header { background: rgba(10, 15, 13, 0.9); border-bottom-color: rgba(0,194,122,0.1); }
-        .dark .sidebar { background: rgba(17, 26, 21, 0.95); border-right-color: rgba(0,194,122,0.1); }
-        .dark .card-ui { background: #111a15; border-color: rgba(255,255,255,0.06); box-shadow: none; }
-        .dark .card-ui:hover { border-color: rgba(0,194,122,0.2); }
-        .dark input, .dark select, .dark textarea { background: #1e2e25; border-color: rgba(255,255,255,0.1); color: white; }
-        .dark .text-slate-800 { color: #ffffff; }
-        .dark .text-slate-600 { color: #e8f0eb; }
-        .dark .text-gray-500 { color: #7a9e8a; }
-        .dark .bg-gray-50 { background-color: #1e2e25; }
-        .dark .border-gray-200 { border-color: rgba(255,255,255,0.1); }
-        .dark .border-gray-100 { border-color: rgba(255,255,255,0.05); }
-        .dark .agenda-cell { color: #e8f0eb; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-        .sidebar { transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; z-index: 40; }
+        /* Layout Fixes */
+        html, body { height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .sidebar { transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; }
         .sidebar-hidden { margin-left: -20rem; }
         .sidebar-content { flex: 1; overflow-y: auto; overflow-x: hidden; padding-bottom: 20px; }
         
+        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .dark ::-webkit-scrollbar-thumb { background: #1e2e25; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        body.dark-mode ::-webkit-scrollbar-thumb { background: #334155; }
+
+        /* General UI */
+        .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); transition: box-shadow 0.2s; }
+        .card-shadow:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025); transform: translateY(-2px); }
         
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        [contenteditable]:empty:before { content: attr(placeholder); color: #94a3b8; display: block; }
-        
-        /* Linguagem Visual de Prioridades (Linha Lateral) */
-        .prio-1 { border-left: 4px solid #ef4444 !important; }
-        .prio-2 { border-left: 4px solid #f59e0b !important; }
-        .prio-3 { border-left: 4px solid #3b82f6 !important; }
-        .prio-4 { border-left: 4px solid #94a3b8 !important; }
-        .prio-rev { border-left: 4px dashed #00c27a !important; }
+        [contenteditable]:empty:before { content: attr(placeholder); color: #9ca3af; display: block; }
 
-        .task-card.done { opacity: 0.5; filter: grayscale(0.6); }
-        
-        /* Modais */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 1rem; }
-        .modal-overlay.open { display: flex; }
-        .modal-content { background: #ffffff; border-radius: 24px; padding: 2.5rem; width: 100%; max-width: 500px; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: scaleIn 0.2s ease; max-height: 90vh; overflow-y: auto; }
-        .dark .modal-content { background: #111a15; border: 1px solid rgba(0,194,122,0.2); }
-        @keyframes scaleIn { from { opacity: 0; transform: scale(.95); } to { opacity: 1; transform: scale(1); } }
-
-        /* Timeline (Home) */
-        .timeline-item { position: relative; padding-left: 1.5rem; border-left: 2px solid #e2e8f0; margin-bottom: 1.5rem; }
-        .dark .timeline-item { border-left-color: #1e2e25; }
-        .timeline-item::before { content: ''; position: absolute; left: -0.35rem; top: 0; width: 0.6rem; height: 0.6rem; border-radius: 50%; background: #00c27a; }
-
-        .custom-checkbox { width: 1.5rem; height: 1.5rem; border-radius: 6px; border: 2px solid #cbd5e1; appearance: none; background-color: transparent; cursor: pointer; position: relative; transition: all 0.2s; }
-        .dark .custom-checkbox { border-color: rgba(255,255,255,0.3); }
-        .custom-checkbox:checked { background-color: #00c27a; border-color: #00c27a; }
-        .custom-checkbox:checked::after { content: '✓'; position: absolute; color: white; font-size: 1rem; font-weight: 900; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-        .dark .custom-checkbox:checked::after { color: #0a0f0d; }
-
-        .fade-enter { animation: fadeIn 0.4s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .task-details-wrapper { transition: max-height 0.3s ease, opacity 0.2s ease; max-height: 0; opacity: 0; overflow: hidden; }
-        .task-details-wrapper.expanded { max-height: 500px; opacity: 1; }
-
-        /* Mini Player Pomodoro (Spotify Style) */
-        .mini-player { position: fixed; bottom: 20px; right: 20px; z-index: 999; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 100px; padding: 0.5rem 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: none; align-items: center; gap: 1rem; transition: transform 0.2s; }
-        .dark .mini-player { background: #111a15; border-color: #00c27a; box-shadow: 0 10px 25px rgba(0,194,122,0.1); }
-        .mini-player.show { display: flex; animation: slideUp 0.3s ease; }
-        @keyframes slideUp { from { transform: translateY(100px); } to { transform: translateY(0); } }
-
-        /* Loader Overlay */
-        #loader-overlay { position: fixed; inset: 0; background: #f8fafc; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .dark #loader-overlay { background: #0a0f0d; }
-
-        /* Tabela da Agenda */
+        /* AGENDA STYLING */
         .agenda-table { border-collapse: separate; border-spacing: 0; width: 100%; border: 1px solid #e2e8f0; table-layout: fixed; border-radius: 8px; overflow: hidden; }
-        .dark .agenda-table { border-color: rgba(255,255,255,0.06); }
-        .agenda-table th { background-color: #0f172a; color: white; font-weight: 600; padding: 10px; text-transform: uppercase; font-size: 0.7rem; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #334155; text-align: center; }
-        .dark .agenda-table th { background-color: #0a0f0d; border-color: rgba(255,255,255,0.06); }
+        .agenda-table th { background-color: #0f172a; color: white; font-weight: 600; padding: 10px; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #334155; }
         .agenda-table td { border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; position: relative; vertical-align: top; }
-        .dark .agenda-table td { border-color: rgba(255,255,255,0.06); }
+        .time-col { background-color: #f8fafc; color: #334155; font-weight: 600; vertical-align: middle !important; font-size: 0.75rem; }
+        .agenda-cell { width: 100%; height: 100%; min-height: 60px; padding: 6px; display: flex; align-items: center; justify-content: center; text-align: center; outline: none; word-break: break-word; white-space: pre-wrap; font-size: 11px; background-color: #fff; transition: background-color 0.2s; }
+        .agenda-cell:focus { background-color: #fffbeb; box-shadow: inset 0 0 0 2px #fbbf24; z-index: 10; }
         .row-controls { position: absolute; right: 0; top: 0; bottom: 0; width: 20px; display: flex; flex-direction: column; justify-content: center; gap: 2px; opacity: 0; transition: opacity 0.2s; pointer-events: none; background: rgba(255,255,255,0.9); border-left: 1px solid #e2e8f0; }
-        .dark .row-controls { background: rgba(17, 26, 21, 0.9); border-left-color: rgba(255,255,255,0.06); }
         tr:hover .row-controls { opacity: 1; pointer-events: auto; }
+
+        /* DASHBOARD ITEM STYLE */
+        .dash-item { border-left: 3px solid transparent; background-color: white; padding: 10px 14px; margin-bottom: 8px; border-radius: 6px; border: 1px solid #e2e8f0; transition: all 0.2s ease; display: flex; align-items: center; justify-content: space-between; }
+        .dash-item.done .subject-text { text-decoration: line-through; color: #94a3b8; }
+        .dash-item.done { background-color: #f8fafc; border-color: #e2e8f0; opacity: 0.75; }
+        .dash-item.crucial { border-left-color: #ef4444; background-color: #fff1f2; }
+        
+        .hy-card { padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 11px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; background: white; justify-content: space-between; color: #334155; }
+        .hy-card:hover { border-color: #10b981; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1); }
+        .hy-card.completed { background-color: #f0fdf4; border-color: #86efac; color: #166534; font-weight: 600; }
+        .hy-circle { width: 10px; height: 10px; border-radius: 50%; border: 2px solid #cbd5e1; background: white; flex-shrink: 0; }
+        .hy-card.completed .hy-circle { background: #166534; border-color: #166534; }
+
+        /* MODAIS E TRANSIÇÕES */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 1rem; }
+        .modal-overlay.open { display: flex; }
+        .modal-content { animation: scaleIn 0.2s ease; max-height: 90vh; overflow-y: auto; }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(.95); } to { opacity: 1; transform: scale(1); } }
+        .fade-enter { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        .fire-btn { filter: grayscale(100%); opacity: 0.3; transition: all 0.2s; cursor: pointer; }
+        .fire-btn.active { filter: grayscale(0%); opacity: 1; transform: scale(1.15); }
+        .fire-btn:hover { opacity: 0.7; filter: grayscale(30%); }
+
+        /* CALENDAR STYLES */
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; width: 100%; }
+        .calendar-day { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; font-size: 12px; cursor: pointer; position: relative; background: white; border: 1px solid transparent; color: #334155; transition: all 0.2s; overflow: hidden; min-width: 0; }
+        .calendar-day:hover { background: #f1f5f9; color: #0f172a; font-weight: 600; }
+        .calendar-day.today { background: #0f172a; color: white; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .calendar-day.has-activity::after { content: ''; width: 4px; height: 4px; background: #22c55e; border-radius: 50%; position: absolute; bottom: 4px; }
+
+        /* SETTINGS SIDEBAR */
+        .settings-sidebar { position: fixed; top: 0; right: -22rem; width: 22rem; height: 100vh; background: white; border-left: 1px solid #e2e8f0; z-index: 1001; transition: right 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow: -4px 0 24px rgba(0,0,0,0.08); overflow-y: auto; }
+        .settings-sidebar.open { right: 0; }
+        .settings-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 1000; display: none; }
+        .settings-overlay.open { display: block; }
+
+        /* DARK MODE & OLED */
+        body.dark-mode { background: #0f172a !important; color: #e2e8f0 !important; }
+        body.dark-mode #main-sidebar { background: #1e293b !important; border-color: #334155 !important; }
+        body.dark-mode #main-scroll { background: #0f172a !important; }
+        body.dark-mode .bg-white { background-color: #1e293b !important; }
+        body.dark-mode .bg-gray-50, body.dark-mode .bg-slate-50 { background-color: #0f172a !important; }
+        body.dark-mode .border-gray-200, body.dark-mode .border-gray-100 { border-color: #334155 !important; }
+        body.dark-mode .text-slate-800, body.dark-mode .text-slate-700, body.dark-mode .text-slate-900 { color: #e2e8f0 !important; }
+        body.dark-mode .text-gray-400, body.dark-mode .text-gray-500 { color: #94a3b8 !important; }
+        body.dark-mode .bg-gray-100, body.dark-mode .bg-slate-100 { background-color: #334155 !important; }
+        body.dark-mode .dash-item, body.dark-mode .hy-card, body.dark-mode .agenda-cell, body.dark-mode .settings-sidebar, body.dark-mode .reminder-panel, body.dark-mode .remanejo-card { background: #1e293b !important; border-color: #334155 !important; color: #e2e8f0 !important; }
+        body.dark-mode .modal-content { background: #1e293b !important; border-color: #334155 !important; color: #e2e8f0 !important; }
+        body.dark-mode .agenda-table { border-color: #334155; }
+        body.dark-mode .agenda-table td { border-color: #334155; }
+        
+        body.dark-mode.oled-mode { background: #000000 !important; }
+        body.dark-mode.oled-mode #main-scroll, body.dark-mode.oled-mode .bg-gray-50 { background-color: #000000 !important; }
+        body.dark-mode.oled-mode #main-sidebar, body.dark-mode.oled-mode .bg-white { background-color: #0a0a0a !important; border-color: #1a1a1a !important; }
+        body.dark-mode.oled-mode .modal-content { background: #0a0a0a !important; border-color: #1a1a1a !important; }
+
+        /* REMINDERS BALLOON */
+        .reminder-balloon { position: fixed; bottom: 84px; right: 24px; z-index: 150; } 
+        @media (min-width: 768px) { .reminder-balloon { bottom: 24px; } }
+        .reminder-fab { width: 52px; height: 52px; border-radius: 50%; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 4px 16px rgba(16,185,129,0.3); transition: transform 0.2s; }
+        .reminder-fab:hover { transform: scale(1.08); }
+        .reminder-panel { position: absolute; bottom: 64px; right: 0; width: 320px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 8px 32px rgba(0,0,0,0.12); padding: 20px; display: none; }
+        .reminder-panel.open { display: block; }
+        
+        /* FOCUS MODE */
+        body.focus-mode header, body.focus-mode aside, body.focus-mode .reminder-balloon, body.focus-mode nav { display: none !important; }
+        body.focus-mode #main-scroll { padding: 2rem !important; }
+        .focus-exit-btn { display: none; } body.focus-mode .focus-exit-btn { display: flex !important; }
+
+        /* LOADER */
+        #loader-overlay { position: fixed; inset: 0; background: #f8fafc; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        body.dark-mode #loader-overlay { background: #0a0f0d; }
+
+        .task-details-wrapper { transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out; max-height: 0; opacity: 0; overflow: hidden; }
+        .task-details-wrapper.expanded { max-height: 600px; opacity: 1; }
     </style>
 </head>
-<body class="transition-colors duration-300">
+<body class="bg-gray-50 text-slate-800 overflow-hidden" onkeydown="handleGlobalKeydown(event)">
 
     <!-- OVERLAY DE CARREGAMENTO -->
     <div id="loader-overlay">
-        <i class="fas fa-circle-notch fa-spin text-5xl text-cm-green mb-4"></i>
-        <h2 class="text-2xl font-serif font-bold text-slate-800 dark:text-white">A carregar o seu Cronograma...</h2>
-        <p class="text-gray-500 mt-2" id="loader-text">A sincronizar com a base de dados inteligente</p>
+        <i class="fas fa-circle-notch fa-spin text-5xl text-green-500 mb-4"></i>
+        <h2 class="text-2xl font-bold text-slate-800 dark:text-white font-serif">A carregar o seu Cronograma...</h2>
+        <p class="text-gray-500 mt-2" id="loader-text">A sincronizar inteligência com o banco de dados...</p>
     </div>
 
     <!-- TOAST -->
     <div id="toast-container" class="fixed top-20 right-6 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
 
-    <!-- MINI PLAYER POMODORO FLUTUANTE -->
-    <div id="mini-player" class="mini-player">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-cm-mid flex items-center justify-center text-cm-green animate-pulse"><i class="fas fa-clock"></i></div>
-            <div class="flex flex-col">
-                <span class="text-[10px] font-bold uppercase text-gray-500 tracking-widest leading-none mb-1" id="mp-phase">Foco: Aula</span>
-                <span class="font-mono font-black text-lg text-slate-800 dark:text-white leading-none" id="mp-time">50:00</span>
-            </div>
-        </div>
-        <div class="flex items-center gap-2 border-l border-gray-200 dark:border-gray-700 pl-3">
-            <button onclick="window.togglePomo()" class="w-10 h-10 rounded-full bg-slate-900 text-white dark:bg-cm-green dark:text-cm-dark flex items-center justify-center hover:scale-105 transition shadow-md" id="mp-play-btn"><i class="fas fa-pause"></i></button>
-            <button onclick="window.stopPomo()" class="w-8 h-8 rounded-full text-gray-400 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-cm-mid transition flex items-center justify-center"><i class="fas fa-times"></i></button>
-        </div>
-    </div>
-
-    <div class="h-screen flex flex-col pb-16 md:pb-0 relative z-10">
+    <div class="h-screen flex flex-col pb-16 md:pb-0">
         
-        <!-- HEADER SUPERIOR -->
-        <header class="glass-header p-4 z-50 flex-shrink-0 flex justify-between items-center transition-colors duration-300">
-            <div class="flex items-center gap-4 md:gap-6">
-                <button onclick="toggleSidebar()" class="text-gray-500 hover:text-cm-green focus:outline-none transition-colors"><i class="fas fa-bars text-xl"></i></button>
-                <div class="font-serif font-black text-2xl text-slate-900 dark:text-white tracking-tight">Crono<span class="text-cm-green">Med</span></div>
+        <!-- HEADER -->
+        <header class="bg-black text-white p-4 shadow-lg sticky-header z-50 flex-shrink-0 flex justify-between items-center transition-colors duration-300">
+            <div class="flex items-center gap-6">
+                <button onclick="toggleSidebar()" class="text-gray-400 hover:text-white focus:outline-none transition-colors">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2 font-serif">
+                        <i class="fas fa-heartbeat text-green-500"></i> CronoMED
+                    </h1>
+                </div>
             </div>
-            <div class="text-right flex items-center gap-3 md:gap-5">
-                <button onclick="toggleDarkMode()" class="text-gray-400 hover:text-slate-800 dark:hover:text-white transition text-lg" title="Mudar Tema"><i class="fas fa-moon" id="theme-icon"></i></button>
-                <div class="relative cursor-pointer group" onclick="toggleProfileMenu()">
-                    <div class="w-10 h-10 rounded-full bg-cm-green text-white font-bold flex items-center justify-center shadow-md uppercase" id="user-avatar">U</div>
-                    <!-- Menu de Perfil -->
-                    <div id="profile-menu" class="absolute right-0 top-12 mt-2 w-48 bg-white dark:bg-cm-dark2 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-2 hidden flex-col z-50 transition-colors">
-                        <div class="px-4 py-2 border-b border-gray-100 dark:border-gray-800 mb-1">
-                            <p class="text-sm font-bold text-slate-800 dark:text-white truncate" id="user-name">Usuário</p>
-                            <p class="text-[10px] text-gray-500 truncate" id="user-email">email@email.com</p>
-                        </div>
-                        <button onclick="window.recalculateRoute()" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-cm-mid flex items-center gap-2"><i class="fas fa-sync-alt w-4"></i> Recalcular Rota</button>
-                        <button onclick="window.handleLogout()" class="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-2"><i class="fas fa-sign-out-alt w-4"></i> Sair</button>
+            <div class="text-right flex items-center gap-4">
+                <div class="flex flex-col items-end hidden sm:flex">
+                    <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Progresso Geral</div>
+                    <div class="w-40 bg-gray-800 rounded-full h-2 mt-1 border border-gray-700 relative overflow-hidden">
+                        <div id="global-progress" class="bg-green-500 h-2 rounded-full transition-all duration-700 shadow-[0_0_10px_rgba(34,197,94,0.5)] absolute top-0 left-0" style="width: 0%"></div>
                     </div>
                 </div>
+                <div class="text-xl font-black text-white w-12 text-right hidden sm:block" id="global-percent-text">0%</div>
+                <button onclick="openSettingsSidebar()" class="text-gray-400 hover:text-white transition-colors ml-2 bg-gray-800 p-2 rounded-full" title="Configurações">
+                    <i class="fas fa-cog"></i>
+                </button>
             </div>
         </header>
 
         <div class="flex flex-1 overflow-hidden relative">
-            <!-- SIDEBAR ESQUERDA -->
-            <aside id="main-sidebar" class="w-72 sidebar hidden md:flex">
-                <div class="p-5 border-b border-gray-200 dark:border-gray-800 space-y-2 shrink-0">
-                    <button onclick="switchView('homepage')" id="nav-homepage" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all bg-cm-green/10 text-cm-green dark:bg-cm-green dark:text-cm-dark text-left"><i class="fas fa-home text-lg w-5 text-center"></i><span>Página Inicial</span></button>
-                    <button onclick="switchView('week')" id="nav-week" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-gray-500 hover:bg-gray-100 dark:hover:bg-cm-mid dark:text-cm-muted hover:text-slate-800 dark:hover:text-white text-left"><i class="fas fa-calendar-alt text-lg w-5 text-center"></i><span>A Minha Semana</span></button>
-                    <button onclick="switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-gray-500 hover:bg-gray-100 dark:hover:bg-cm-mid dark:text-cm-muted hover:text-slate-800 dark:hover:text-white text-left"><i class="fas fa-chart-pie text-lg w-5 text-center"></i><span>Dashboard</span></button>
-                    <button onclick="switchView('search')" id="nav-search" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-gray-500 hover:bg-gray-100 dark:hover:bg-cm-mid dark:text-cm-muted hover:text-slate-800 dark:hover:text-white text-left"><i class="fas fa-search text-lg w-5 text-center"></i><span>Banco de Tarefas</span></button>
-                </div>
-                
-                <!-- Botão de Remanejo IA -->
-                <div class="px-5 py-3 border-b border-gray-200 dark:border-gray-800">
-                    <button onclick="openRemanejoModal()" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs bg-purple-50 text-purple-600 hover:bg-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:hover:bg-purple-900/40 border border-purple-200 dark:border-purple-800 transition">
-                        <i class="fas fa-wand-magic-sparkles"></i> Remanejamento IA
+            <!-- SIDEBAR -->
+            <aside id="main-sidebar" class="w-80 bg-white border-r border-gray-200 sidebar flex flex-col z-40 shadow-xl hidden md:flex transition-colors duration-300">
+                <div class="p-6 border-b border-gray-100 bg-gray-50/50 space-y-3 shrink-0">
+                    <button onclick="switchView('homepage')" id="nav-homepage" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-white border border-gray-200 text-gray-600 hover:bg-gray-100 text-left">
+                        <i class="fas fa-home text-lg w-5 text-center"></i><span>Página Inicial</span>
+                    </button>
+                    <button onclick="switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-black text-white hover:bg-gray-800 text-left">
+                        <i class="fas fa-chart-line text-lg w-5 text-center"></i><span>Dashboard &amp; Metas</span>
+                    </button>
+                    <button onclick="switchView('search')" id="nav-search" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-white border border-gray-200 text-gray-600 hover:bg-gray-100 text-left">
+                        <i class="fas fa-search text-lg w-5 text-center"></i><span>Busca de Tarefas</span>
+                    </button>
+                    <button onclick="openModal('remanejo')" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-purple-50 border border-purple-200 text-purple-700 hover:bg-purple-100 text-left">
+                        <i class="fas fa-wand-magic-sparkles text-lg w-5 text-center"></i><span>Remanejamento IA</span>
                     </button>
                 </div>
-
-                <div class="px-5 pt-4 pb-2 text-[10px] uppercase font-bold text-gray-400 dark:text-cm-muted tracking-widest">Semanas do Curso</div>
-                <nav class="px-3 space-y-1 sidebar-content" id="week-nav"></nav>
+                <nav class="p-3 space-y-1 sidebar-content" id="week-nav"></nav>
             </aside>
 
-            <!-- CONTEÚDO PRINCIPAL -->
-            <main class="flex-1 p-4 md:p-8 overflow-y-auto relative w-full" id="main-scroll">
-                <div id="content-area" class="container mx-auto max-w-6xl pb-24"></div>
+            <!-- MAIN CONTENT -->
+            <main class="flex-1 p-4 md:p-8 overflow-y-auto bg-slate-50 relative w-full transition-colors duration-300" id="main-scroll">
+                <button onclick="toggleFocusMode()" class="focus-exit-btn fixed top-6 right-6 z-[999] bg-red-600 text-white px-5 py-2.5 rounded-full font-black shadow-xl hover:bg-red-700 transition items-center gap-2"><i class="fas fa-compress-arrows-alt"></i> Sair do Foco</button>
+                <div id="content-area" class="container mx-auto max-w-7xl pb-24"></div>
             </main>
         </div>
 
-        <!-- NAVEGAÇÃO MOBILE (Fundo da tela) -->
-        <nav class="md:hidden fixed bottom-0 left-0 w-full glass-header flex justify-around p-3 z-50">
-            <button onclick="switchView('homepage')" class="flex flex-col items-center text-gray-500 dark:text-cm-muted hover:text-cm-green transition-colors"><i class="fas fa-home text-xl mb-1"></i><span class="text-[9px] font-bold uppercase">Início</span></button>
-            <button onclick="switchView('week')" class="flex flex-col items-center text-gray-500 dark:text-cm-muted hover:text-cm-green transition-colors"><i class="fas fa-calendar-alt text-xl mb-1"></i><span class="text-[9px] font-bold uppercase">Semana</span></button>
-            <button onclick="switchView('dashboard')" class="flex flex-col items-center text-gray-500 dark:text-cm-muted hover:text-cm-green transition-colors"><i class="fas fa-chart-pie text-xl mb-1"></i><span class="text-[9px] font-bold uppercase">Resumo</span></button>
-            <button onclick="switchView('search')" class="flex flex-col items-center text-gray-500 dark:text-cm-muted hover:text-cm-green transition-colors"><i class="fas fa-search text-xl mb-1"></i><span class="text-[9px] font-bold uppercase">Buscar</span></button>
+        <!-- MOBILE NAV -->
+        <nav class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 flex justify-around p-3 z-50 dark:bg-slate-900 dark:border-slate-800">
+            <button onclick="switchView('homepage')" class="flex flex-col items-center text-gray-500 hover:text-green-600 transition-colors"><i class="fas fa-home text-lg mb-1"></i><span class="text-[9px] font-bold">Início</span></button>
+            <button onclick="switchView('week')" class="flex flex-col items-center text-gray-500 hover:text-green-600 transition-colors"><i class="fas fa-calendar-alt text-lg mb-1"></i><span class="text-[9px] font-bold">Semana</span></button>
+            <button onclick="switchView('dashboard')" class="flex flex-col items-center text-gray-500 hover:text-green-600 transition-colors"><i class="fas fa-chart-pie text-lg mb-1"></i><span class="text-[9px] font-bold">Resumo</span></button>
+            <button onclick="switchView('search')" class="flex flex-col items-center text-gray-500 hover:text-green-600 transition-colors"><i class="fas fa-search text-lg mb-1"></i><span class="text-[9px] font-bold">Buscar</span></button>
         </nav>
     </div>
 
-    <!-- ================== MODAIS ================== -->
-    
-    <!-- MODAL: ADICIONAR TAREFA -->
+    <!-- ================== MODAIS E OVERLAYS ================== -->
+
+    <!-- CONFIGURAÇÕES (SIDEBAR) -->
+    <div id="settings-overlay" class="settings-overlay" onclick="closeSettingsSidebar()"></div>
+    <div id="settings-sidebar" class="settings-sidebar bg-white">
+        <div class="p-6 border-b border-gray-200 flex justify-between items-center bg-slate-900 text-white">
+            <h3 class="font-black text-lg flex items-center gap-2"><i class="fas fa-cog"></i> Configurações</h3>
+            <button onclick="closeSettingsSidebar()" class="text-gray-300 hover:text-white transition"><i class="fas fa-times text-xl"></i></button>
+        </div>
+        <div class="p-6 space-y-6">
+            <div>
+                <h4 class="text-xs font-bold uppercase text-gray-400 tracking-widest mb-4">Conta</h4>
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-3">
+                    <div class="font-bold text-sm text-slate-800 truncate" id="user-name">Usuário</div>
+                    <div class="text-[10px] text-gray-500 truncate" id="user-email">email@email.com</div>
+                </div>
+                <button onclick="window.recalculateRoute()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 bg-white hover:bg-blue-50 text-blue-700 font-bold text-sm transition card-shadow mb-2"><i class="fas fa-sync-alt"></i> Recalcular Rota (Novo Ano)</button>
+                <button onclick="window.handleLogout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 bg-white hover:bg-red-50 text-red-600 font-bold text-sm transition card-shadow"><i class="fas fa-sign-out-alt"></i> Sair da Conta</button>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold uppercase text-gray-400 tracking-widest mb-4">Aparência</h4>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50">
+                        <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white"><i class="fas fa-moon text-sm"></i></div><div><div class="font-bold text-sm text-slate-800">Modo Noturno</div></div></div>
+                        <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="dark-mode-toggle" class="sr-only peer" onchange="toggleDarkMode(this.checked)"><div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-slate-900"></div></label>
+                    </div>
+                    <div class="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50">
+                        <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-black flex items-center justify-center text-white"><i class="fas fa-circle text-sm"></i></div><div><div class="font-bold text-sm text-slate-800">True Black (OLED)</div></div></div>
+                        <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="oled-mode-toggle" class="sr-only peer" onchange="toggleOledMode(this.checked)"><div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div></label>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold uppercase text-gray-400 tracking-widest mb-4">Avançado</h4>
+                <button onclick="closeSettingsSidebar(); openModal('backup');" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-bold text-sm transition card-shadow">
+                    <i class="fas fa-file-code text-gray-500"></i> Backup Manual Texto
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD TAREFA AVULSA -->
     <div class="modal-overlay" id="modal-add-task">
-        <div class="modal-content text-slate-800 dark:text-white">
-            <button class="absolute top-4 right-4 text-gray-400 hover:text-slate-800 dark:hover:text-white" onclick="closeModal('add-task')"><i class="fas fa-times text-xl"></i></button>
-            <h3 class="text-2xl font-serif mb-2">Novo Tema</h3>
-            <p class="text-sm text-gray-500 dark:text-cm-muted mb-6">Adicione um conteúdo extra à sua semana.</p>
-            
+        <div class="modal-content bg-white">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-black text-gray-900">Nova Tarefa</h3>
+                <button onclick="closeModal('add-task')" class="text-gray-400 hover:text-black"><i class="fas fa-times text-lg"></i></button>
+            </div>
             <div class="space-y-4 mb-6">
                 <div>
-                    <label class="block text-[10px] font-bold uppercase text-gray-500 tracking-widest mb-1.5">Nome da Aula/Tema</label>
-                    <input type="text" id="add-nome" placeholder="Ex: Aula Prática de Suturas" class="w-full bg-gray-50 dark:bg-cm-mid border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-sm outline-none focus:border-cm-green">
+                    <label class="block text-xs font-bold uppercase text-gray-500 tracking-widest mb-1.5">Nome do Tema</label>
+                    <input type="text" id="add-nome" placeholder="Ex: Aula da Faculdade" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-green-500">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[10px] font-bold uppercase text-gray-500 tracking-widest mb-1.5">Área Principal</label>
-                        <select id="add-area" class="w-full bg-gray-50 dark:bg-cm-mid border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-sm outline-none focus:border-cm-green cursor-pointer">
+                        <label class="block text-xs font-bold uppercase text-gray-500 tracking-widest mb-1.5">Área</label>
+                        <select id="add-area" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-green-500 cursor-pointer">
                             <option value="Cirurgia">Cirurgia</option>
                             <option value="Clínica Médica">Clínica Médica</option>
                             <option value="Ginecologia e Obstetrícia">Gineco e Obstetrícia</option>
@@ -241,60 +281,154 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold uppercase text-gray-500 tracking-widest mb-1.5">Prioridade</label>
-                        <select id="add-prio" class="w-full bg-gray-50 dark:bg-cm-mid border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-sm outline-none focus:border-cm-green cursor-pointer">
-                            <option value="1">Alta (Crucial)</option>
-                            <option value="2" selected>Média</option>
-                            <option value="3">Baixa</option>
-                            <option value="4">Opcional</option>
+                        <label class="block text-xs font-bold uppercase text-gray-500 tracking-widest mb-1.5">Prioridade</label>
+                        <select id="add-prio" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-green-500 cursor-pointer">
+                            <option value="1">Alta (1)</option>
+                            <option value="2" selected>Média (2)</option>
+                            <option value="3">Baixa (3)</option>
+                            <option value="4">Opcional (4)</option>
                         </select>
                     </div>
                 </div>
             </div>
-            <button onclick="saveCustomTask()" class="w-full bg-cm-green text-white dark:text-cm-dark py-3.5 rounded-xl font-bold hover:bg-cm-greenD transition shadow-md">Adicionar à Semana</button>
+            <button onclick="saveCustomTask()" class="w-full bg-green-600 text-white py-3.5 rounded-xl font-bold hover:bg-green-700 transition">Adicionar à Semana</button>
         </div>
     </div>
 
     <!-- MODAL: REPLICAR AGENDA -->
     <div class="modal-overlay" id="modal-replica-agenda">
-        <div class="modal-content text-center">
-            <div class="mb-5 text-blue-500 bg-blue-50 dark:bg-blue-900/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto"><i class="fas fa-copy text-2xl"></i></div>
-            <h3 class="text-xl font-serif text-slate-800 dark:text-white mb-2">Replicar Grade Horária</h3>
-            <p class="text-sm text-gray-500 mb-6">Os seus blocos e horários desta semana serão copiados para o futuro.</p>
-            <div class="space-y-3">
-                <button onclick="executeReplicaAgenda(4)" class="w-full py-3.5 bg-gray-100 dark:bg-cm-mid text-slate-800 dark:text-white rounded-xl font-bold hover:bg-gray-200 dark:hover:bg-gray-800 transition">Copiar para as próximas 4 semanas</button>
-                <button onclick="executeReplicaAgenda(999)" class="w-full py-3.5 bg-cm-green text-white dark:text-cm-dark rounded-xl font-bold shadow-md hover:bg-cm-greenD transition">Copiar para todo o resto do ano</button>
-                <button onclick="closeModal('replica-agenda')" class="w-full py-2 text-xs font-bold text-gray-400 hover:text-gray-600 dark:hover:text-white mt-2">Cancelar</button>
+        <div class="modal-content bg-white text-center">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-xl font-black text-gray-900 mx-auto">Replicar Grade Horária</h3>
+                <button onclick="closeModal('replica-agenda')" class="text-gray-400 hover:text-black absolute right-6 top-6"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="mb-5 text-blue-500 bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mt-4"><i class="fas fa-copy text-2xl"></i></div>
+            <p class="text-sm text-gray-500 mb-6">Quantas semanas à frente deseja manter esta mesma rotina de horários?</p>
+            <div class="space-y-4">
+                <input type="number" id="replica-weeks-input" value="4" min="1" class="w-24 text-center bg-gray-50 border border-gray-200 text-lg font-black px-4 py-3 rounded-xl mx-auto block focus:outline-none focus:border-blue-500">
+                <button onclick="executeReplicaAgenda()" class="w-full py-3.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition shadow-lg">Replicar Grade</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL: REMANEJAMENTO INTELIGENTE -->
-    <div class="modal-overlay" id="modal-remanejo">
-        <div class="modal-content">
+    <!-- MODAL: CADERNO DE ANOTAÇÕES -->
+    <div id="notes-modal" class="modal-overlay">
+        <div class="modal-content bg-white flex flex-col">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-serif text-slate-900 dark:text-white flex items-center gap-2"><i class="fas fa-magic text-purple-500"></i> Remanejamento IA</h3>
-                <button onclick="closeModal('remanejo')" class="text-gray-400 hover:text-slate-800 dark:hover:text-white"><i class="fas fa-times"></i></button>
+                <h3 class="text-xl font-black text-slate-900 flex items-center gap-2"><i class="fas fa-book-medical text-green-600"></i> Caderno de Anotações</h3>
+                <button onclick="closeNotesModal()" class="text-gray-400 hover:text-black w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition"><i class="fas fa-times"></i></button>
             </div>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">O sistema detetou tarefas atrasadas de semanas anteriores. Como quer reorganizar o seu estudo?</p>
+            <p class="text-xs text-gray-500 mb-4">Guarde os seus links do Anki, videoaulas ou resumos para este tema.</p>
+            <textarea id="notes-textarea" rows="6" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition resize-none custom-scrollbar" placeholder="Cole aqui o link do seu deck do Anki, Drive ou resumo..." oninput="window.parseNotesLinks()"></textarea>
+            <div id="notes-links-container" class="hidden mt-4 w-full"></div>
+            <div class="flex gap-3 mt-6 pt-4 border-t border-gray-100">
+                <button onclick="closeNotesModal()" class="flex-1 py-3 rounded-xl font-bold text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition">Fechar</button>
+                <button onclick="saveNotes()" class="flex-1 py-3 rounded-xl font-bold text-sm bg-black text-white hover:bg-gray-800 transition">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: BACKUP MANUAL (TEXTO) -->
+    <div id="modal-backup" class="modal-overlay">
+        <div class="modal-content bg-white">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-black text-gray-900">Backup Manual</h3>
+                <button onclick="closeModal('backup')" class="text-gray-400 hover:text-black transition"><i class="fas fa-times"></i></button>
+            </div>
+            <p class="text-sm text-gray-500 mb-6">Seus dados estão seguros no Firebase, mas você pode exportar ou importar manualmente.</p>
+            <div class="space-y-6">
+                <div class="bg-gray-50 p-5 rounded-xl border border-gray-200">
+                    <label class="block text-xs font-bold uppercase mb-2 text-gray-500">1. Exportar Código</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="export-data" readonly class="w-full bg-white border border-gray-300 text-gray-500 text-xs p-3 rounded-lg font-mono focus:outline-none shadow-inner" value="...">
+                        <button onclick="copyToClipboard()" class="bg-black text-white px-5 rounded-lg text-xs font-bold hover:bg-gray-800 transition">Copiar</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase mb-2 text-gray-500">2. Importar Código</label>
+                    <textarea id="import-data" rows="3" class="w-full border border-gray-300 p-3 rounded-lg text-xs font-mono outline-none shadow-sm transition focus:border-blue-500"></textarea>
+                    <button onclick="importData()" class="mt-4 w-full bg-blue-600 text-white py-3.5 rounded-lg font-bold text-sm hover:bg-blue-700 transition shadow-lg"><i class="fas fa-sync-alt"></i> Restaurar Dados</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: DELETE -->
+    <div id="modal-delete" class="modal-overlay">
+        <div class="modal-content bg-white text-center max-w-sm">
+            <div class="mb-5 text-red-500 bg-red-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto"><i class="fas fa-trash-alt text-2xl"></i></div>
+            <h3 class="text-xl font-black text-gray-900 mb-2">Excluir Item?</h3>
+            <p class="text-sm text-gray-500 mb-8">Esta ação removerá a tarefa. Pode desfazer usando Ctrl+Z.</p>
+            <div class="flex gap-3 justify-center">
+                <button onclick="closeModal('delete')" class="px-6 py-3 rounded-xl font-bold text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition flex-1">Cancelar</button>
+                <button id="confirm-delete-btn" class="px-6 py-3 rounded-xl font-bold text-sm bg-red-600 text-white hover:bg-red-700 transition flex-1 shadow-lg shadow-red-500/30">Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: REMANEJO -->
+    <div id="modal-remanejo" class="modal-overlay">
+        <div class="modal-content bg-white">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-black text-slate-900 flex items-center gap-2"><i class="fas fa-magic text-purple-600"></i> Remanejamento IA</h3>
+                <button onclick="closeModal('remanejo')" class="text-gray-400 hover:text-black"><i class="fas fa-times"></i></button>
+            </div>
+            <p class="text-sm text-gray-500 mb-6">O sistema detectou tarefas atrasadas de semanas anteriores. Como quer reorganizar o seu estudo?</p>
             
             <div id="remanejo-options" class="space-y-3">
-                <button onclick="applyRemanejo('dilute')" class="w-full text-left p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition group">
-                    <div class="font-bold text-slate-800 dark:text-white group-hover:text-purple-700 dark:group-hover:text-purple-300">Diluir Suavemente</div>
-                    <div class="text-xs text-gray-500 mt-1">Redistribui os atrasos pelas próximas 4 semanas para não sobrecarregar.</div>
+                <button onclick="applyRemanejo('dilute')" class="w-full text-left p-4 rounded-xl border border-gray-200 hover:border-purple-400 hover:bg-purple-50 transition group">
+                    <div class="font-bold text-slate-800 group-hover:text-purple-700">Diluir Suavemente</div>
+                    <div class="text-xs text-gray-500 mt-1">Redistribui os atrasos pelas próximas 4 semanas.</div>
                 </button>
-                <button onclick="applyRemanejo('cut')" class="w-full text-left p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-red-400 dark:hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition group">
-                    <div class="font-bold text-slate-800 dark:text-white group-hover:text-red-700 dark:group-hover:text-red-300">Corte de Gordura (Intensivo)</div>
-                    <div class="text-xs text-gray-500 mt-1">Elimina os atrasos que são de Prioridade Baixa, mantendo apenas o essencial.</div>
+                <button onclick="applyRemanejo('cut')" class="w-full text-left p-4 rounded-xl border border-gray-200 hover:border-red-400 hover:bg-red-50 transition group">
+                    <div class="font-bold text-slate-800 group-hover:text-red-700">Corte de Gordura (Intensivo)</div>
+                    <div class="text-xs text-gray-500 mt-1">Elimina atrasos de Prioridade Baixa, mantendo o essencial.</div>
                 </button>
             </div>
             
             <div id="remanejo-empty" class="hidden text-center py-8">
-                <i class="fas fa-check-circle text-4xl text-cm-green mb-3"></i>
-                <div class="font-bold text-slate-800 dark:text-white">Não há atrasos!</div>
-                <div class="text-sm text-gray-500">O seu cronograma está perfeitamente em dia. Continue assim!</div>
+                <i class="fas fa-check-circle text-4xl text-green-500 mb-3"></i>
+                <div class="font-bold text-slate-800">Não há atrasos!</div>
+                <div class="text-sm text-gray-500">O seu cronograma está em dia.</div>
             </div>
         </div>
+    </div>
+
+    <!-- MODAL: REVISÃO -->
+    <div id="modal-review" class="modal-overlay">
+        <div class="modal-content bg-white text-center max-w-sm">
+            <div class="mb-5 text-blue-600 bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto"><i class="fas fa-calendar-check text-2xl"></i></div>
+            <h3 class="text-xl font-black text-gray-900 mb-2">Tarefa Concluída!</h3>
+            <p class="text-sm text-gray-500 mb-6">Deseja agendar uma revisão espaçada?</p>
+            <div class="grid gap-3">
+                <button onclick="scheduleReview(10)" class="w-full py-3.5 rounded-xl font-bold text-sm bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 transition flex justify-between px-6"><span>Difícil</span> <span>10 dias</span></button>
+                <button onclick="scheduleReview(15)" class="w-full py-3.5 rounded-xl font-bold text-sm bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border border-yellow-200 transition flex justify-between px-6"><span>Médio</span> <span>15 dias</span></button>
+                <button onclick="scheduleReview(20)" class="w-full py-3.5 rounded-xl font-bold text-sm bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 transition flex justify-between px-6"><span>Fácil</span> <span>20 dias</span></button>
+                <button onclick="closeModal('review')" class="w-full py-3 rounded-xl font-bold text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition mt-2">Não agendar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- REMINDERS (BALÃO FLUTUANTE) -->
+    <div class="reminder-balloon z-[150]">
+        <div id="reminder-panel" class="reminder-panel bg-white">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-3">
+                <h4 class="font-black text-sm text-slate-800 flex items-center gap-2"><i class="fas fa-bell text-yellow-500"></i> Seus Lembretes</h4>
+                <button onclick="toggleReminderPanel()" class="text-gray-400 hover:text-gray-800 transition"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="reminder-list" class="mb-4 max-h-48 overflow-y-auto custom-scrollbar"></div>
+            <div class="space-y-3 pt-4 border-t border-gray-100">
+                <input type="text" id="reminder-text" placeholder="O que não pode esquecer?" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-xs outline-none focus:border-green-500 transition">
+                <div class="flex gap-2">
+                    <input type="date" id="reminder-date" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-2 py-2.5 text-xs outline-none focus:border-green-500">
+                    <select id="reminder-type" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-2 py-2.5 text-[10px] font-bold uppercase outline-none focus:border-green-500">
+                        <option value="day">Para Hoje</option><option value="week">Esta Semana</option><option value="future">Outra Data</option>
+                    </select>
+                </div>
+                <button onclick="addReminder()" class="w-full bg-slate-900 text-white py-3 rounded-xl text-xs font-black hover:bg-slate-800 transition shadow-md">Salvar Lembrete</button>
+            </div>
+        </div>
+        <button class="reminder-fab bg-black" onclick="toggleReminderPanel()" title="Lembretes" style="position:relative"><i class="fas fa-bell"></i><span id="reminder-badge" class="hidden absolute -top-1 -right-1 w-5 h-5 bg-red-500 border-2 border-white rounded-full text-white text-[9px] font-bold flex items-center justify-center"></span></button>
     </div>
 
     <!-- ======================================================================
@@ -305,32 +439,49 @@
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
-        // 📥 IMPORTANDO O BANCO DE TAREFAS DO SEU GITHUB
+        // 📥 IMPORTANDO O BANCO DE TAREFAS (Requer o arquivo banco.js no GitHub)
         import { bancoDeMaterias } from './banco.js';
 
-        // ⚠️ COLE AS SUAS CHAVES DO FIREBASE ABAIXO
+        // ⚠️ SUAS CHAVES DO FIREBASE 
         const firebaseConfig = {
             apiKey: "AIzaSyAwQrhAoma0iuofm_MMghCbBnPPtLbrn0E",
             authDomain: "cronomed-4b880.firebaseapp.com",
             projectId: "cronomed-4b880",
             storageBucket: "cronomed-4b880.firebasestorage.app",
             messagingSenderId: "853512629124",
-            appId: "1:853512629124:web:42bb7b6808ca5487060bd1"
+            appId: "1:853512629124:web:42bb7b6808ca5487060bd1",
+            measurementId: "G-TEYJ2D53QD"
         };
 
         let app, auth, db, currentUser;
         
         // Estado Global
-        window.state = { weeks: [], progress: {}, dailyStats: {} };
+        window.state = { weeks: [], progress: {}, dailyStats: {}, timeTracking: {} };
         window.activeView = 'homepage';
         window.activeWeek = 1;
         window.expandedCards = {};
-        window.isDarkMode = false;
         
-        // Pomodoro
+        // Lo-Fi e Pomo
+        window.isFocusMode = false;
         window.pomoTime = 50 * 60;
+        window.pomoTotalTime = 50 * 60;
         window.isPomoRunning = false;
         window.activePomoId = null;
+        window.pomoPhase = 'aula';
+        window.sessionStudySeconds = 0;
+        window.pomoLastTick = 0;
+        window.lofiEnabled = false;
+        window.lofiType = 'temporal';
+        window.audioCtx = null; window.noiseNode = null; window.isLoFiPlaying = false;
+        window.rainAudio = new Audio('https://actions.google.com/sounds/v1/weather/thunderstorm.ogg');
+        window.rainAudio.loop = true;
+
+        // Utilitários de Undo/Redo Local
+        let undoStack = []; let redoStack = [];
+        window.pushState = function() { undoStack.push(JSON.stringify(window.state)); if(undoStack.length > 50) undoStack.shift(); redoStack = []; }
+        window.undo = function() { if(undoStack.length === 0) return; redoStack.push(JSON.stringify(window.state)); window.state = JSON.parse(undoStack.pop()); window.triggerSave(); window.updateUI(); window.showToast('Ação desfeita');}
+        window.redo = function() { if(redoStack.length === 0) return; undoStack.push(JSON.stringify(window.state)); window.state = JSON.parse(redoStack.pop()); window.triggerSave(); window.updateUI(); window.showToast('Ação refeita');}
+        window.handleGlobalKeydown = function(e) { if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); window.undo(); } if ((e.ctrlKey || e.metaKey) && e.key === 'y') { e.preventDefault(); window.redo(); } }
 
         // ----------------------------------------------------------------------
         // INICIALIZAÇÃO E AUTENTICAÇÃO
@@ -351,52 +502,53 @@
                         const data = docSnap.data();
                         document.getElementById('user-name').innerText = data.nome || 'Usuário';
                         
-                        // Proteções
                         if (!data.acesso_liberado) { window.location.href = "index.html"; return; }
                         if (!data.has_onboarded) { window.location.href = "onboarding.html"; return; }
                         
-                        // Carrega estado ou Gera cronograma
+                        // Verifica se já tem cronograma gerado
                         if (data.app_state && data.app_state.weeks && data.app_state.weeks.length > 0) {
                             window.state = data.app_state;
+                            if(!window.state.timeTracking) window.state.timeTracking = {};
                             finishLoading();
                         } else {
+                            // Gera o cronograma
                             generateSchedule(data.onboarding_data);
                         }
                     } else { window.location.href = "index.html"; }
                 } else { window.location.href = "index.html"; }
             });
         } catch(e) {
-            console.error("Firebase Auth Error", e);
-            document.getElementById('loader-text').innerText = "Modo Teste Local (Sem Nuvem).";
-            generateSchedule({ horas: "4h", internato: "nao", dataInicio: new Date().toISOString(), dataProva: new Date(new Date().setMonth(new Date().getMonth() + 10)).toISOString() });
+            console.error("Firebase Initialization Error:", e);
+            document.getElementById('loader-text').innerText = "Rodando em modo local (Firebase Offline).";
+            finishLoading();
         }
 
         // ----------------------------------------------------------------------
-        // O CÉREBRO: ALGORITMO GERADOR (Com a "Regra do Teto")
+        // ALGORITMO GERADOR INTELIGENTE (MAX 15 TAREFAS/SEMANA)
         // ----------------------------------------------------------------------
         async function generateSchedule(obData) {
-            document.getElementById('loader-text').innerText = "A processar matriz de prioridades e teto de tarefas...";
+            document.getElementById('loader-text').innerText = "A processar matriz de prioridades (Limite 15/sem)...";
             
-            // 1. Cálculos de Tempo
-            const start = obData.dataInicio ? new Date(obData.dataInicio + 'T12:00:00') : new Date();
-            const end = obData.dataProva ? new Date(obData.dataProva + 'T12:00:00') : new Date(new Date().setMonth(new Date().getMonth() + 10));
+            // Lógica Básica de Datas
+            const startStr = obData.dataInicio || new Date().toISOString();
+            const endStr = obData.dataProva || new Date(new Date().setMonth(new Date().getMonth() + 10)).toISOString();
+            const start = new Date(startStr.split('T')[0] + 'T12:00:00');
+            const end = new Date(endStr.split('T')[0] + 'T12:00:00');
             const totalSemanas = Math.max(4, Math.ceil((end - start) / (1000 * 60 * 60 * 24 * 7)));
             
-            // 2. A "Regra do Teto" (Max 15 tarefas teóricas por semana)
             const MAX_TASKS_PER_WEEK = 15;
             const maxTasksAllowed = totalSemanas * MAX_TASKS_PER_WEEK;
 
-            // 3. Filtros Base (Ordena pelo score que você criou)
+            // Filtros no Banco
             let filteredDB = [...bancoDeMaterias].sort((a, b) => b.score - a.score);
             if (obData.horas === '2h') filteredDB = filteredDB.filter(t => t.prioridade <= 2);
             else if (obData.horas === '4h') filteredDB = filteredDB.filter(t => t.prioridade <= 3);
             
-            // Aplica o teto cortando as menos importantes
             if (filteredDB.length > maxTasksAllowed) {
                 filteredDB = filteredDB.slice(0, maxTasksAllowed);
             }
             
-            // 4. Estruturar as Semanas (Incluindo os blocos da noite)
+            // Prepara Semanas e Agenda Padrão
             const newWeeks = [];
             for(let i=0; i<totalSemanas; i++) {
                 const wStart = new Date(start); wStart.setDate(start.getDate() + (i*7));
@@ -421,12 +573,13 @@
                         category: t.area,
                         subject: t.tema,
                         prioridade: t.prioridade,
-                        tipo: isRevision ? 'revisao' : 'materia_nova'
+                        tipo: isRevision ? 'revisao' : 'materia_nova',
+                        score: t.score
                     });
                 });
             };
 
-            // 5. Distribuir Tarefas (Internato vs. Livre)
+            // Distribuição (Internato vs Livre)
             if (obData.internato === 'sim' && obData.datasRodizios) {
                 const mapArea = { 'Cirurgia': 'cirurgia', 'Clínica Médica': 'clinica', 'Ginecologia e Obstetrícia': 'go', 'Pediatria': 'ped' };
                 
@@ -449,46 +602,33 @@
                 Object.keys(tasksByArea).forEach(area => {
                     const tasks = tasksByArea[area];
                     const rKey = mapArea[area];
-                    
                     if (rKey) {
                         const r = obData.datasRodizios[rKey];
                         if (r && r.concluido) {
-                            const revTasks = tasks.filter(t => t.prioridade === 1);
-                            spreadTasks(revTasks, newWeeks, true);
+                            spreadTasks(tasks.filter(t => t.prioridade === 1), newWeeks, true);
                         } else if (r && r.in && r.fim) {
-                            const rStart = new Date(r.in + 'T12:00:00');
-                            const rEnd = new Date(r.fim + 'T12:00:00'); rEnd.setMonth(rEnd.getMonth() + 1);
+                            const rStart = new Date(r.in + 'T12:00:00'); const rEnd = new Date(r.fim + 'T12:00:00'); rEnd.setMonth(rEnd.getMonth() + 1);
                             const validWeeks = newWeeks.filter(w => w._start >= rStart && w._start <= rEnd);
                             spreadTasks(tasks, validWeeks.length > 0 ? validWeeks : newWeeks);
                         } else {
                             spreadTasks(tasks, newWeeks);
                         }
                     } else {
-                        spreadTasks(tasks, newWeeks);
+                        spreadTasks(tasks, newWeeks); // Preventiva e outros espalham geral
                     }
                 });
-
             } else {
-                // Estudo Livre (Spiral Curriculum)
+                // Estudo Livre
                 filteredDB.forEach((task, index) => {
                     const wIdx = index % totalSemanas;
-                    newWeeks[wIdx].tasks.push({
-                        id: `gen_${index}_${Date.now()}`,
-                        category: task.area,
-                        subject: task.tema,
-                        prioridade: task.prioridade,
-                        tipo: "materia_nova"
-                    });
+                    newWeeks[wIdx].tasks.push({ id: `gen_${index}_${Date.now()}`, category: task.area, subject: task.tema, prioridade: task.prioridade, tipo: "materia_nova", score: task.score });
                 });
             }
 
-            // 6. Limpar e adicionar Simulados a cada 4 semanas
+            // Limpeza e ordenação
             newWeeks.forEach(w => {
                 delete w._start; delete w._end;
-                if (w.week % 4 === 0 && obData.horas !== '2h') {
-                    w.tasks.push({ id: `sim_${w.week}`, category: "Outros", subject: "🎯 Simulado Geral na Íntegra", prioridade: 1, tipo: "simulado" });
-                }
-                w.tasks.sort((a,b) => a.prioridade - b.prioridade);
+                w.tasks.sort((a,b) => b.score - a.score); // Ordena pelo que mais cai primeiro
             });
 
             window.state.weeks = newWeeks;
@@ -501,232 +641,353 @@
 
         function finishLoading() {
             document.getElementById('loader-overlay').style.display = 'none';
-            if(localStorage.getItem('cm_theme') === 'dark') window.toggleDarkMode(true);
+            if(localStorage.getItem('darkMode') === '1') window.toggleDarkMode(true);
+            if(localStorage.getItem('oledMode') === '1') window.toggleOledMode(true);
+            
+            // Load Reminders
+            window._reminders = JSON.parse(localStorage.getItem('reminders_v2') || '[]');
+            window.renderReminderList();
+
             window.updateUI();
         }
 
-        // SALVAMENTO COM DEBOUNCE PARA NÃO SOBRECARREGAR A NUVEM
+        // SALVAMENTO COM DEBOUNCE (NUVEM)
         window.saveToCloud = async function() {
             try { if(currentUser) await updateDoc(doc(db, "profiles", currentUser.uid), { app_state: window.state }); } 
-            catch(e) { console.error("Save error", e); }
+            catch(e) { console.error("Erro ao salvar:", e); }
         }
-        
         let saveTimeout;
         window.triggerSave = function() {
             clearTimeout(saveTimeout);
             saveTimeout = setTimeout(() => { window.saveToCloud(); }, 3000); 
         }
 
-        window.handleLogout = async function() { if(auth) await signOut(auth); window.location.href = "index.html"; }
-        window.recalculateRoute = function() { window.location.href = "onboarding.html"; }
-
-        // ----------------------------------------------------------------------
-        // FUNÇÕES UI GERAIS E ESTILOS
-        // ----------------------------------------------------------------------
-        window.toggleDarkMode = function(force) {
-            const icon = document.getElementById('theme-icon');
-            if (force === true || force === false) window.isDarkMode = force;
-            else window.isDarkMode = !window.isDarkMode;
-            
-            if (window.isDarkMode) { document.documentElement.classList.add('dark'); icon.classList.replace('fa-moon', 'fa-sun'); localStorage.setItem('cm_theme', 'dark'); } 
-            else { document.documentElement.classList.remove('dark'); icon.classList.replace('fa-sun', 'fa-moon'); localStorage.setItem('cm_theme', 'light'); }
+        // Recalcular Rota -> Deleta o app_state do Firebase
+        window.recalculateRoute = async function() {
+            if(currentUser && confirm("Isso apagará o cronograma atual e criará um novo com base no questionário. Confirma?")) {
+                document.getElementById('loader-text').innerText = "Apagando histórico e reiniciando...";
+                document.getElementById('loader-overlay').style.display = 'flex';
+                try {
+                    await updateDoc(doc(db, "profiles", currentUser.uid), { app_state: null, has_onboarded: false });
+                    window.location.href = "onboarding.html";
+                } catch(e) { alert("Erro ao reiniciar. Tente novamente."); document.getElementById('loader-overlay').style.display = 'none'; }
+            }
         }
+        window.handleLogout = async function() { if(auth) await signOut(auth); window.location.href = "index.html"; }
 
-        window.toggleSidebar = function() { document.getElementById('main-sidebar').classList.toggle('sidebar-hidden'); }
-        window.toggleProfileMenu = function() { const menu = document.getElementById('profile-menu'); menu.classList.toggle('hidden'); menu.classList.toggle('flex'); }
+        // ----------------------------------------------------------------------
+        // FUNÇÕES UI GERAIS E MODAIS
+        // ----------------------------------------------------------------------
         window.openModal = function(id) { document.getElementById('modal-'+id).classList.add('open'); }
         window.closeModal = function(id) { document.getElementById('modal-'+id).classList.remove('open'); }
+        window.openSettingsSidebar = function() { document.getElementById('settings-sidebar').classList.add('open'); document.getElementById('settings-overlay').classList.add('open'); }
+        window.closeSettingsSidebar = function() { document.getElementById('settings-sidebar').classList.remove('open'); document.getElementById('settings-overlay').classList.remove('open'); }
+        window.toggleSidebar = function() { document.getElementById('main-sidebar').classList.toggle('sidebar-hidden'); }
+        
+        window.toggleDarkMode = function(on) { document.body.classList.toggle('dark-mode', on); localStorage.setItem('darkMode', on ? '1' : '0'); }
+        window.toggleOledMode = function(on) { document.body.classList.toggle('oled-mode', on); localStorage.setItem('oledMode', on ? '1' : '0'); }
 
-        window.showToast = function(msg) {
+        window.showToast = function(msg, type='success') {
             const container = document.getElementById('toast-container'); const t = document.createElement('div');
-            t.className = `px-6 py-3 rounded-xl shadow-lg font-bold text-sm flex items-center gap-3 fade-enter bg-cm-green text-cm-dark`;
-            t.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
+            t.className = `px-6 py-3.5 rounded-xl shadow-xl font-bold text-sm flex items-center gap-3 fade-enter text-white ${type==='success'?'bg-emerald-500':'bg-red-500'}`;
+            t.innerHTML = `<i class="fas ${type==='success'?'fa-check-circle':'fa-exclamation-circle'}"></i> ${msg}`;
             container.appendChild(t); setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(()=>t.remove(), 300); }, 3000);
         }
 
         window.getTodayStr = function() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
         window.getCategoryColor = function(cat) {
-            const map = { "Cirurgia": "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20", "Clínica Médica": "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20", "Ginecologia e Obstetrícia": "bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20", "Pediatria": "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20", "Preventiva": "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20" };
-            return map[cat] || "bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-500/20";
+            const map = { "Cirurgia": "bg-red-50 text-red-600 border-red-200", "Clínica Médica": "bg-blue-50 text-blue-600 border-blue-200", "Ginecologia e Obstetrícia": "bg-pink-50 text-pink-600 border-pink-200", "Pediatria": "bg-yellow-50 text-yellow-700 border-yellow-200", "Preventiva": "bg-emerald-50 text-emerald-600 border-emerald-200" };
+            return map[cat] || "bg-gray-50 text-gray-600 border-gray-200";
         }
-        window.getPrioClass = function(prio, tipo) {
-            if(tipo === 'revisao') return 'prio-rev';
-            if(prio === 1) return 'prio-1'; if(prio === 2) return 'prio-2'; if(prio === 3) return 'prio-3'; return 'prio-4';
-        }
-        window.getPrioLabel = function(prio, tipo, custom) {
-            if(tipo === 'simulado') return 'SIMULADO'; if(tipo === 'revisao') return 'REVISÃO'; if(custom) return 'CUSTOMIZADO';
-            if(prio===1) return 'ALTA'; if(prio===2) return 'MÉDIA'; if(prio===3) return 'BAIXA'; return 'OPCIONAL';
-        }
+        window.getPrioClass = function(prio, tipo) { if(tipo === 'revisao') return 'prio-rev'; if(prio === 1) return 'prio-1'; if(prio === 2) return 'prio-2'; if(prio === 3) return 'prio-3'; return 'prio-4'; }
+        window.getPrioLabel = function(prio, tipo, custom) { if(tipo === 'revisao') return 'REVISÃO'; if(custom) return 'CUSTOMIZADO'; if(prio===1) return 'ALTA'; if(prio===2) return 'MÉDIA'; if(prio===3) return 'BAIXA'; return 'OPCIONAL'; }
 
         // ----------------------------------------------------------------------
-        // AÇÕES NAS TAREFAS E REMANEJAMENTO
+        // AÇÕES NAS TAREFAS
         // ----------------------------------------------------------------------
-        window.ensureProgress = function(id) { if (!state.progress[id]) state.progress[id] = {}; }
+        window.ensureProgress = function(id) { if (!window.state.progress[id]) window.state.progress[id] = {}; }
         window.toggleTask = function(id) { 
-            window.ensureProgress(id); const newStatus = !state.progress[id].doneStatus; state.progress[id].doneStatus = newStatus; 
-            if(newStatus) confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#00c27a', '#1e2e25'] });
+            window.pushState(); window.ensureProgress(id); const p = window.state.progress[id]; p.doneStatus = !p.doneStatus; 
+            if(p.doneStatus) { p.completedDate = window.getTodayStr(); confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }}); window.openReviewModal(id); } else { delete p.completedDate; delete p.nextReview; }
             window.triggerSave(); window.updateUI(); 
         }
+        window.toggleCrucial = function(taskId) { window.pushState(); window.ensureProgress(taskId); window.state.progress[taskId].crucial = !window.state.progress[taskId].crucial; window.triggerSave(); window.updateUI(); }
         window.updateTaskQuestions = function(taskId, newVal, isCorrect = false) { 
-            const val = parseInt(newVal) || 0; window.ensureProgress(taskId); 
-            if(isCorrect) state.progress[taskId].correct = val; 
-            else { const diff = val - (parseInt(state.progress[taskId].done) || 0); state.progress[taskId].done = val; if (diff > 0) { const today = window.getTodayStr(); state.dailyStats[today] = (state.dailyStats[today] || 0) + diff; } }
+            window.pushState(); const val = parseInt(newVal) || 0; window.ensureProgress(taskId); 
+            if(isCorrect) window.state.progress[taskId].correct = val; 
+            else { const diff = val - (parseInt(window.state.progress[taskId].done) || 0); window.state.progress[taskId].done = val; if (diff > 0) { const today = window.getTodayStr(); window.state.dailyStats[today] = (window.state.dailyStats[today] || 0) + diff; } }
             window.triggerSave(); window.updateUI(); 
         }
         window.toggleTaskDetails = function(taskId, event) {
-            if(event && (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || event.target.closest('button') || event.target.closest('.custom-checkbox'))) return;
+            if(event && (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || event.target.closest('button') || event.target.closest('.custom-checkbox') || event.target.closest('.task-edit-subject'))) return;
             window.expandedCards[taskId] = !window.expandedCards[taskId]; window.updateUI();
         }
+        window.updateTaskName = function(weekIdx, taskIdx, newName) { window.pushState(); const week = window.state.weeks.find(w => w.week === weekIdx); if(week && week.tasks[taskIdx]) { week.tasks[taskIdx].subject = newName; window.triggerSave(); } };
+        window.toggleSubTask = function(idSuffix) { window.pushState(); const parts = idSuffix.split('_'); const type = 'sub_' + parts.pop(); const id = parts.join('_'); window.ensureProgress(id); window.state.progress[id][type] = !window.state.progress[id][type]; window.triggerSave(); window.updateUI(); }
+        
+        window.openAddTaskModal = function(weekNum) { window.activeWeek = weekNum; document.getElementById('add-nome').value = ''; window.openModal('add-task'); }
         window.saveCustomTask = function() {
-            const nome = document.getElementById('add-nome').value.trim(); const area = document.getElementById('add-area').value; const prio = parseInt(document.getElementById('add-prio').value);
-            if(!nome) return alert("Insira o nome da tarefa."); const week = state.weeks.find(w => w.week === activeWeek);
+            window.pushState(); const nome = document.getElementById('add-nome').value.trim(); const area = document.getElementById('add-area').value; const prio = parseInt(document.getElementById('add-prio').value);
+            if(!nome) return alert("Insira o nome da tarefa."); const week = window.state.weeks.find(w => w.week === activeWeek);
             if(week) { week.tasks.push({ id: `cstm_${Date.now()}`, category: area, subject: nome, prioridade: prio, customizado: true, tipo: 'materia_nova' }); window.triggerSave(); window.updateUI(); window.showToast("Tema adicionado!"); window.closeModal('add-task'); }
         }
-        window.deleteTask = function(weekIdx, taskIdx) {
-            if(confirm("Deseja realmente remover esta tarefa?")) { const week = state.weeks.find(w => w.week === weekIdx); if(week) { week.tasks.splice(taskIdx, 1); window.triggerSave(); window.updateUI(); window.showToast("Tarefa removida."); } }
+        let taskToDelete = null;
+        window.requestDeleteTask = function(weekIdx, taskIdx) { taskToDelete = {weekIdx, taskIdx}; window.openModal('delete'); }
+        document.getElementById('confirm-delete-btn').onclick = function() {
+            if(taskToDelete) { window.pushState(); const week = window.state.weeks.find(w => w.week === taskToDelete.weekIdx); if(week) { week.tasks.splice(taskToDelete.taskIdx, 1); window.triggerSave(); window.updateUI(); window.showToast("Tarefa removida."); } taskToDelete = null; window.closeModal('delete'); }
+        };
+
+        // Notas / Anki
+        window.parseNotesLinks = function() {
+            const text = document.getElementById('notes-textarea').value; const links = text.match(/(https?:\/\/[^\s]+)/g); const container = document.getElementById('notes-links-container');
+            if (links && links.length > 0) { container.innerHTML = '<p class="text-[10px] font-bold uppercase text-gray-400 tracking-widest mb-2">Links Detectados</p><div class="flex flex-col gap-2">' + links.map(l => `<a href="${l}" target="_blank" class="bg-green-50 text-green-700 border border-green-200 px-3 py-2 rounded-xl text-xs font-bold truncate"><i class="fas fa-external-link-alt"></i> ${l}</a>`).join('') + '</div>'; container.classList.remove('hidden'); } 
+            else { container.innerHTML = ''; container.classList.add('hidden'); }
+        }
+        window.openNotesModal = function(taskId) { window.activeNotesTaskId = taskId; window.ensureProgress(taskId); document.getElementById('notes-textarea').value = window.state.progress[taskId].notes || ''; window.parseNotesLinks(); window.openModal('notes'); }
+        window.closeNotesModal = function() { window.activeNotesTaskId = null; window.closeModal('notes'); }
+        window.saveNotes = function() { window.pushState(); if(window.activeNotesTaskId) { window.state.progress[window.activeNotesTaskId].notes = document.getElementById('notes-textarea').value; window.triggerSave(); window.showToast('Anotação salva'); } window.closeNotesModal(); }
+
+        // ----------------------------------------------------------------------
+        // AGENDA EDITÁVEL
+        // ----------------------------------------------------------------------
+        window.updateTimeSlot = function(weekIdx, slotIdx, val) { window.pushState(); const w = window.state.weeks.find(w => w.week === weekIdx); if(w) { w.timeSlots[slotIdx] = val; window.triggerSave(); } }
+        window.updateAgendaCell = function(weekIdx, dayKey, slotIdx, text) { window.pushState(); const w = window.state.weeks.find(w => w.week === weekIdx); if(w) { const k = `${dayKey}_s${slotIdx}`; if(!w.agenda) w.agenda={}; if(!w.agenda[k]) w.agenda[k]={}; w.agenda[k].text = text; window.triggerSave(); } }
+        window.addAgendaRowAt = function(weekIdx, index) { window.pushState(); const week = window.state.weeks.find(w => w.week === weekIdx); week.timeSlots.splice(index + 1, 0, "00:00 - 00:00"); const newAgenda = {}; Object.keys(week.agenda).forEach(key => { const [d, sStr] = key.split('_'); const s = parseInt(sStr.substring(1)); if (s > index) newAgenda[`${d}_s${s+1}`] = week.agenda[key]; else newAgenda[key] = week.agenda[key]; }); week.agenda = newAgenda; window.triggerSave(); window.updateUI(); }
+        window.requestRemoveAgendaRow = function(weekIdx, index) { if(confirm("Excluir esta linha inteira da agenda?")) { window.pushState(); const week = window.state.weeks.find(w => w.week === weekIdx); week.timeSlots.splice(index, 1); const newAgenda = {}; Object.keys(week.agenda).forEach(key => { const [d, sStr] = key.split('_'); const s = parseInt(sStr.substring(1)); if (s < index) newAgenda[key] = week.agenda[key]; else if (s > index) newAgenda[`${d}_s${s-1}`] = week.agenda[key]; }); week.agenda = newAgenda; window.triggerSave(); window.updateUI(); } }
+        
+        window.executeReplicaAgenda = function() {
+            const weeksAhead = parseInt(document.getElementById('replica-weeks-input').value) || 4;
+            window.pushState(); const sourceW = window.state.weeks.find(w => w.week === activeWeek); if(!sourceW) return;
+            window.state.weeks.forEach(w => { if(w.week > activeWeek && w.week < activeWeek + weeksAhead) { w.timeSlots = [...sourceW.timeSlots]; w.agenda = JSON.parse(JSON.stringify(sourceW.agenda)); } });
+            window.triggerSave(); window.showToast(`Grade copiada para as próximas ${weeksAhead} semanas!`); window.closeModal('replica-agenda');
         }
 
+        // ----------------------------------------------------------------------
+        // REMANEJAMENTO INTELIGENTE
+        // ----------------------------------------------------------------------
         window.openRemanejoModal = function() {
-            let delayedCount = 0;
-            state.weeks.forEach(w => { if (w.week < activeWeek) { w.tasks.forEach(t => { if (!(state.progress[t.id] || {}).doneStatus) delayedCount++; }); } });
-            const btnOptions = document.getElementById('remanejo-options'); const btnEmpty = document.getElementById('remanejo-empty');
-            if(delayedCount === 0) { btnOptions.classList.add('hidden'); btnEmpty.classList.remove('hidden'); } 
-            else { btnOptions.classList.remove('hidden'); btnEmpty.classList.add('hidden'); }
+            let delayedCount = 0; let curW = 1; const today = new Date();
+            window.state.weeks.forEach(w => { const s = new Date(startDate); s.setDate(startDate.getDate() + (w.week - 1) * 7); if (today >= s) curW = w.week; });
+            window.state.weeks.forEach(w => { if (w.week < curW) { w.tasks.forEach(t => { if (!(window.state.progress[t.id] || {}).doneStatus) delayedCount++; }); } });
+            const btnOpts = document.getElementById('remanejo-options'); const btnEmp = document.getElementById('remanejo-empty');
+            if(delayedCount === 0) { btnOpts.classList.add('hidden'); btnEmp.classList.remove('hidden'); } else { btnOpts.classList.remove('hidden'); btnEmp.classList.add('hidden'); }
             window.openModal('remanejo');
         }
 
         window.applyRemanejo = function(strategy) {
-            const delayedTasks = [];
-            state.weeks.forEach(w => { if (w.week < activeWeek) { for (let i = w.tasks.length - 1; i >= 0; i--) { const t = w.tasks[i]; if (!(state.progress[t.id] || {}).doneStatus) { delayedTasks.push(t); w.tasks.splice(i, 1); } } } });
+            window.pushState(); const delayedTasks = []; let curW = 1; const today = new Date();
+            window.state.weeks.forEach(w => { const s = new Date(startDate); s.setDate(startDate.getDate() + (w.week - 1) * 7); if (today >= s) curW = w.week; });
+            window.state.weeks.forEach(w => { if (w.week < curW) { for (let i = w.tasks.length - 1; i >= 0; i--) { const t = w.tasks[i]; if (!(window.state.progress[t.id] || {}).doneStatus) { delayedTasks.push(t); w.tasks.splice(i, 1); } } } });
+            
             if (strategy === 'cut') {
                 const savedTasks = delayedTasks.filter(t => t.prioridade <= 2);
-                const targetW = state.weeks.find(w => w.week === activeWeek); if(targetW) targetW.tasks.push(...savedTasks);
-                window.showToast("Atrasos limpos. Mantivemos apenas o essencial!");
+                const targetW = window.state.weeks.find(w => w.week === curW); if(targetW) targetW.tasks.push(...savedTasks);
+                window.showToast("Atrasos limpos. Mantivemos o essencial.");
             } else {
-                let wPtr = 0;
-                const futureWeeks = state.weeks.filter(w => w.week >= activeWeek && w.week < activeWeek + 4);
-                if(futureWeeks.length === 0) futureWeeks.push(state.weeks[state.weeks.length-1]);
-                delayedTasks.forEach(t => { futureWeeks[wPtr % futureWeeks.length].tasks.push(t); wPtr++; });
-                window.showToast("Tarefas diluídas suavemente.");
+                let wPtr = 0; const futWeeks = window.state.weeks.filter(w => w.week >= curW && w.week < curW + 4);
+                if(futWeeks.length === 0) futWeeks.push(window.state.weeks[window.state.weeks.length-1]);
+                delayedTasks.forEach(t => { futWeeks[wPtr % futWeeks.length].tasks.push(t); wPtr++; });
+                window.showToast("Tarefas redistribuídas.");
             }
             window.triggerSave(); window.updateUI(); window.closeModal('remanejo');
         }
 
         // ----------------------------------------------------------------------
-        // AGENDA EDITÁVEL
+        // LO-FI, POMO E MODO FOCO
         // ----------------------------------------------------------------------
-        window.updateTimeSlot = function(weekIdx, slotIdx, val) { const w = state.weeks.find(w => w.week === weekIdx); if(w) { w.timeSlots[slotIdx] = val; window.triggerSave(); } }
-        window.updateAgendaCell = function(weekIdx, dayKey, slotIdx, text) { const w = state.weeks.find(w => w.week === weekIdx); if(w) { const k = `${dayKey}_${slotIdx}`; if(!w.agenda) w.agenda={}; if(!w.agenda[k]) w.agenda[k]={}; w.agenda[k].text = text; window.triggerSave(); } }
-        window.addAgendaRowAt = function(weekIdx, index) { const week = state.weeks.find(w => w.week === weekIdx); week.timeSlots.splice(index + 1, 0, "00:00 - 00:00"); const newAgenda = {}; Object.keys(week.agenda).forEach(key => { const [d, sStr] = key.split('_'); const s = parseInt(sStr); if (s > index) newAgenda[`${d}_${s+1}`] = week.agenda[key]; else newAgenda[key] = week.agenda[key]; }); week.agenda = newAgenda; window.triggerSave(); window.updateUI(); }
-        window.requestRemoveAgendaRow = function(weekIdx, index) { if(confirm("Excluir esta linha inteira?")) { const week = state.weeks.find(w => w.week === weekIdx); week.timeSlots.splice(index, 1); const newAgenda = {}; Object.keys(week.agenda).forEach(key => { const [d, sStr] = key.split('_'); const s = parseInt(sStr); if (s < index) newAgenda[key] = week.agenda[key]; else if (s > index) newAgenda[`${d}_${s-1}`] = week.agenda[key]; }); week.agenda = newAgenda; window.triggerSave(); window.updateUI(); } }
+        window.changeLoFiType = function(type) { window.lofiType = type; if (window.isLoFiPlaying) { window.stopLoFi(); window.startLoFi(); } }
+        window.toggleLoFi = function() {
+            window.lofiEnabled = !window.lofiEnabled; const btn = document.getElementById('lofi-btn');
+            if (window.lofiEnabled) { if (btn) btn.classList.replace('text-gray-400', 'text-blue-500'); if (window.isPomoRunning && window.pomoPhase !== 'descanso') window.startLoFi(); } 
+            else { if (btn) btn.classList.replace('text-blue-500', 'text-gray-400'); window.stopLoFi(); }
+            window.showToast(window.lofiEnabled ? 'Lo-Fi Ativado 🎧' : 'Lo-Fi Desativado');
+        }
+        window.startLoFi = function() {
+            if (window.lofiType === 'temporal') { window.rainAudio.volume = 0.6; window.rainAudio.play().catch(e=>{}); window.isLoFiPlaying = true; return; }
+            if (!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
+            if (window.noiseNode) return; 
+            const bufferSize = 2 * window.audioCtx.sampleRate; const noiseBuffer = window.audioCtx.createBuffer(1, bufferSize, window.audioCtx.sampleRate); const output = noiseBuffer.getChannelData(0);
+            if (window.lofiType === 'brown') { let lastOut = 0; for (let i = 0; i < bufferSize; i++) { let white = Math.random() * 2 - 1; output[i] = (lastOut + (0.02 * white)) / 1.02; lastOut = output[i]; output[i] *= 3.5; } } 
+            else if (window.lofiType === 'pink') { let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0; for (let i = 0; i < bufferSize; i++) { let white = Math.random() * 2 - 1; b0 = 0.99886 * b0 + white * 0.0555179; b1 = 0.99332 * b1 + white * 0.0750759; b2 = 0.96900 * b2 + white * 0.1538520; b3 = 0.86650 * b3 + white * 0.3104856; b4 = 0.55000 * b4 + white * 0.5329522; b5 = -0.7616 * b5 - white * 0.0168980; output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362; output[i] *= 0.15; b6 = white * 0.115926; } }
+            window.noiseNode = window.audioCtx.createBufferSource(); window.noiseNode.buffer = noiseBuffer; window.noiseNode.loop = true;
+            const filter = window.audioCtx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = window.lofiType === 'brown' ? 800 : 1200; 
+            const gain = window.audioCtx.createGain(); gain.gain.value = window.lofiType === 'brown' ? 1.5 : 0.8; 
+            window.noiseNode.connect(filter); filter.connect(gain); gain.connect(window.audioCtx.destination);
+            window.noiseNode.start(0); window.isLoFiPlaying = true;
+        }
+        window.stopLoFi = function() { if (window.noiseNode) { window.noiseNode.stop(); window.noiseNode.disconnect(); window.noiseNode = null; } if (window.rainAudio) { window.rainAudio.pause(); window.rainAudio.currentTime = 0; } window.isLoFiPlaying = false; }
         
-        window.executeReplicaAgenda = function(weeksAhead) {
-            const sourceW = state.weeks.find(w => w.week === activeWeek); if(!sourceW) return;
-            state.weeks.forEach(w => { if(w.week > activeWeek && w.week <= activeWeek + weeksAhead) { w.timeSlots = [...sourceW.timeSlots]; w.agenda = JSON.parse(JSON.stringify(sourceW.agenda)); } });
-            window.triggerSave(); window.showToast("Grade copiada para as próximas semanas!"); window.closeModal('replica-agenda');
-        }
+        window.toggleFocusMode = function() { window.isFocusMode = !window.isFocusMode; document.body.classList.toggle('focus-mode', window.isFocusMode); if(window.isFocusMode) window.showToast("Modo foco ativado"); }
 
-        // ----------------------------------------------------------------------
-        // POMODORO FLUTUANTE
-        // ----------------------------------------------------------------------
         window.togglePomo = function() {
-            if (window.isPomoRunning) { window.isPomoRunning = false; document.getElementById('mp-play-btn').innerHTML = '<i class="fas fa-play ml-1"></i>'; } 
-            else { window.isPomoRunning = true; document.getElementById('mp-play-btn').innerHTML = '<i class="fas fa-pause"></i>'; }
+            if (window.isPomoRunning) { window.isPomoRunning = false; document.getElementById('mp-play-btn').innerHTML = '<i class="fas fa-play ml-1"></i>'; if(window.lofiEnabled) window.stopLoFi(); } 
+            else { window.isPomoRunning = true; document.getElementById('mp-play-btn').innerHTML = '<i class="fas fa-pause"></i>'; if(window.lofiEnabled && window.pomoPhase !== 'descanso') window.startLoFi(); window.pomoLastTick = Date.now(); }
+            window.updateUI();
         }
-        window.stopPomo = function() { window.isPomoRunning = false; window.activePomoId = null; document.getElementById('mini-player').classList.remove('show'); }
+        window.stopPomo = function() { window.isPomoRunning = false; window.activePomoId = null; window.stopLoFi(); document.getElementById('mini-player').classList.remove('show'); window.updateUI(); }
         window.startPomoTask = function(taskId, phase) {
-            window.activePomoId = taskId; window.pomoTime = phase === 'aula' ? 50*60 : 25*60; window.isPomoRunning = true;
-            document.getElementById('mp-phase').innerText = `Foco: ${phase}`; document.getElementById('mp-play-btn').innerHTML = '<i class="fas fa-pause"></i>';
-            document.getElementById('mini-player').classList.add('show');
+            window.activePomoId = taskId; window.pomoTotalTime = phase === 'aula' ? 50*60 : (phase === 'questoes' ? 25*60 : 5*60); window.pomoTime = window.pomoTotalTime; window.isPomoRunning = true; window.pomoPhase = phase; window.pomoLastTick = Date.now();
+            document.getElementById('mp-phase').innerText = `Foco: ${phase}`; document.getElementById('mp-play-btn').innerHTML = '<i class="fas fa-pause"></i>'; document.getElementById('mini-player').classList.add('show');
+            if(window.lofiEnabled && phase !== 'descanso') window.startLoFi();
+            window.updateUI();
         }
-        setInterval(() => {
-            if(window.isPomoRunning && window.pomoTime > 0) {
-                window.pomoTime--; const m = Math.floor(window.pomoTime / 60); const s = window.pomoTime % 60;
-                document.getElementById('mp-time').innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-                if(window.pomoTime === 0) { window.togglePomo(); window.showToast("Sessão finalizada. Descanse um pouco!"); }
-            }
-        }, 1000);
+        window.pomoNextPhase = function() {
+            if(window.lofiEnabled) window.stopLoFi();
+            if (window.pomoPhase === 'aula') { window.pomoPhase = 'descanso'; window.pomoTotalTime = 5 * 60; window.pomoTime = 5 * 60; window.showToast("Hora de relaxar (5 min)."); } 
+            else if (window.pomoPhase === 'descanso') { window.pomoPhase = 'questoes'; window.pomoTotalTime = 25 * 60; window.pomoTime = 25 * 60; window.showToast("Foco nas questões (25 min)."); if(window.lofiEnabled) window.startLoFi(); } 
+            else if (window.pomoPhase === 'questoes') { window.isPomoRunning = false; window.activePomoId = null; document.getElementById('mini-player').classList.remove('show'); confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 }}); window.showToast("Ciclo Completo!"); window.updateUI(); return; }
+            if(window.isPomoRunning) window.pomoLastTick = Date.now();
+            document.getElementById('mp-phase').innerText = `Foco: ${window.pomoPhase}`;
+            window.updateUI();
+        }
+        window.pomoSkip = function() { window.pomoNextPhase(); }
+
+        // Lembretes
+        window.renderReminderList = function() { const list = document.getElementById('reminder-list'); const badge = document.getElementById('reminder-badge'); if (!list) return; const today = window.getTodayStr(); if (badge) { if(window._reminders.length > 0) { badge.textContent = window._reminders.length; badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); } } if (window._reminders.length === 0) { list.innerHTML = `<div class="text-xs text-gray-400 italic text-center py-4">Tudo tranquilo.</div>`; return; } list.innerHTML = window._reminders.map((r, i) => `<div class="reminder-item"><div><div class="font-bold text-slate-700">${r.text}</div><div class="rm-date">${r.type === 'day' ? 'Hoje' : r.type === 'week' ? 'Esta semana' : r.date}</div></div><button onclick="window.deleteReminder(${i})" class="text-gray-300 hover:text-red-500 ml-2 transition w-6 h-6 rounded hover:bg-red-50"><i class="fas fa-times text-xs"></i></button></div>`).join(''); }
+        window.addReminder = function() { const text = document.getElementById('reminder-text').value.trim(); const date = document.getElementById('reminder-date').value; const type = document.getElementById('reminder-type').value; if (!text) return; window._reminders.push({ text, date: date || window.getTodayStr(), type }); localStorage.setItem('reminders_v2', JSON.stringify(window._reminders)); document.getElementById('reminder-text').value = ''; window.renderReminderList(); window.showToast('Lembrete salvo'); }
+        window.deleteReminder = function(idx) { window._reminders.splice(idx, 1); localStorage.setItem('reminders_v2', JSON.stringify(window._reminders)); window.renderReminderList(); }
+        window.toggleReminderPanel = function() { document.getElementById('reminder-panel').classList.toggle('open'); window.renderReminderList(); }
+
+        // Revisão
+        window.openReviewModal = function(taskId) { pendingReviewTaskId = taskId; window.openModal('review'); }
+        window.scheduleReview = function(days) { if(pendingReviewTaskId) { window.pushState(); const date = new Date(); date.setDate(date.getDate() + days); const dateStr = date.toISOString().split('T')[0]; window.ensureProgress(pendingReviewTaskId); window.state.progress[pendingReviewTaskId].nextReview = dateStr; window.triggerSave(); window.updateUI(); window.showToast('Revisão agendada!');} window.closeModal('review'); pendingReviewTaskId = null; }
 
         // ----------------------------------------------------------------------
         // RENDERIZADORES UI
         // ----------------------------------------------------------------------
         window.switchView = function(view) {
             activeView = view;
-            ['nav-dashboard', 'nav-search', 'nav-homepage', 'nav-week'].forEach(id => { const el = document.getElementById(id); if (el) el.className = el.className.replace('bg-cm-green/10 text-cm-green dark:bg-cm-green dark:text-cm-dark', 'text-gray-500 hover:bg-gray-100 dark:hover:bg-cm-mid dark:text-cm-muted hover:text-slate-800 dark:hover:text-white bg-transparent'); });
-            const activeEl = document.getElementById(`nav-${view}`); if (activeEl) activeEl.className = activeEl.className.replace('text-gray-500 hover:bg-gray-100 dark:hover:bg-cm-mid dark:text-cm-muted hover:text-slate-800 dark:hover:text-white bg-transparent', 'bg-cm-green/10 text-cm-green dark:bg-cm-green dark:text-cm-dark');
+            ['nav-dashboard', 'nav-search', 'nav-homepage', 'nav-week'].forEach(id => { const el = document.getElementById(id); if (el) el.className = el.className.replace('bg-black text-white shadow-sm', 'text-gray-600 hover:bg-gray-100 bg-white shadow-sm border border-gray-200'); });
+            const activeEl = document.getElementById(`nav-${view}`); if (activeEl) activeEl.className = activeEl.className.replace('text-gray-600 hover:bg-gray-100 bg-white border border-gray-200', 'bg-black text-white border-transparent');
             window.updateUI();
         }
 
         window.renderNav = function() {
             const nav = document.getElementById('week-nav'); if(!nav) return; nav.innerHTML = '';
-            state.weeks.forEach(w => {
-                let done = 0; w.tasks.forEach(t => { if(state.progress[t.id]?.doneStatus) done++; });
+            window.state.weeks.forEach(w => {
+                let done = 0; w.tasks.forEach(t => { if(window.state.progress[t.id]?.doneStatus) done++; });
                 const pct = w.tasks.length ? Math.round((done/w.tasks.length)*100) : 0;
-                const active = (activeView === 'week' && activeWeek === w.week) ? 'bg-gray-100 dark:bg-cm-mid border-cm-green' : 'border-transparent hover:bg-gray-50 dark:hover:bg-cm-mid/50';
-                nav.innerHTML += `<div onclick="activeWeek=${w.week}; window.switchView('week');" class="px-4 py-2.5 rounded-xl mb-1 cursor-pointer transition-all border-l-2 ${active} flex justify-between items-center text-slate-700 dark:text-gray-300"><div><span class="block text-xs font-bold">Semana ${w.week}</span></div><span class="text-[10px] font-bold px-1.5 rounded ${pct===100?'bg-cm-green text-cm-dark':'bg-gray-200 dark:bg-cm-dark2'}">${pct}%</span></div>`;
+                const active = (activeView === 'week' && activeWeek === w.week) ? 'ring-2 ring-slate-900 shadow-md font-bold z-10' : '';
+                let statusClass = done === w.tasks.length && w.tasks.length > 0 ? "bg-emerald-50 text-emerald-900 border-l-4 border-emerald-500" : done > 0 ? "bg-amber-50 text-amber-900 border-l-4 border-amber-400" : "bg-white text-slate-600 border-l-4 border-transparent hover:bg-slate-50";
+                nav.innerHTML += `<div onclick="activeWeek=${w.week}; window.switchView('week');" class="px-4 py-3.5 rounded-xl mb-2 cursor-pointer transition-all border border-gray-100 ${statusClass} ${active} flex justify-between items-center"><div><span class="block text-[11px] font-black uppercase tracking-wide opacity-80">Semana ${w.week}</span></div><span class="text-xs font-black bg-white/60 px-2 py-1 rounded shadow-sm">${pct}%</span></div>`;
             });
         }
 
         window.renderHomepage = function() {
             const content = document.getElementById('content-area'); const nome = document.getElementById('user-name').innerText.split(' ')[0] || 'Doutor(a)';
-            const currW = state.weeks.find(w => w.week === activeWeek) || state.weeks[0]; 
-            const todayTasks = currW ? currW.tasks.filter(t => !(state.progress[t.id] || {}).doneStatus) : [];
+            const currW = window.state.weeks.find(w => w.week === activeWeek) || window.state.weeks[0]; 
+            const todayTasks = currW ? currW.tasks.filter(t => !(window.state.progress[t.id] || {}).doneStatus) : [];
             const dayIdx = new Date().getDay();
             let agendaHtml = '';
             if(currW && currW.timeSlots) {
                 currW.timeSlots.forEach((slot, sIdx) => {
-                    const cell = currW.agenda ? currW.agenda[`d${dayIdx}_${sIdx}`] : null; const txt = cell ? cell.text : '- Estudo/Livre -';
+                    const cell = currW.agenda ? currW.agenda[`d${dayIdx}_s${sIdx}`] : null; const txt = cell ? cell.text : '- Estudo/Livre -';
                     agendaHtml += `<div class="flex items-start gap-4 timeline-item"><div class="text-[10px] font-bold font-mono text-gray-400 mt-1 w-20 shrink-0">${slot}</div><div class="font-bold text-sm text-slate-800 dark:text-white bg-white dark:bg-cm-mid px-4 py-2 border border-gray-100 dark:border-transparent rounded-xl flex-1 shadow-sm break-words">${txt}</div></div>`;
                 });
             }
 
-            let html = `<div class="max-w-4xl mx-auto fade-enter"><div class="mb-10"><h1 class="text-4xl font-serif text-slate-900 dark:text-white tracking-tight">Bom dia, ${nome}!</h1><p class="text-gray-500 dark:text-cm-muted mt-2 text-lg">Aqui está o seu painel de comando para o dia de hoje.</p></div><div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10"><div class="card-ui p-6 flex flex-col justify-center items-center text-center"><div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Semana Atual</div><div class="text-xl font-black text-blue-500 flex items-center gap-2"><i class="fas fa-calendar-week"></i> Semana ${currW?currW.week:''}</div></div><div class="card-ui p-6 flex flex-col justify-center items-center text-center"><div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Questões Hoje</div><div class="text-3xl font-black text-cm-green flex items-center gap-2">${state.dailyStats[window.getTodayStr()]||0}</div></div><div class="card-ui p-6 flex flex-col justify-center items-center text-center bg-cm-green text-white dark:text-cm-dark border-transparent cursor-pointer hover:scale-105 transition shadow-md" onclick="window.startPomoTask('avulso', 'Foco Livre')"><i class="fas fa-play text-2xl mb-2"></i><div class="font-bold text-sm">Foco Livre</div></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><div><h3 class="text-sm font-bold uppercase tracking-widest text-gray-500 mb-6 flex items-center gap-2"><i class="far fa-clock"></i> A Linha do Tempo (Hoje)</h3><div class="card-ui p-8 pt-10">${agendaHtml}<button onclick="switchView('week')" class="w-full text-xs font-bold text-cm-green hover:underline mt-4 text-center">Editar minha grade na Aba Semanas</button></div></div><div><h3 class="text-sm font-bold uppercase tracking-widest text-gray-500 mb-6 flex items-center gap-2"><i class="fas fa-tasks"></i> Foco Principal (Sem. ${currW?currW.week:''})</h3><div class="space-y-3">`;
+            let html = `<div class="max-w-4xl mx-auto fade-enter"><div class="mb-10"><h1 class="text-4xl font-serif text-slate-900 dark:text-white tracking-tight">Bom dia, ${nome}!</h1><p class="text-gray-500 dark:text-cm-muted mt-2 text-lg">Aqui está o seu painel de comando de hoje.</p></div><div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10"><div class="card-ui p-6 flex flex-col justify-center items-center text-center"><div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Semana Atual</div><div class="text-xl font-black text-blue-500 flex items-center gap-2"><i class="fas fa-calendar-week"></i> Semana ${currW?currW.week:''}</div></div><div class="card-ui p-6 flex flex-col justify-center items-center text-center"><div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Questões Hoje</div><div class="text-3xl font-black text-green-500 flex items-center gap-2">${window.state.dailyStats[window.getTodayStr()]||0}</div></div><div class="card-ui p-6 flex flex-col justify-center items-center text-center bg-black text-white dark:bg-cm-green dark:text-cm-dark border-transparent cursor-pointer hover:scale-105 transition shadow-md" onclick="window.startPomoTask('avulso', 'Foco Livre')"><i class="fas fa-play text-2xl mb-2 text-green-400 dark:text-cm-dark"></i><div class="font-bold text-sm">Foco Livre</div></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><div><h3 class="text-sm font-bold uppercase tracking-widest text-gray-500 mb-6 flex items-center gap-2"><i class="far fa-clock"></i> A Linha do Tempo (Hoje)</h3><div class="card-ui p-8 pt-10">${agendaHtml}<button onclick="switchView('week')" class="w-full text-xs font-bold text-blue-600 hover:underline mt-4 text-center">Editar grade (Aba Semanas)</button></div></div><div><h3 class="text-sm font-bold uppercase tracking-widest text-gray-500 mb-6 flex items-center gap-2"><i class="fas fa-tasks"></i> Foco Principal (Sem. ${currW?currW.week:''})</h3><div class="space-y-3">`;
             todayTasks.slice(0, 6).forEach(t => { html += `<div class="card-ui p-4 flex items-center gap-3 ${window.getPrioClass(t.prioridade, t.tipo)} cursor-pointer" onclick="activeWeek=${currW?currW.week:1}; window.switchView('week');"><div class="w-8 h-8 rounded-full bg-gray-50 dark:bg-cm-dark2 flex items-center justify-center text-gray-400 shrink-0"><i class="fas fa-arrow-right"></i></div><div class="min-w-0"><div class="font-bold text-sm text-slate-800 dark:text-white leading-tight truncate">${t.subject}</div><span class="${window.getCategoryColor(t.category)} text-[8px] uppercase font-bold px-1.5 rounded mt-1 inline-block">${t.category}</span></div></div>`; });
             if(todayTasks.length===0) html+=`<div class="text-gray-400 text-sm text-center py-10 italic">Tudo concluído para esta semana! Descanse.</div>`;
             html += `</div></div></div></div>`; content.innerHTML = html;
         }
 
         window.renderWeek = function() {
-            const w = state.weeks.find(d => d.week === activeWeek); const content = document.getElementById('content-area'); if(!w) return; const days = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+            const w = window.state.weeks.find(d => d.week === activeWeek); const content = document.getElementById('content-area'); if(!w) return; const days = window.getWeekDates(activeWeek);
             
-            let agendaHtml = `<div class="mb-12 fade-enter"><div class="flex justify-between items-center mb-6"><div><h2 class="text-3xl font-serif text-slate-900 dark:text-white">Semana ${w.week}</h2><span class="text-sm font-bold text-gray-500 dark:text-cm-green">${w.phase}</span></div><button onclick="window.openModal('replica-agenda')" class="text-xs font-bold bg-white dark:bg-cm-mid border border-gray-200 dark:border-gray-700 px-4 py-2 rounded-xl shadow-sm hover:border-cm-green transition"><i class="fas fa-copy mr-1 text-cm-green"></i> Configurar Grade</button></div><div class="overflow-x-auto rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-cm-dark2"><table class="agenda-table min-w-[700px]"><thead><tr><th class="p-3 w-24">Horário</th>${days.map(d=>`<th class="p-3 text-xs font-bold">${d}</th>`).join('')}</tr></thead><tbody>`;
+            let agendaHtml = `<div class="mb-12 fade-enter"><div class="flex justify-between items-center mb-6"><div><h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Semana ${w.week}</h2><span class="text-sm font-bold text-gray-500 dark:text-cm-green">${w.phase}</span></div><button onclick="window.openModal('replica-agenda')" class="text-xs font-bold bg-white dark:bg-cm-mid border border-gray-200 dark:border-gray-700 px-4 py-2 rounded-xl shadow-sm hover:border-blue-500 transition"><i class="fas fa-copy mr-1 text-blue-500"></i> Configurar Grade</button></div><div class="overflow-x-auto rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-cm-dark2"><table class="agenda-table min-w-[700px]"><thead><tr><th class="p-3 w-24">Horário</th>${days.map(d=>`<th class="p-3 text-xs font-bold">${d.name}</th>`).join('')}</tr></thead><tbody>`;
             w.timeSlots.forEach((slot, sIdx) => {
                 agendaHtml += `<tr><td class="p-0 w-24 align-middle time-col relative border-r border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-cm-mid/30"><div class="w-full text-center font-mono text-[10px] font-bold outline-none p-3" contenteditable="true" onblur="window.updateTimeSlot(${activeWeek}, ${sIdx}, this.innerText)">${slot}</div><div class="row-controls"><button onclick="window.addAgendaRowAt(${activeWeek}, ${sIdx})" class="text-[10px] text-blue-600 hover:bg-blue-50 py-1"><i class="fas fa-plus"></i></button><button onclick="window.requestRemoveAgendaRow(${activeWeek}, ${sIdx})" class="text-[10px] text-red-600 hover:bg-red-50 py-1"><i class="fas fa-minus"></i></button></div></td>`;
-                days.forEach((d, dIdx) => { const c = w.agenda[`d${dIdx}_${sIdx}`] || {}; agendaHtml += `<td class="p-0 h-16 relative"><div class="agenda-cell w-full h-full p-2 outline-none flex items-center justify-center text-xs font-medium text-slate-700 dark:text-white" contenteditable="true" onblur="window.updateAgendaCell(${activeWeek}, 'd${dIdx}', ${sIdx}, this.innerText)">${c.text||''}</div></td>`; }); agendaHtml += `</tr>`;
+                days.forEach((d, dIdx) => { const c = w.agenda[`${d.key}_s${sIdx}`] || {}; agendaHtml += `<td class="p-0 h-16 relative"><div class="agenda-cell w-full h-full p-2 outline-none flex items-center justify-center text-xs font-medium text-slate-700 dark:text-white" contenteditable="true" onblur="window.updateAgendaCell(${activeWeek}, '${d.key}', ${sIdx}, this.innerText)">${c.text||''}</div></td>`; }); agendaHtml += `</tr>`;
             });
-            agendaHtml += `</tbody></table></div><p class="text-[10px] text-gray-400 mt-2"><i class="fas fa-info-circle text-blue-400"></i> Edite a tabela acima para configurar as suas aulas e plantões. As alterações são guardadas na nuvem.</p></div>`;
+            agendaHtml += `</tbody></table></div><p class="text-[10px] text-gray-400 mt-2"><i class="fas fa-info-circle text-blue-400"></i> Edite a tabela acima para configurar as suas aulas. As alterações são guardadas na nuvem.</p></div>`;
 
-            let tasksHtml = `<div class="mb-4 flex justify-between items-center"><h3 class="text-sm font-bold uppercase tracking-widest text-gray-500"><i class="fas fa-bullseye text-cm-green mr-1"></i> Tarefas da Semana (${w.tasks.length})</h3></div><div class="grid gap-3 fade-enter">`;
+            let tasksHtml = `<div class="mb-4 flex justify-between items-center"><h3 class="text-sm font-bold uppercase tracking-widest text-gray-500"><i class="fas fa-bullseye text-green-500 mr-1"></i> Tarefas da Semana (${w.tasks.length})</h3></div><div class="grid gap-4 fade-enter">`;
             w.tasks.forEach((t, idx) => {
-                const p = state.progress[t.id] || {}; const isChecked = p.doneStatus; const prioClass = window.getPrioClass(t.prioridade, t.tipo);
+                const p = window.state.progress[t.id] || {}; const isChecked = p.doneStatus; const prioClass = window.getPrioClass(t.prioridade, t.tipo);
                 const labels = window.getPrioLabel(t.prioridade, t.tipo, t.customizado);
                 const acc = Math.round(((parseInt(p.correct)||0) / (parseInt(p.done)||1)) * 100) || 0;
                 
-                tasksHtml += `<div class="card-ui p-4 flex flex-col gap-2 ${prioClass} ${isChecked?'done':''}"><div class="flex items-center gap-4 w-full"><div class="relative shrink-0"><input type="checkbox" class="custom-checkbox" ${isChecked?'checked':''} onchange="window.toggleTask('${t.id}')"></div><div class="flex-1 cursor-pointer min-w-0" onclick="window.toggleTaskDetails('${t.id}', event)"><div class="font-bold text-slate-800 dark:text-white text-[15px] leading-tight truncate">${t.subject}</div><div class="flex gap-2 mt-1"><span class="${window.getCategoryColor(t.category)} text-[8px] font-bold uppercase px-1.5 rounded border">${t.category}</span><span class="bg-gray-100 dark:bg-cm-mid text-gray-500 text-[8px] font-bold uppercase px-1.5 rounded border border-gray-200 dark:border-gray-700">${labels}</span></div></div><button onclick="window.toggleTaskDetails('${t.id}', event)" class="text-gray-400 w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-cm-mid transition shrink-0"><i class="fas fa-chevron-down ${window.expandedCards[t.id]?'rotate-180':''}"></i></button></div>`;
-                if(window.expandedCards[t.id]) {
-                    tasksHtml += `<div class="pt-4 mt-2 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row gap-5 fade-enter"><div class="flex-1 flex gap-2"><button onclick="window.startPomoTask('${t.id}', 'aula')" class="bg-gray-100 dark:bg-cm-mid text-slate-700 dark:text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:border-cm-green border border-transparent transition flex items-center gap-2"><i class="fas fa-play text-cm-green"></i> Focar</button><button onclick="window.deleteTask(${activeWeek}, ${idx})" class="text-[10px] text-gray-400 hover:text-red-500 uppercase ml-auto"><i class="fas fa-trash-alt"></i></button></div><div class="flex items-center gap-3 bg-gray-50 dark:bg-cm-dark p-3 rounded-xl border border-gray-100 dark:border-gray-800 shrink-0"><div class="text-center"><span class="text-[9px] font-bold text-gray-400 uppercase block tracking-wider mb-1">Feitas</span><input type="number" value="${p.done||''}" onchange="window.updateTaskQuestions('${t.id}', this.value)" class="w-12 bg-transparent text-center font-bold text-slate-800 dark:text-white outline-none border-b border-gray-300 dark:border-gray-700 focus:border-cm-green py-1" placeholder="-"></div><div class="text-center"><span class="text-[9px] font-bold text-gray-400 uppercase block tracking-wider mb-1">Acertos</span><input type="number" value="${p.correct||''}" onchange="window.updateTaskQuestions('${t.id}', this.value, true)" class="w-12 bg-transparent text-center font-bold text-slate-800 dark:text-white outline-none border-b border-gray-300 dark:border-gray-700 focus:border-cm-green py-1" placeholder="-"></div><div class="pl-3 border-l border-gray-200 dark:border-gray-800 text-center min-w-[3.5rem]"><span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">%</span><span class="text-lg font-black ${acc>0?'text-cm-green':'text-gray-400'}">${acc}%</span></div></div></div>`;
+                let isPomoActiveForThis = (window.activePomoId === t.id);
+                const isExpanded = window.expandedCards[t.id] || isPomoActiveForThis;
+                
+                let pomoUI = '';
+                if (isPomoActiveForThis) {
+                    let displayTime = "50:00"; const m = Math.floor(window.pomoTime / 60); const s = window.pomoTime % 60; displayTime = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+                    let pct1 = 0, pct2 = 0, pct3 = 0;
+                    if (window.pomoPhase === 'aula') pct1 = ((window.pomoTotalTime - window.pomoTime) / window.pomoTotalTime) * 100;
+                    else if (window.pomoPhase === 'descanso') { pct1 = 100; pct2 = ((window.pomoTotalTime - window.pomoTime) / window.pomoTotalTime) * 100; }
+                    else if (window.pomoPhase === 'questoes') { pct1 = 100; pct2 = 100; pct3 = ((window.pomoTotalTime - window.pomoTime) / window.pomoTotalTime) * 100; }
+                    
+                    pomoUI = `<div class="mt-4 bg-slate-50 dark:bg-cm-mid border border-slate-200 dark:border-gray-800 p-5 rounded-2xl w-full shadow-inner"><div class="flex justify-between text-[9px] font-black uppercase tracking-widest mb-3"><span class="${window.pomoPhase === 'aula' ? 'text-blue-600' : 'text-slate-400'}"><i class="fas fa-book-open"></i> Aula</span><span class="${window.pomoPhase === 'descanso' ? 'text-amber-500' : 'text-slate-400'}"><i class="fas fa-coffee"></i> Pausa</span><span class="${window.pomoPhase === 'questoes' ? 'text-emerald-600' : 'text-slate-400'}"><i class="fas fa-pen"></i> Questões</span></div><div class="flex gap-2 h-2 mb-5"><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div class="h-full bg-blue-500 transition-all duration-1000" style="width: ${pct1}%"></div></div><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div class="h-full bg-amber-400 transition-all duration-1000" style="width: ${pct2}%"></div></div><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div class="h-full bg-emerald-500 transition-all duration-1000" style="width: ${pct3}%"></div></div></div><div class="flex justify-between items-center"><div class="font-mono font-black text-4xl text-slate-800 dark:text-white tracking-tight">${displayTime}</div><div class="flex gap-2 items-center"><button onclick="window.togglePomo()" class="w-10 h-10 flex items-center justify-center text-white rounded-xl shadow-md ${window.isPomoRunning ? 'bg-red-500 hover:bg-red-600' : 'bg-slate-900 hover:bg-slate-700'}">${window.isPomoRunning ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play ml-1"></i>'}</button><button onclick="window.pomoNextPhase()" class="px-4 py-2.5 bg-white dark:bg-cm-dark2 border border-gray-200 text-gray-700 dark:text-gray-300 rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-gray-50 transition shadow-sm">Pular <i class="fas fa-forward"></i></button><button onclick="window.stopPomo()" class="px-4 py-2.5 bg-red-50 border border-red-200 text-red-600 rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-red-100 transition shadow-sm"><i class="fas fa-times"></i></button></div></div></div>`;
+                }
+
+                tasksHtml += `<div class="card-ui p-5 flex flex-col md:flex-row gap-5 ${prioClass} ${isChecked?'done':''} relative group"><div class="flex items-start gap-4 flex-1 min-w-0"><div class="mt-1 relative shrink-0"><input type="checkbox" class="peer appearance-none w-6 h-6 border-2 border-gray-300 rounded-lg checked:bg-black checked:border-black transition cursor-pointer" ${isChecked?'checked':''} onchange="window.toggleTask('${t.id}')"><i class="fas fa-check text-white absolute top-1 left-1 pointer-events-none opacity-0 peer-checked:opacity-100 text-xs transition"></i></div><div class="flex-1 cursor-pointer min-w-0" onclick="window.toggleTaskDetails('${t.id}', event)"><div class="font-bold text-slate-800 dark:text-white text-lg leading-snug truncate outline-none task-edit-subject" contenteditable="true" onblur="window.updateTaskName(${activeWeek}, ${idx}, this.innerText)">${t.subject}</div><div class="flex items-center justify-between mt-2"><div class="flex gap-2 items-center"><button onclick="window.cycleTaskCategory(${activeWeek}, ${idx})" class="text-[10px] font-bold bg-slate-100 dark:bg-cm-mid px-2.5 py-1 rounded-md text-slate-600 dark:text-gray-300 hover:bg-slate-200 transition-colors uppercase tracking-wide">${t.category}</button><button onclick="window.toggleCrucial('${t.id}')" class="fire-btn ${p.crucial ? 'active' : ''} w-8 h-8 rounded-full hover:bg-red-50 flex items-center justify-center transition text-lg"><i class="fas fa-fire ${p.crucial ? 'text-red-500' : 'text-gray-400'}"></i></button></div><button onclick="window.requestDeleteTask(${activeWeek}, ${idx})" class="text-gray-300 hover:text-red-500 px-2 py-1 rounded transition text-xl"><i class="fas fa-trash-alt"></i></button></div><div class="flex gap-2 mt-4 flex-wrap"><button onclick="window.toggleSubTask('${t.id}_a')" class="px-3 py-1.5 rounded-lg border ${p.sub_a ? 'bg-slate-800 text-white' : 'bg-white text-slate-500 border-gray-200 dark:bg-cm-dark2 dark:text-gray-400'} text-[10px] font-bold uppercase transition hover:shadow-md flex items-center gap-1.5"><i class="fas fa-play"></i> Aula</button><button onclick="window.toggleSubTask('${t.id}_q')" class="px-3 py-1.5 rounded-lg border ${p.sub_q ? 'bg-slate-800 text-white' : 'bg-white text-slate-500 border-gray-200 dark:bg-cm-dark2 dark:text-gray-400'} text-[10px] font-bold uppercase transition hover:shadow-md flex items-center gap-1.5"><i class="fas fa-pen"></i> Questões</button><button onclick="window.toggleSubTask('${t.id}_k')" class="px-3 py-1.5 rounded-lg border ${p.sub_k ? 'bg-slate-800 text-white' : 'bg-white text-slate-500 border-gray-200 dark:bg-cm-dark2 dark:text-gray-400'} text-[10px] font-bold uppercase transition hover:shadow-md flex items-center gap-1.5"><i class="fas fa-bolt"></i> Anki</button><button onclick="window.startPomoTask('${t.id}', 'aula')" class="px-4 py-1.5 rounded-xl border bg-white dark:bg-cm-mid text-slate-700 dark:text-white border-gray-200 hover:bg-gray-50 text-[10px] font-black uppercase tracking-wider transition shadow-sm flex items-center gap-2 ml-auto ${isPomoActiveForThis ? 'hidden' : ''}"><i class="fas fa-stopwatch text-green-500 text-sm"></i> Sessão</button></div>${pomoUI}</div><button onclick="window.toggleTaskDetails('${t.id}', event)" class="text-gray-400 w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-cm-mid transition shrink-0"><i class="fas fa-chevron-down ${isExpanded?'rotate-180':''}"></i></button></div>`;
+                if(isExpanded) {
+                    tasksHtml += `<div class="pt-4 mt-2 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row gap-5 fade-enter"><div class="flex-1 flex gap-2 items-center"><button onclick="window.openNotesModal('${t.id}')" class="text-gray-500 hover:text-blue-500 px-3 py-2 rounded-xl transition-colors text-sm bg-gray-100 dark:bg-cm-mid font-bold flex items-center gap-2"><i class="fas fa-book-open"></i> Anotações / Links</button></div><div class="flex items-center gap-3 bg-gray-50 dark:bg-cm-dark2 p-3 rounded-xl border border-gray-100 dark:border-gray-800 shrink-0 shadow-inner"><div class="text-center"><span class="text-[9px] font-bold text-gray-400 uppercase block tracking-wider mb-1">Feitas</span><input type="number" value="${p.done||''}" onchange="window.updateTaskQuestions('${t.id}', this.value)" class="w-12 bg-transparent text-center font-bold text-slate-800 dark:text-white outline-none border-b-2 border-gray-300 dark:border-gray-700 focus:border-green-500 py-1 transition" placeholder="-"></div><div class="text-center"><span class="text-[9px] font-bold text-gray-400 uppercase block tracking-wider mb-1">Acertos</span><input type="number" value="${p.correct||''}" onchange="window.updateTaskQuestions('${t.id}', this.value, true)" class="w-12 bg-transparent text-center font-bold text-slate-800 dark:text-white outline-none border-b-2 border-gray-300 dark:border-gray-700 focus:border-green-500 py-1 transition" placeholder="-"></div><div class="pl-3 border-l border-gray-200 dark:border-gray-800 text-center min-w-[3.5rem]"><span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">%</span><span class="text-lg font-black ${acc>0?'text-green-500':'text-gray-400'}">${acc}%</span></div></div></div>`;
                 }
                 tasksHtml += `</div>`;
             });
-            tasksHtml += `<button onclick="window.openAddTaskModal(${activeWeek})" class="w-full py-6 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-2xl text-gray-400 hover:text-cm-green hover:border-cm-green transition font-bold text-sm mt-2 flex items-center justify-center gap-2"><i class="fas fa-plus"></i> Inserir Tema Avulso</button></div>`;
+            tasksHtml += `<button onclick="window.openAddTaskModal(${activeWeek})" class="w-full py-8 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-3xl text-gray-400 hover:text-blue-600 hover:border-blue-400 hover:bg-blue-50/50 transition font-bold text-sm mt-2 flex items-center justify-center gap-3 group"><span class="w-10 h-10 rounded-full bg-gray-100 dark:bg-cm-mid flex items-center justify-center group-hover:bg-blue-100 transition shadow-sm text-lg"><i class="fas fa-plus"></i></span> Inserir Tema Avulso</button></div>`;
             content.innerHTML = agendaHtml + tasksHtml;
         }
 
         window.renderDashboard = function() { 
             const content = document.getElementById('content-area'); 
-            const qCanvas = `<div class="bg-white dark:bg-cm-dark2 p-6 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 h-full"><h3 class="font-black text-sm text-slate-700 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2"><i class="fas fa-chart-bar text-blue-500"></i> Questões (14 dias)</h3><canvas id="chart-questions" height="150"></canvas></div>`;
+            const qCanvas = `<div class="bg-white dark:bg-cm-dark2 p-6 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 relative h-64 w-full"><h3 class="font-black text-sm text-slate-700 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2"><i class="fas fa-chart-bar text-blue-500"></i> Questões (14 dias)</h3><div class="relative h-48 w-full"><canvas id="chart-questions"></canvas></div></div>`;
             content.innerHTML = `<div class="fade-enter"><h2 class="text-3xl font-serif text-slate-900 dark:text-white mb-6">Dashboard</h2><div class="grid grid-cols-1 lg:grid-cols-2 gap-8">${qCanvas}</div></div>`; 
             setTimeout(() => {
                 const ctx = document.getElementById('chart-questions');
                 if (ctx) {
                     const labels = []; const data = [];
-                    for (let i = 13; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); labels.push(`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`); data.push(state.dailyStats[`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`] || 0); }
+                    for (let i = 13; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); labels.push(`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`); data.push(window.state.dailyStats[`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`] || 0); }
                     new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ data, backgroundColor: '#00c27a', borderRadius: 4 }] }, options: { plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false } });
                 }
             }, 100);
         }
         
-        window.renderSearch = function() { document.getElementById('content-area').innerHTML = `<div class="fade-enter"><h2 class="text-3xl font-serif text-slate-900 dark:text-white mb-6">Banco de Tarefas</h2><div class="card-ui p-10 text-center"><i class="fas fa-search text-5xl text-gray-300 dark:text-gray-700 mb-4"></i><p class="text-gray-500 font-bold">A aba de pesquisa em desenvolvimento. Em breve todos os temas de banco.js serão listados aqui.</p></div></div>`; }
+        window.renderSearch = function() { 
+            const content = document.getElementById('content-area'); 
+            content.classList.add('fade-enter'); 
+            const filterButtons = ['Todas', ...mainCategories].map(area => `<button onclick="window.toggleSearchFilter('${area}')" class="filter-chip ${searchFilterArea === area ? 'active' : ''}">${area === 'Clínica' ? 'Clínica Médica' : area}</button>`).join('');
+            const html = `<div class="bg-white dark:bg-cm-dark2 p-8 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 min-h-[600px]"><div class="mb-10"><h2 class="text-3xl font-black text-slate-800 dark:text-white mb-6 tracking-tight">Buscar Tarefas</h2><input type="text" id="global-search-input" placeholder="Digite o tema, categoria ou palavra-chave..." class="w-full text-lg p-5 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none bg-gray-50 dark:bg-cm-mid transition shadow-sm mb-6 font-medium dark:text-white"><div class="flex flex-wrap gap-2">${filterButtons}</div></div><div id="search-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div></div>`;
+            content.innerHTML = html; 
+            setTimeout(() => content.classList.remove('fade-enter'), 500); 
+            const searchInput = document.getElementById('global-search-input'); const resultsContainer = document.getElementById('search-results');
+            window.toggleSearchFilter = function(area) { searchFilterArea = area; filterAndRender(searchInput.value); }
+            
+            function filterAndRender(query) {
+                const lowerQ = query.toLowerCase(); 
+                const filtered = bancoDeMaterias.filter(t => {
+                    const textMatch = t.tema.toLowerCase().includes(lowerQ) || t.area.toLowerCase().includes(lowerQ);
+                    let areaMatch = true; if (searchFilterArea !== 'Todas') { let tArea = areaMapping[t.area] || "Outros"; areaMatch = tArea === searchFilterArea; } return textMatch && areaMatch;
+                });
+                if(filtered.length === 0) { resultsContainer.innerHTML = `<div class="col-span-full text-center py-24"><i class="fas fa-search-minus text-4xl text-gray-200 dark:text-gray-700 mb-4 block"></i><p class="text-gray-400 font-medium">Nenhuma tarefa encontrada no banco.</p></div>`; } 
+                else { 
+                    resultsContainer.innerHTML = filtered.slice(0, 50).map((item, index) => { 
+                        return `<div class="p-5 border border-gray-100 dark:border-gray-800 rounded-2xl bg-white dark:bg-cm-mid hover:shadow-lg transition-all hover:border-blue-200 card-shadow flex justify-between items-center"><div class="flex-1 min-w-0"><div class="font-bold text-sm text-slate-800 dark:text-white leading-tight mb-2">${item.tema}</div><div class="text-[10px] font-bold uppercase text-gray-400 tracking-wide">${item.area}</div></div><button onclick="window.addFromBank(${index})" class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-blue-600 hover:text-white transition shadow-sm ml-2 flex-shrink-0" title="Adicionar à Semana Atual"><i class="fas fa-plus"></i> Add</button></div>`; 
+                    }).join(''); 
+                }
+            }
+            searchInput.addEventListener('input', (e) => filterAndRender(e.target.value)); filterAndRender('');
+            
+            window._currentFilteredBank = bancoDeMaterias;
+            window.addFromBank = function(index) {
+                const query = searchInput.value.toLowerCase();
+                const filtered = bancoDeMaterias.filter(t => { const textMatch = t.tema.toLowerCase().includes(query) || t.area.toLowerCase().includes(query); let areaMatch = true; if (searchFilterArea !== 'Todas') { let tArea = areaMapping[t.area] || "Outros"; areaMatch = tArea === searchFilterArea; } return textMatch && areaMatch; });
+                const taskToAdd = filtered[index];
+                if(taskToAdd) {
+                    let targetWeek = window.activeWeek; if(targetWeek === 0) targetWeek = 1;
+                    const week = window.state.weeks.find(w => w.week === targetWeek);
+                    if(week) {
+                        window.pushState();
+                        week.tasks.push({ id: `cstm_${Date.now()}`, category: taskToAdd.area, subject: taskToAdd.tema, prioridade: taskToAdd.prioridade, customizado: true, tipo: 'materia_nova' });
+                        window.triggerSave(); window.showToast(`Adicionado à Semana ${targetWeek}!`);
+                    }
+                }
+            }
+        }
         window.updateUI = function() { window.renderNav(); if(activeView === 'homepage') window.renderHomepage(); else if(activeView === 'dashboard') window.renderDashboard(); else if (activeView === 'search') window.renderSearch(); else window.renderWeek(); }
     </script>
 </body>
