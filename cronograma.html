@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CronoMed — Meu Cronograma</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,700&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cm: {
+                            dark: '#0a0f0d',
+                            dark2: '#111a15',
+                            mid: '#1e2e25',
+                            green: '#00c27a',
+                            greenD: '#009f64',
+                            text: '#e8f0eb',
+                            muted: '#7a9e8a'
+                        }
+                    },
+                    fontFamily: { sans: ['DM Sans', 'sans-serif'], serif: ['Fraunces', 'serif'] }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html, body { height: 100%; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+        
+        /* Tema Claro (Padrão) */
+        body { background-color: #f8fafc; color: #1e293b; }
+        .glass-header { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; }
+        .sidebar { background: #ffffff; border-right: 1px solid #e2e8f0; }
+        .card-ui { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 1.5rem; transition: all 0.3s ease; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .card-ui:hover { border-color: #cbd5e1; transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
+        
+        /* Tema Escuro (Ativado via classe .dark no HTML) */
+        .dark body { background-color: #0a0f0d; color: #e8f0eb; }
+        .dark .glass-header { background: rgba(10, 15, 13, 0.9); border-bottom-color: rgba(0,194,122,0.1); }
+        .dark .sidebar { background: rgba(17, 26, 21, 0.95); border-right-color: rgba(0,194,122,0.1); }
+        .dark .card-ui { background: #111a15; border-color: rgba(255,255,255,0.06); box-shadow: none; }
+        .dark .card-ui:hover { border-color: rgba(0,194,122,0.2); }
+        .dark input, .dark select, .dark textarea { background: #1e2e25; border-color: rgba(255,255,255,0.1); color: white; }
+        .dark .text-slate-800 { color: #ffffff; }
+        .dark .text-slate-600 { color: #e8f0eb; }
+        .dark .text-gray-500 { color: #7a9e8a; }
+        .dark .bg-gray-50 { background-color: #1e2e25; }
+        .dark .border-gray-200 { border-color: rgba(255,255,255,0.1); }
+        .dark .agenda-cell { color: #e8f0eb; }
+
+        .sidebar { transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; z-index: 40; }
+        .sidebar-hidden { margin-left: -20rem; }
+        .sidebar-content { flex: 1; overflow-y: auto; overflow-x: hidden; padding-bottom: 20px; }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .dark ::-webkit-scrollbar-thumb { background: #1e2e25; }
+        
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        [contenteditable]:empty:before { content: attr(placeholder); color: #94a3b8; display: block; }
+        
+        /* Linhas de Prioridade */
+        .prio-1 { border-left: 4px solid #ff4d4d !important; }
+        .prio-2 { border-left: 4px solid #f59e0b !important; }
+        .prio-3 { border-left: 4px solid #3b82f6 !important; }
+        .prio-4 { border-left: 4px solid #94a3b8 !important; }
+        .prio-rev { border-left: 4px dashed #00c27a !important; }
+
+        .task-card.done { opacity: 0.5; filter: grayscale(0.6); }
+        
+        /* Modal */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 1rem; }
+        .modal-overlay.open { display: flex; }
+        .modal-content { background: #ffffff; border-radius: 24px; padding: 2.5rem; w-full max-w: 500px; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: scaleIn 0.2s ease; }
+        .dark .modal-content { background: #111a15; border: 1px solid rgba(0,194,122,0.2); }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(.95); } to { opacity: 1; transform: scale(1); } }
+
+        /* Agenda / Timeline */
+        .timeline-item { position: relative; padding-left: 1.5rem; border-left: 2px solid #e2e8f0; margin-bottom: 1.5rem; }
+        .dark .timeline-item { border-left-color: #1e2e25; }
+        .timeline-item::before { content: ''; position: absolute; left: -0.35rem; top: 0; width: 0.6rem; height: 0.6rem; border-radius: 50%; background: #00c27a; }
+
+        .custom-checkbox { width: 1.5rem; height: 1.5rem; border-radius: 6px; border: 2px solid #cbd5e1; appearance: none; background-color: transparent; cursor: pointer; position: relative; transition: all 0.2s; }
+        .dark .custom-checkbox { border-color: rgba(255,255,255,0.3); }
+        .custom-checkbox:checked { background-color: #00c27a; border-color: #00c27a; }
+        .custom-checkbox:checked::after { content: '✓'; position: absolute; color: white; font-size: 1rem; font-weight: 900; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+
+        .fade-enter { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .task-details-wrapper { transition: max-height 0.3s ease, opacity 0.2s ease; max-height: 0; opacity: 0; overflow: hidden; }
+        .task-details-wrapper.expanded { max-height: 500px; opacity: 1; }
+
+        /* Player Spotify-like */
+        .mini-player { position: fixed; bottom: 20px; right: 20px; z-index: 999; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 100px; padding: 0.5rem 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: none; align-items: center; gap: 1rem; transition: transform 0.2s; }
+        .dark .mini-player { background: #111a15; border-color: #00c27a; box-shadow: 0 10px 25px rgba(0,194,122,0.1); }
+        .mini-player.show { display: flex; animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { transform: translateY(100px); } to { transform: translateY(0); } }
+
+        /* Loader Overlay */
+        #loader-overlay { position: fixed; inset: 0; background: #f8fafc; z-index: 9999; display: flex; flex-col; align-items: center; justify-content: center; }
+        .dark #loader-overlay { background: #0a0f0d; }
+    </style>
+</head>
+<body class="transition-colors duration-300">
+
+    <!-- OVERLAY DE CARREGAMENTO -->
+    <div id="loader-overlay">
+        <i class="fas fa-circle-notch fa-spin text-5xl text-cm-green mb-4"></i>
+        <h2 class="text-2xl font-serif font-bold text-slate-800 dark:text-white">A carregar o seu Cronograma...</h2>
+        <p class="text-gray-500 mt-2" id="loader-text">Sincronizando dados com a nuvem</p>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast-container" class="fixed top-20 right-6 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- MINI PLAYER POMODORO -->
+    <div id="mini-player" class="mini-player">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-cm-mid flex items-center justify-center text-cm-green animate-pulse"><i class="fas fa-clock"></i></div>
+            <div class="flex flex-col">
+                <span class="text-[10px] font-bold uppercase text-gray-500 tracking-widest leading-none mb-1" id="mp-phase">Foco: Aula</span>
+                <span class="font-mono font-black text-lg text-slate-800 dark:text-white leading-none" id="mp-time">50:00</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 border-l border-gray-200 dark:border-gray-700 pl-3">
+            <button onclick="window.togglePomo()" class="w-10 h-10 rounded-full bg-slate-900 text-white dark:bg-cm-green dark:text-cm-dark flex items-center justify-center hover:scale-105 transition shadow-md" id="mp-play-btn"><i class="fas fa-pause"></i></button>
+            <button onclick="window.stopPomo()" class="w-8 h-8 rounded-full text-gray-400 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-cm-mid transition flex items-center justify-center"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+
+    <div class="h-screen flex flex-col pb-16 md:pb-0 relative z-10">
+        
+        <!-- HEADER -->
+        <header class="glass-header p-4 z-50 flex-shrink-0 flex justify-between items-center transition-colors duration-300">
+            <div class="flex items-center gap-4 md:gap-6">
+                <button onclick="toggleSidebar()" class="text-gray-500 hover:text-cm-green focus:outline-none transition-colors"><i class="fas fa-bars text-xl"></i></button>
+                <div class="font-serif font-black text-2xl text-slate-900 dark:text-white tracking-tight">Crono<span class="text-cm-green">Med</span></div>
+            </div>
+            <div class="text-right flex items-center gap-3 md:gap-5">
+                <button onclick="toggleDarkMode()" class="text-gray-400 hover:text-slate-800 dark:hover:text-white transition text-lg" title="Mudar Tema"><i class="fas fa-moon" id="theme-icon"></i></button>
+                <div class="relative cursor-pointer group" onclick="toggleProfileMenu()">
+                    <div class="w-10 h-10 rounded-full bg-cm-green text-white font-bold flex items-center justify-center shadow-md uppercase" id="user-avatar">A</div>
+                    <!-- Menu de Perfil -->
+                    <div id="profile-menu" class="absolute right-0 top-12 mt-2 w-48 bg-white dark:bg-cm-dark2 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-2 hidden flex-col z-50 transition-colors">
+                        <div class="px-4 py-2 border-b border-gray-100 dark:border-gray-800 mb-1">
+                            <p class="text-sm font-bold text-slate-800 dark:text-white truncate" id="user-name">Usuário</p>
+                            <p class="text-[10px] text-gray-500 truncate" id="user-email">email@email.com</p>
+                        </div>
+                        <button onclick="window.recalculateRoute()" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-cm-mid flex items-center gap-2"><i class="fas fa-sync-alt w-4"></i> Recalcular Rota</button>
+                        <button onclick="window.handleLogout()" class="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-2"><i class="fas fa-sign-out-alt w-4"></i> Sair</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex flex-1 overflow-hidden relative">
+            <!-- SIDEBAR -->
+            <aside id="main-sidebar" class="w-72 sidebar hidden md:flex">
+                <div class="p-5 border-b border-gray-200 dark:border-gray-800 space-y-2 shrink-0">
+                    <button onclick="switchView('homepage')" id="nav-homepage" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all bg-cm-green/10 text-cm-green dark:bg-cm-green text-left"><i class="fas fa-home text-lg w-5 text-center"></i><span>Página Inicial</span></button>
+                    <button onclick="switchView('week')" id="nav-week" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-gray-500 hover:bg-gray-100 dark:hover:bg-cm-mid dark:text-cm-muted hover:text-slate-800 dark:hover:text-white text-left"><i class="fas fa-calendar-alt text-lg w-5 text-center"></i><span>A Minha Semana</span></button>
+                    <button onclick="switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-gray-500 hover:bg-gray-100 dark:hover:bg-cm-mid dark:text-cm-muted hover:text-slate-800 dark:hover:text-white text-left"><i class="fas fa-chart-pie text-lg w-5 text-center"></i><span>Dashboard</span></button>
+                    <button onclick="switchView('search')" id="nav-search" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-gray-500 hover:bg-gray-100 dark:hover:bg-cm-mid dark:text-cm-muted hover:text-slate-800 dark:hover:text-white text-left"><i class="fas fa-search text-lg w-5 text-center"></i><span>Banco de Tarefas</span></button>
+                </div>
+                <div class="px-5 pt-4 pb-2 text-[10px] uppercase font-bold text-gray-400 dark:text-cm-muted tracking-widest">Navegação Rápida</div>
+                <nav class="px-3 space-y-1 sidebar-content" id="week-nav"></nav>
+            </aside>
+
+            <!-- MAIN CONTENT -->
+            <main class="flex-1 p-4 md:p-8 overflow-y-auto relative w-full" id="main-scroll">
+                <div id="content-area" class="container mx-auto max-w-6xl pb-24"></div>
+            </main>
+        </div>
+
+        <!-- MOBILE NAV -->
+        <nav class="md:hidden fixed bottom-0 left-0 w-full glass-header flex justify-around p-3 z-50">
+            <button onclick="switchView('homepage')" class="flex flex-col items-center text-gray-500 dark:text-cm-muted hover:text-cm-green transition-colors"><i class="fas fa-home text-xl mb-1"></i><span class="text-[9px] font-bold uppercase">Início</span></button>
+            <button onclick="switchView('week')" class="flex flex-col items-center text-gray-500 dark:text-cm-muted hover:text-cm-green transition-colors"><i class="fas fa-calendar-alt text-xl mb-1"></i><span class="text-[9px] font-bold uppercase">Semana</span></button>
+            <button onclick="switchView('dashboard')" class="flex flex-col items-center text-gray-500 dark:text-cm-muted hover:text-cm-green transition-colors"><i class="fas fa-chart-pie text-xl mb-1"></i><span class="text-[9px] font-bold uppercase">Resumo</span></button>
+            <button onclick="switchView('search')" class="flex flex-col items-center text-gray-500 dark:text-cm-muted hover:text-cm-green transition-colors"><i class="fas fa-search text-xl mb-1"></i><span class="text-[9px] font-bold uppercase">Buscar</span></button>
+        </nav>
+    </div>
+
+    <!-- MODALS -->
+    <!-- ADD TASK -->
+    <div class="modal-overlay" id="modal-add-task">
+        <div class="modal-content text-slate-800 dark:text-white">
+            <button class="absolute top-4 right-4 text-gray-400 hover:text-slate-800 dark:hover:text-white" onclick="closeModal('add-task')"><i class="fas fa-times text-xl"></i></button>
+            <h3 class="text-2xl font-serif mb-2">Novo Tema</h3>
+            <p class="text-sm text-gray-500 dark:text-cm-muted mb-6">Adicione um conteúdo extra à sua semana.</p>
+            
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="block text-[10px] font-bold uppercase text-gray-500 tracking-widest mb-1.5">Nome da Aula/Tema</label>
+                    <input type="text" id="add-nome" placeholder="Ex: Aula Prática de Suturas" class="w-full bg-gray-50 dark:bg-cm-mid border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-sm outline-none focus:border-cm-green">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-gray-500 tracking-widest mb-1.5">Área Principal</label>
+                        <select id="add-area" class="w-full bg-gray-50 dark:bg-cm-mid border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-sm outline-none focus:border-cm-green">
+                            <option value="Cirurgia">Cirurgia</option>
+                            <option value="Clínica Médica">Clínica Médica</option>
+                            <option value="Ginecologia e Obstetrícia">Gineco e Obstetrícia</option>
+                            <option value="Pediatria">Pediatria</option>
+                            <option value="Preventiva">Preventiva</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-gray-500 tracking-widest mb-1.5">Prioridade</label>
+                        <select id="add-prio" class="w-full bg-gray-50 dark:bg-cm-mid border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-sm outline-none focus:border-cm-green">
+                            <option value="1">Alta (Crucial)</option>
+                            <option value="2" selected>Média</option>
+                            <option value="3">Baixa</option>
+                            <option value="4">Opcional</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <button onclick="saveCustomTask()" class="w-full bg-cm-green text-white dark:text-cm-dark py-3.5 rounded-xl font-bold hover:bg-cm-greenD transition shadow-md">Adicionar à Semana</button>
+        </div>
+    </div>
+
+    <!-- AGENDA REPLICATOR -->
+    <div class="modal-overlay" id="modal-replica-agenda">
+        <div class="modal-content text-center">
+            <div class="mb-5 text-blue-500 bg-blue-50 dark:bg-blue-900/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto"><i class="fas fa-copy text-2xl"></i></div>
+            <h3 class="text-xl font-serif text-slate-800 dark:text-white mb-2">Replicar Grade Horária</h3>
+            <p class="text-sm text-gray-500 mb-6">A sua grade (horários da esquerda) e blocos fixos da agenda serão copiados.</p>
+            <div class="space-y-3">
+                <button onclick="executeReplicaAgenda(4)" class="w-full py-3.5 bg-gray-100 dark:bg-cm-mid text-slate-800 dark:text-white rounded-xl font-bold hover:bg-gray-200 dark:hover:bg-gray-800 transition">Copiar para as próximas 4 semanas</button>
+                <button onclick="executeReplicaAgenda(999)" class="w-full py-3.5 bg-cm-green text-white dark:text-cm-dark rounded-xl font-bold shadow-md hover:bg-cm-greenD transition">Copiar para todo o resto do ano</button>
+                <button onclick="closeModal('replica-agenda')" class="w-full py-2 text-xs font-bold text-gray-400 hover:text-gray-600 dark:hover:text-white mt-2">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================================================
+         LÓGICA E FIREBASE
+         ====================================================================== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // ⚠️ SUBSTITUA PELAS SUAS CHAVES DO FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyAwQrhAoma0iuofm_MMghCbBnPPtLbrn0E",
+            authDomain: "cronomed-4b880.firebaseapp.com",
+            projectId: "cronomed-4b880",
+            storageBucket: "cronomed-4b880.firebasestorage.app",
+            messagingSenderId: "853512629124",
+            appId: "1:853512629124:web:42bb7b6808ca5487060bd1"
+        };
+
+        // --- O BANCO DE DADOS MASTER (Resumido para a versão inicial) ---
+        // Você pode colar os seus 240+ temas aqui depois. Coloquei os essenciais para testar.
+        const bancoDeMaterias = [
+            { "area": "Clínica Médica", "tema": "Hipertensão Arterial Sistêmica", "prioridade": 1 },
+            { "area": "Clínica Médica", "tema": "Insuficiência Cardíaca", "prioridade": 1 },
+            { "area": "Clínica Médica", "tema": "Diabetes Mellitus", "prioridade": 1 },
+            { "area": "Clínica Médica", "tema": "Doenças da Tireoide", "prioridade": 2 },
+            { "area": "Clínica Médica", "tema": "Asma e DPOC", "prioridade": 1 },
+            { "area": "Clínica Médica", "tema": "AVC", "prioridade": 1 },
+            { "area": "Clínica Médica", "tema": "Lesão Renal Aguda", "prioridade": 1 },
+            { "area": "Clínica Médica", "tema": "Sepse e Choque Séptico", "prioridade": 1 },
+            { "area": "Clínica Médica", "tema": "Anemias", "prioridade": 2 },
+            { "area": "Clínica Médica", "tema": "Lúpus Eritematoso Sistêmico", "prioridade": 3 },
+            { "area": "Cirurgia", "tema": "ATLS e Avaliação Inicial do Trauma", "prioridade": 1 },
+            { "area": "Cirurgia", "tema": "Abdome Agudo", "prioridade": 1 },
+            { "area": "Cirurgia", "tema": "Apendicite Aguda", "prioridade": 1 },
+            { "area": "Cirurgia", "tema": "Colelitíase", "prioridade": 2 },
+            { "area": "Cirurgia", "tema": "Hérnias da Parede Abdominal", "prioridade": 2 },
+            { "area": "Cirurgia", "tema": "Queimaduras", "prioridade": 3 },
+            { "area": "Pediatria", "tema": "Reanimação Neonatal", "prioridade": 1 },
+            { "area": "Pediatria", "tema": "Puericultura", "prioridade": 1 },
+            { "area": "Pediatria", "tema": "Infecções Respiratórias Agudas", "prioridade": 1 },
+            { "area": "Pediatria", "tema": "Doenças Exantemáticas", "prioridade": 2 },
+            { "area": "Pediatria", "tema": "Cardiopatias Congênitas", "prioridade": 3 },
+            { "area": "Ginecologia e Obstetrícia", "tema": "Doença Hipertensiva da Gestação", "prioridade": 1 },
+            { "area": "Ginecologia e Obstetrícia", "tema": "Trabalho de Parto Prematuro", "prioridade": 1 },
+            { "area": "Ginecologia e Obstetrícia", "tema": "Infecções Sexualmente Transmissíveis", "prioridade": 1 },
+            { "area": "Ginecologia e Obstetrícia", "tema": "Sangramento Uterino Anormal", "prioridade": 2 },
+            { "area": "Ginecologia e Obstetrícia", "tema": "Anticoncepção", "prioridade": 2 },
+            { "area": "Preventiva", "tema": "Princípios do SUS", "prioridade": 1 },
+            { "area": "Preventiva", "tema": "Medidas de Associação e Risco", "prioridade": 1 },
+            { "area": "Preventiva", "tema": "Vigilância Epidemiológica", "prioridade": 2 }
+        ];
+
+        let app, auth, db, currentUser;
+        window.state = { weeks: [], progress: {}, dailyStats: {}, simulados: [] };
+        window.activeView = 'homepage';
+        window.activeWeek = 1;
+        window.expandedCards = {};
+        window.isDarkMode = false;
+        
+        // Pomo Variables
+        window.pomoTime = 50 * 60;
+        window.pomoTotal = 50 * 60;
+        window.isPomoRunning = false;
+        window.activePomoId = null;
+        window.pomoPhase = 'aula';
+
+        // START
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    currentUser = user;
+                    document.getElementById('user-avatar').innerText = user.email ? user.email[0].toUpperCase() : 'U';
+                    document.getElementById('user-email').innerText = user.email;
+                    
+                    const docSnap = await getDoc(doc(db, "profiles", user.uid));
+                    if(docSnap.exists()) {
+                        const data = docSnap.data();
+                        document.getElementById('user-name').innerText = data.nome || 'Usuário';
+                        
+                        if (!data.acesso_liberado) { window.location.href = "index.html"; return; }
+                        if (!data.has_onboarded) { window.location.href = "onboarding.html"; return; }
+                        
+                        // Load App State or Generate
+                        if (data.app_state && data.app_state.weeks && data.app_state.weeks.length > 0) {
+                            window.state = data.app_state;
+                            finishLoading();
+                        } else {
+                            generateSchedule(data.onboarding_data);
+                        }
+                    } else { window.location.href = "index.html"; }
+                } else { window.location.href = "index.html"; }
+            });
+        } catch(e) {
+            console.error("Firebase Auth Error", e);
+            document.getElementById('loader-text').innerText = "Erro ao conectar. Executando em modo Demonstração local.";
+            generateSchedule({ horas: "4h", internato: "nao", dataInicio: new Date().toISOString(), dataProva: new Date(new Date().setMonth(new Date().getMonth() + 10)).toISOString() });
+        }
+
+        // ======================================================================
+        // O CÉREBRO: ALGORITMO GERADOR DO CRONOGRAMA
+        // ======================================================================
+        async function generateSchedule(obData) {
+            document.getElementById('loader-text').innerText = "A processar algoritmo de prioridades...";
+            
+            const start = obData.dataInicio ? new Date(obData.dataInicio) : new Date();
+            const end = obData.dataProva ? new Date(obData.dataProva) : new Date(new Date().setMonth(new Date().getMonth() + 10));
+            const totalSemanas = Math.max(4, Math.floor((end - start) / (1000 * 60 * 60 * 24 * 7)));
+            
+            // 1. Filtrar Banco por Tempo
+            let filteredDB = bancoDeMaterias.filter(t => t.prioridade <= 2); // default
+            if (totalSemanas > 35) filteredDB = bancoDeMaterias; // tem tempo, estuda tudo
+            if (totalSemanas < 15) filteredDB = bancoDeMaterias.filter(t => t.prioridade === 1); // intensivo
+            
+            // 2. Criar Semanas
+            const newWeeks = [];
+            for(let i=1; i<=totalSemanas; i++) {
+                newWeeks.push({
+                    week: i,
+                    phase: "Estudo Focado",
+                    timeSlots: ["08:00 - 12:00", "14:00 - 18:00"],
+                    agenda: {},
+                    tasks: []
+                });
+            }
+
+            // 3. Distribuir Tarefas (Simplificado: Espiral Misto)
+            let wIdx = 0;
+            filteredDB.forEach((task, index) => {
+                newWeeks[wIdx].tasks.push({
+                    id: `gen_${index}`,
+                    category: task.area,
+                    subject: task.tema,
+                    prioridade: task.prioridade,
+                    tipo: "materia_nova"
+                });
+                wIdx++;
+                if(wIdx >= totalSemanas) wIdx = 0;
+            });
+
+            window.state.weeks = newWeeks;
+            window.state.progress = {};
+            window.state.dailyStats = {};
+
+            // 4. Salvar
+            await window.saveToCloud();
+            finishLoading();
+        }
+
+        function finishLoading() {
+            document.getElementById('loader-overlay').style.display = 'none';
+            // Configurar tema salvo no cache do navegador
+            if(localStorage.getItem('cm_theme') === 'dark') window.toggleDarkMode(true);
+            window.updateUI();
+        }
+
+        window.saveToCloud = async function() {
+            try {
+                if(currentUser) {
+                    await updateDoc(doc(db, "profiles", currentUser.uid), { app_state: window.state });
+                }
+            } catch(e) { console.error("Save error", e); }
+        }
+        
+        // Timer de auto-save (A cada 5 segundos se houver mudança)
+        let saveTimeout;
+        window.triggerSave = function() {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => { window.saveToCloud(); }, 5000);
+        }
+
+        window.handleLogout = async function() { if(auth) await signOut(auth); window.location.href = "index.html"; }
+        window.recalculateRoute = function() { window.location.href = "onboarding.html"; }
+
+        // ======================================================================
+        // FUNÇÕES UI BASE
+        // ======================================================================
+        window.toggleDarkMode = function(force) {
+            const body = document.body;
+            const icon = document.getElementById('theme-icon');
+            if (force === true || force === false) {
+                window.isDarkMode = force;
+            } else {
+                window.isDarkMode = !window.isDarkMode;
+            }
+            
+            if (window.isDarkMode) {
+                document.documentElement.classList.add('dark');
+                icon.classList.replace('fa-moon', 'fa-sun');
+                localStorage.setItem('cm_theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                icon.classList.replace('fa-sun', 'fa-moon');
+                localStorage.setItem('cm_theme', 'light');
+            }
+        }
+
+        window.toggleSidebar = function() { document.getElementById('main-sidebar').classList.toggle('sidebar-hidden'); }
+        window.toggleProfileMenu = function() { const menu = document.getElementById('profile-menu'); menu.classList.toggle('hidden'); menu.classList.toggle('flex'); }
+        window.openModal = function(id) { document.getElementById('modal-'+id).classList.add('open'); }
+        window.closeModal = function(id) { document.getElementById('modal-'+id).classList.remove('open'); }
+
+        window.showToast = function(msg) {
+            const container = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            t.className = `px-6 py-3 rounded-xl shadow-lg font-bold text-sm flex items-center gap-3 fade-enter bg-cm-green text-cm-dark`;
+            t.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
+            container.appendChild(t);
+            setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(()=>t.remove(), 300); }, 3000);
+        }
+
+        window.getTodayStr = function() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+        window.getCategoryColor = function(category) {
+            const map = { "Cirurgia": "bg-red-500/10 text-red-500 border-red-500/20", "Clínica Médica": "bg-blue-500/10 text-blue-500 border-blue-500/20", "Ginecologia e Obstetrícia": "bg-pink-500/10 text-pink-500 border-pink-500/20", "Pediatria": "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20", "Preventiva": "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" };
+            return map[category] || "bg-gray-500/10 text-gray-500 border-gray-500/20";
+        }
+
+        // ======================================================================
+        // AÇÕES NAS TAREFAS
+        // ======================================================================
+        window.ensureProgress = function(id) { if (!state.progress[id]) state.progress[id] = {}; }
+
+        window.toggleTask = function(id) { 
+            window.ensureProgress(id); 
+            const newStatus = !state.progress[id].doneStatus; 
+            state.progress[id].doneStatus = newStatus; 
+            if(newStatus) { 
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#00c27a', '#1e2e25'] });
+            } 
+            window.triggerSave(); window.updateUI(); 
+        }
+
+        window.updateTaskQuestions = function(taskId, newVal, isCorrect = false) { 
+            const val = parseInt(newVal) || 0; window.ensureProgress(taskId); 
+            if(isCorrect) { state.progress[taskId].correct = val; }
+            else {
+                const oldVal = parseInt(state.progress[taskId].done) || 0; 
+                const diff = val - oldVal; 
+                state.progress[taskId].done = val; 
+                if (diff > 0) { const today = window.getTodayStr(); state.dailyStats[today] = (state.dailyStats[today] || 0) + diff; } 
+            }
+            window.triggerSave(); window.updateUI(); 
+        }
+
+        window.toggleTaskDetails = function(taskId, event) {
+            if(event && (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || event.target.closest('button') || event.target.closest('.custom-checkbox'))) return;
+            window.expandedCards[taskId] = !window.expandedCards[taskId];
+            window.updateUI();
+        }
+
+        // Modal Custom Task
+        window.openAddTaskModal = function(weekNum) { window.activeWeek = weekNum; document.getElementById('add-nome').value = ''; window.openModal('add-task'); }
+        window.saveCustomTask = function() {
+            const nome = document.getElementById('add-nome').value.trim();
+            const area = document.getElementById('add-area').value;
+            const prio = parseInt(document.getElementById('add-prio').value);
+            if(!nome) return alert("Insira o nome.");
+            const week = state.weeks.find(w => w.week === activeWeek);
+            if(week) {
+                week.tasks.push({ id: `cstm_${Date.now()}`, category: area, subject: nome, prioridade: prio, customizado: true });
+                window.triggerSave(); window.updateUI(); window.showToast("Tema adicionado!"); window.closeModal('add-task');
+            }
+        }
+
+        window.deleteTask = function(weekIdx, taskIdx) {
+            if(confirm("Remover esta tarefa da semana?")) {
+                const week = state.weeks.find(w => w.week === weekIdx);
+                if(week) { week.tasks.splice(taskIdx, 1); window.triggerSave(); window.updateUI(); window.showToast("Removida."); }
+            }
+        }
+
+        // ======================================================================
+        // AGENDA HORÁRIA EDITÁVEL
+        // ======================================================================
+        window.updateTimeSlot = function(weekIdx, slotIdx, val) { const w = state.weeks.find(w => w.week === weekIdx); if(w) { w.timeSlots[slotIdx] = val; window.triggerSave(); } }
+        window.updateAgendaCell = function(weekIdx, dayKey, slotIdx, text) { const w = state.weeks.find(w => w.week === weekIdx); if(w) { const k = `${dayKey}_${slotIdx}`; if(!w.agenda) w.agenda={}; if(!w.agenda[k]) w.agenda[k]={}; w.agenda[k].text = text; window.triggerSave(); } }
+        
+        window.executeReplicaAgenda = function(weeksAhead) {
+            const sourceW = state.weeks.find(w => w.week === activeWeek);
+            if(!sourceW) return;
+            state.weeks.forEach(w => {
+                if(w.week > activeWeek && w.week <= activeWeek + weeksAhead) {
+                    w.timeSlots = [...sourceW.timeSlots];
+                    w.agenda = JSON.parse(JSON.stringify(sourceW.agenda));
+                }
+            });
+            window.triggerSave(); window.showToast("Agenda replicada com sucesso!"); window.closeModal('replica-agenda');
+        }
+
+        // ======================================================================
+        // POMODORO FLUTUANTE (Spotify Style)
+        // ======================================================================
+        window.togglePomo = function() {
+            if (window.isPomoRunning) { window.isPomoRunning = false; document.getElementById('mp-play-btn').innerHTML = '<i class="fas fa-play ml-1"></i>'; } 
+            else { window.isPomoRunning = true; document.getElementById('mp-play-btn').innerHTML = '<i class="fas fa-pause"></i>'; }
+        }
+        window.stopPomo = function() { window.isPomoRunning = false; window.activePomoId = null; document.getElementById('mini-player').classList.remove('show'); }
+        window.startPomoTask = function(taskId, phase) {
+            window.activePomoId = taskId; window.pomoPhase = phase;
+            window.pomoTotal = phase === 'aula' ? 50*60 : (phase === 'questoes' ? 25*60 : 5*60);
+            window.pomoTime = window.pomoTotal; window.isPomoRunning = true;
+            document.getElementById('mp-phase').innerText = phase;
+            document.getElementById('mp-play-btn').innerHTML = '<i class="fas fa-pause"></i>';
+            document.getElementById('mini-player').classList.add('show');
+        }
+        setInterval(() => {
+            if(window.isPomoRunning && window.pomoTime > 0) {
+                window.pomoTime--;
+                const m = Math.floor(window.pomoTime / 60); const s = window.pomoTime % 60;
+                document.getElementById('mp-time').innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+                if(window.pomoTime === 0) { window.togglePomo(); window.showToast("Tempo concluído! Descanse."); }
+            }
+        }, 1000);
+
+        // ======================================================================
+        // RENDERS
+        // ======================================================================
+        window.switchView = function(view) {
+            activeView = view;
+            ['nav-dashboard', 'nav-search', 'nav-homepage', 'nav-week'].forEach(id => { const el = document.getElementById(id); if (el) { el.className = el.className.replace('bg-cm-green/10 text-cm-green dark:bg-cm-green dark:text-cm-dark', 'text-gray-500 hover:bg-gray-100 dark:hover:bg-cm-mid dark:text-cm-muted hover:text-slate-800 dark:hover:text-white bg-transparent'); } });
+            const activeEl = document.getElementById(`nav-${view}`); if (activeEl) { activeEl.className = activeEl.className.replace('text-gray-500 hover:bg-gray-100 dark:hover:bg-cm-mid dark:text-cm-muted hover:text-slate-800 dark:hover:text-white bg-transparent', 'bg-cm-green/10 text-cm-green dark:bg-cm-green dark:text-cm-dark'); }
+            window.updateUI();
+        }
+
+        window.renderNav = function() {
+            const nav = document.getElementById('week-nav'); if(!nav) return; nav.innerHTML = '';
+            state.weeks.forEach(w => {
+                const total = w.tasks.length; let done = 0;
+                w.tasks.forEach(t => { if(state.progress[t.id]?.doneStatus) done++; });
+                const pct = total ? Math.round((done/total)*100) : 0;
+                const active = (activeView === 'week' && activeWeek === w.week) ? 'bg-gray-100 dark:bg-cm-mid border-cm-green' : 'border-transparent hover:bg-gray-50 dark:hover:bg-cm-mid/50';
+                nav.innerHTML += `<div onclick="activeWeek=${w.week}; window.switchView('week');" class="px-4 py-2.5 rounded-xl mb-1 cursor-pointer transition-all border-l-2 ${active} flex justify-between items-center text-slate-700 dark:text-gray-300"><div><span class="block text-xs font-bold">Semana ${w.week}</span></div><span class="text-[10px] font-bold px-1.5 rounded ${pct===100?'bg-cm-green text-cm-dark':'bg-gray-200 dark:bg-cm-dark2'}">${pct}%</span></div>`;
+            });
+        }
+
+        window.renderHomepage = function() {
+            const content = document.getElementById('content-area');
+            const nome = document.getElementById('user-name').innerText.split(' ')[0] || 'Doutor(a)';
+            const todayStr = window.getTodayStr();
+            const todayCount = state.dailyStats[todayStr] || 0;
+            
+            // Achar semana atual baseada nas datas (Simulado simples aqui: assume semana 1 como agora se não tiver datas reais)
+            let currW = state.weeks[0]; // Fallback
+            
+            let todayTasks = currW ? currW.tasks.filter(t => !(state.progress[t.id] || {}).doneStatus) : [];
+
+            // Mini Agenda Hoje (Fictício do dia atual da semana 1)
+            const dayIdx = new Date().getDay();
+            let agendaHtml = '';
+            if(currW && currW.timeSlots) {
+                currW.timeSlots.forEach((slot, sIdx) => {
+                    const cell = currW.agenda ? currW.agenda[`d${dayIdx}_${sIdx}`] : null;
+                    const txt = cell ? cell.text : '- Livre -';
+                    agendaHtml += `<div class="flex items-start gap-4 timeline-item"><div class="text-[10px] font-bold font-mono text-gray-400 mt-1">${slot}</div><div class="font-bold text-sm text-slate-800 dark:text-white bg-gray-50 dark:bg-cm-mid px-4 py-2 rounded-xl flex-1">${txt}</div></div>`;
+                });
+            }
+
+            let html = `
+            <div class="max-w-4xl mx-auto fade-enter">
+                <div class="mb-10">
+                    <h1 class="text-4xl font-serif text-slate-900 dark:text-white tracking-tight">Bom dia, ${nome}!</h1>
+                    <p class="text-gray-500 dark:text-cm-muted mt-2 text-lg">O seu foco de hoje está desenhado abaixo. Faltam <b class="text-cm-green">140 dias</b> para as provas principais.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                    <div class="card-ui p-6 flex flex-col justify-center items-center text-center">
+                        <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Ofensiva</div>
+                        <div class="text-3xl font-black text-orange-500 flex items-center gap-2"><i class="fas fa-fire"></i> 3 dias</div>
+                    </div>
+                    <div class="card-ui p-6 flex flex-col justify-center items-center text-center">
+                        <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Questões Hoje</div>
+                        <div class="text-3xl font-black text-cm-green flex items-center gap-2">${todayCount}</div>
+                    </div>
+                    <div class="card-ui p-6 flex flex-col justify-center items-center text-center bg-cm-green text-white dark:text-cm-dark border-transparent cursor-pointer hover:scale-105 transition" onclick="window.startPomoTask('avulso', 'aula')">
+                        <i class="fas fa-play text-2xl mb-2"></i>
+                        <div class="font-bold text-sm">Iniciar Foco Livre</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-sm font-bold uppercase tracking-widest text-gray-500 mb-6 flex items-center gap-2"><i class="far fa-clock"></i> Linha do Tempo</h3>
+                        <div class="card-ui p-8 pt-10">
+                            ${agendaHtml}
+                            <button onclick="switchView('week')" class="w-full text-xs font-bold text-cm-green hover:underline mt-4 text-center">Editar minha grade na Aba Semanas</button>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold uppercase tracking-widest text-gray-500 mb-6 flex items-center gap-2"><i class="fas fa-tasks"></i> Foco Principal Hoje</h3>
+                        <div class="space-y-3">
+                            ${todayTasks.slice(0, 5).map(t => {
+                                const prio = t.prioridade || 2; const pClass = `prio-${prio}`;
+                                const tagColor = window.getCategoryColor(t.category);
+                                return `<div class="card-ui p-4 flex items-center gap-3 border-l-4 ${pClass} cursor-pointer" onclick="activeWeek=${currW.week}; window.switchView('week');">
+                                    <div class="w-8 h-8 rounded-full bg-gray-50 dark:bg-cm-dark2 flex items-center justify-center text-gray-400"><i class="fas fa-arrow-right"></i></div>
+                                    <div><div class="font-bold text-sm text-slate-800 dark:text-white leading-tight">${t.subject}</div><span class="${tagColor} text-[8px] uppercase font-bold px-1.5 rounded mt-1 inline-block">${t.category}</span></div>
+                                </div>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+            content.innerHTML = html;
+        }
+
+        window.renderWeek = function() {
+            const w = state.weeks.find(d => d.week === activeWeek); const content = document.getElementById('content-area');
+            if(!w) return;
+
+            const days = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+            
+            // GRADE HORÁRIA EDITÁVEL
+            let agendaHtml = `<div class="mb-12 fade-enter">
+                <div class="flex justify-between items-center mb-6">
+                    <div><h2 class="text-3xl font-serif text-slate-900 dark:text-white">A Minha Semana ${w.week}</h2><span class="text-sm text-gray-500 dark:text-cm-muted">Organize seu tempo e cumpra os alvos.</span></div>
+                    <button onclick="window.openModal('replica-agenda')" class="text-xs font-bold bg-white dark:bg-cm-mid border border-gray-200 dark:border-gray-700 px-4 py-2 rounded-xl shadow-sm hover:border-cm-green transition"><i class="fas fa-copy mr-1 text-cm-green"></i> Configurar Grade</button>
+                </div>
+                <div class="overflow-x-auto rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-cm-dark2">
+                    <table class="w-full text-left min-w-[700px] border-collapse">
+                        <thead><tr class="bg-gray-50 dark:bg-cm-mid"><th class="p-3 w-20 border-b border-gray-200 dark:border-gray-800"></th>${days.map(d=>`<th class="p-3 text-xs font-bold text-gray-500 uppercase tracking-widest text-center border-b border-l border-gray-200 dark:border-gray-800">${d}</th>`).join('')}</tr></thead>
+                        <tbody>
+                            ${w.timeSlots.map((slot, sIdx) => `<tr>
+                                <td class="p-0 border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-cm-mid/30"><div contenteditable="true" onblur="window.updateTimeSlot(${activeWeek}, ${sIdx}, this.innerText)" class="w-full text-center text-[10px] font-bold font-mono text-gray-500 outline-none focus:bg-cm-green/10 p-4">${slot}</div></td>
+                                ${days.map((d, dIdx) => {
+                                    const cell = w.agenda ? w.agenda[`d${dIdx}_${sIdx}`] : null; const txt = cell ? cell.text : '';
+                                    return `<td class="p-0 border-b border-l border-gray-200 dark:border-gray-800 relative"><div contenteditable="true" onblur="window.updateAgendaCell(${activeWeek}, 'd${dIdx}', ${sIdx}, this.innerText)" class="w-full h-full min-h-[60px] p-2 text-xs font-medium text-slate-700 dark:text-white outline-none focus:bg-cm-green/10 transition flex items-center justify-center text-center bg-transparent break-words">${txt}</div></td>`;
+                                }).join('')}
+                            </tr>`).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>`;
+
+            // TAREFAS
+            let tasksHtml = `<div class="mb-4 flex justify-between items-center"><h3 class="text-sm font-bold uppercase tracking-widest text-gray-500"><i class="fas fa-bullseye text-cm-green mr-1"></i> Alvos da Semana</h3></div><div class="grid gap-3 fade-enter">`;
+            
+            w.tasks.forEach((task, idx) => {
+                const taskId = task.id; const p = state.progress[taskId] || {}; const isChecked = p.doneStatus;
+                const prio = task.prioridade || 2; const pClass = `prio-${prio}`;
+                const tagColor = window.getCategoryColor(task.category); 
+                const isExp = window.expandedCards[taskId];
+                const acc = window.calculateAccuracy(p.done, p.correct);
+                
+                let labels = prio===1? 'ALTA PREVALÊNCIA': prio===2? 'MÉDIA PREVALÊNCIA': prio===3? 'BAIXA PREVALÊNCIA': 'OPCIONAL';
+                if(task.customizado) labels = 'CUSTOMIZADO';
+
+                tasksHtml += `<div class="card-ui p-4 flex flex-col gap-2 border-l-4 ${pClass} ${isChecked ? 'done' : ''}">
+                    <div class="flex items-center gap-4 w-full">
+                        <div class="relative flex-shrink-0"><input type="checkbox" class="custom-checkbox" ${isChecked?'checked':''} onchange="window.toggleTask('${taskId}')"></div>
+                        <div class="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 cursor-pointer" onclick="window.toggleTaskDetails('${taskId}', event)">
+                            <div class="font-bold text-slate-800 dark:text-white text-[15px] leading-tight truncate">${task.subject}</div>
+                            <div class="flex gap-2">
+                                <span class="${tagColor} text-[8px] font-bold uppercase tracking-widest px-1.5 rounded border hidden sm:block">${task.category}</span>
+                                <span class="bg-gray-100 dark:bg-cm-mid text-gray-500 text-[8px] font-bold uppercase tracking-widest px-1.5 rounded hidden sm:block border border-gray-200 dark:border-gray-700">${labels}</span>
+                            </div>
+                        </div>
+                        <button onclick="window.toggleTaskDetails('${taskId}', event)" class="text-gray-400 w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-cm-mid transition"><i class="fas fa-chevron-down transition-transform ${isExp?'rotate-180':''}"></i></button>
+                    </div>`;
+                    
+                if(isExp) {
+                    tasksHtml += `<div class="pt-4 mt-2 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row gap-5 fade-enter">
+                        <div class="flex-1 flex flex-col gap-3">
+                            <div class="flex gap-2">
+                                <button onclick="window.startPomoTask('${taskId}', 'aula')" class="bg-gray-100 dark:bg-cm-mid text-slate-700 dark:text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:border-cm-green border border-transparent transition flex items-center gap-2"><i class="fas fa-play text-cm-green"></i> Focar (Aula)</button>
+                                <button onclick="window.startPomoTask('${taskId}', 'questoes')" class="bg-gray-100 dark:bg-cm-mid text-slate-700 dark:text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:border-cm-green border border-transparent transition flex items-center gap-2"><i class="fas fa-pen text-cm-green"></i> Focar (Qst)</button>
+                            </div>
+                            <button onclick="window.deleteTask(${activeWeek}, ${idx})" class="text-[10px] text-gray-400 hover:text-red-500 font-bold uppercase w-fit"><i class="fas fa-trash-alt"></i> Remover da semana</button>
+                        </div>
+                        <div class="flex items-center gap-3 bg-gray-50 dark:bg-cm-dark p-3 rounded-xl border border-gray-100 dark:border-gray-800 shrink-0">
+                            <div class="text-center"><span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 block">Feitas</span><input type="number" value="${p.done||''}" onchange="window.updateTaskQuestions('${taskId}', this.value)" class="w-12 bg-transparent text-center font-bold text-slate-800 dark:text-white outline-none border-b border-gray-300 dark:border-gray-700 focus:border-cm-green py-1" placeholder="-"></div>
+                            <div class="text-center"><span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 block">Acertos</span><input type="number" value="${p.correct||''}" onchange="window.updateTaskQuestions('${taskId}', this.value, true)" class="w-12 bg-transparent text-center font-bold text-slate-800 dark:text-white outline-none border-b border-gray-300 dark:border-gray-700 focus:border-cm-green py-1" placeholder="-"></div>
+                            <div class="pl-3 border-l border-gray-200 dark:border-gray-800 text-center min-w-[3.5rem]"><span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 block">%</span><span class="text-lg font-black ${acc>0?'text-cm-green':'text-gray-400'}">${acc}%</span></div>
+                        </div>
+                    </div>`;
+                }
+                tasksHtml += `</div>`;
+            });
+            
+            tasksHtml += `<button onclick="window.openAddTaskModal(${activeWeek})" class="w-full py-6 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-2xl text-gray-400 hover:text-cm-green hover:border-cm-green transition font-bold text-sm mt-2 flex items-center justify-center gap-2"><i class="fas fa-plus"></i> Inserir Tema Avulso</button></div>`;
+            
+            content.innerHTML = agendaHtml + tasksHtml;
+        }
+
+        window.renderDashboard = function() {
+            const content = document.getElementById('content-area'); 
+            content.innerHTML = `<div class="fade-enter"><h2 class="text-3xl font-serif text-slate-900 dark:text-white mb-6">Dashboard</h2><div class="card-ui p-10 text-center"><i class="fas fa-chart-line text-5xl text-gray-300 dark:text-gray-700 mb-4"></i><p class="text-gray-500 font-bold">Gráficos de evolução serão preenchidos conforme avança no Cronograma.</p></div></div>`;
+        }
+
+        window.renderSearch = function() {
+            const content = document.getElementById('content-area'); 
+            content.innerHTML = `<div class="fade-enter"><h2 class="text-3xl font-serif text-slate-900 dark:text-white mb-6">Banco de Tarefas</h2><div class="card-ui p-10 text-center"><i class="fas fa-search text-5xl text-gray-300 dark:text-gray-700 mb-4"></i><p class="text-gray-500 font-bold">Pesquise pelas ${bancoDeMaterias.length}+ matérias mapeadas.</p></div></div>`;
+        }
+
+        window.updateUI = function() { 
+            window.renderNav(); 
+            if(activeView === 'homepage') window.renderHomepage(); 
+            else if(activeView === 'dashboard') window.renderDashboard(); 
+            else if (activeView === 'search') window.renderSearch(); 
+            else window.renderWeek(); 
+            
+            // Calc Global Prog
+            let total = 0, done = 0;
+            state.weeks.forEach(w => { total += w.tasks.length; w.tasks.forEach(t => { if(state.progress[t.id]?.doneStatus) done++; }) });
+            const pct = total ? Math.round((done/total)*100) : 0;
+            document.getElementById('global-progress').style.width = `${pct}%`;
+            document.getElementById('global-percent-text').innerText = `${pct}%`;
+        }
+    </script>
+</body>
+</html>
