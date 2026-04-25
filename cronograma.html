@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-    <!-- CARREGA O BANCO DE DADOS EXTERNO (À PROVA DE FALHAS) -->
+    <!-- CARREGA O BANCO DE DADOS EXTERNO (À PROVA DE FALHAS E SEM CORTAR O CÓDIGO) -->
     <script src="banco.js"></script>
 
     <script>
@@ -47,6 +47,7 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        body.dark-mode ::-webkit-scrollbar-thumb { background: #334155; }
 
         /* UI de Alto Contraste */
         .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); transition: box-shadow 0.2s, transform 0.2s; }
@@ -73,7 +74,7 @@
         .draggable-item:active { cursor: grabbing; opacity: 0.6; }
         .drop-target-week { background-color: rgba(59, 130, 246, 0.1) !important; border-color: #3b82f6 !important; transform: scale(1.02); }
 
-        /* Modais Centralizados */
+        /* Modais Centralizados e Desfocados */
         .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 1rem; }
         .modal-overlay.flex { display: flex; }
         .modal-content { background: white; border-radius: 1.5rem; padding: 2rem; width: 100%; max-width: 28rem; position: relative; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); animation: scaleIn 0.2s ease; max-height: 90vh; overflow-y: auto; text-align: left; }
@@ -99,7 +100,7 @@
         .settings-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 1000; display: none; }
         .settings-overlay.open { display: block; }
 
-        /* DARK MODE CSS BLINDADO */
+        /* DARK MODE CSS - LIMPO PARA NÃO CONFLITAR */
         body.dark .agenda-table { border-color: #334155; }
         body.dark .agenda-table td { border-color: #334155; }
         body.dark .time-col { background-color: #0f172a !important; color: #94a3b8 !important; border-right-color: #334155 !important;}
@@ -165,7 +166,6 @@
                     </div>
                 </div>
                 <div class="text-xl font-bold text-white w-12 text-right hidden sm:block" id="global-percent-text">0%</div>
-                <!-- Avatar para não quebrar o JS -->
                 <div id="user-avatar" class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center uppercase cursor-pointer" onclick="window.openSettingsSidebar()">U</div>
             </div>
         </header>
@@ -431,7 +431,7 @@
         
         window.pendingDeleteAction = null; window.pendingReviewTaskId = null; window.activeNotesTaskId = null; window.currentCalendarDate = new Date(); 
         
-        window.activeView = 'homepage'; // ABRE SEMPRE NA PÁGINA INICIAL
+        window.activeView = 'homepage';
         window.activeWeek = 1; 
         window.undoStack = []; window.redoStack = [];
         window.isFocusMode = false;
@@ -445,6 +445,63 @@
         window.activePomoTaskId = null; window.pomoPhase = 'aula'; window.pomoTime = 50 * 60; window.pomoTotalTime = 50 * 60; window.pomoTimer = null; window.isPomoRunning = false; window.pomoLastTick = 0; window.sessionStudySeconds = 0;
         window.audioCtx = null; window.noiseNode = null; window.isLoFiPlaying = false; window.lofiEnabled = false; window.lofiType = 'temporal';
         window.rainAudio = new Audio('https://actions.google.com/sounds/v1/weather/thunderstorm.ogg'); window.rainAudio.loop = true;
+
+        // ======================================================================
+        // ✅ FUNÇÃO CENTRAL DE ACESSO SEGURO AO PROGRESSO
+        // Esta é a única forma correta de ler o progresso de uma tarefa.
+        // Garante retorno de objeto vazio em vez de crash quando `progress`
+        // ou a chave da tarefa não existem (ex: após leitura do Firestore).
+        // ======================================================================
+        window.getTaskProgress = function(taskId) {
+            if (!taskId) return {};
+            const progress = (window.state && window.state.progress) ? window.state.progress : {};
+            return progress[taskId] || {};
+        };
+
+        // ======================================================================
+        // A ALFÂNDEGA E REPARADOR DE DADOS (O Escudo do Sistema)
+        // ======================================================================
+        window.repairState = function() {
+            if (!window.state) window.state = {};
+            if (!window.state.weeks || !Array.isArray(window.state.weeks)) window.state.weeks = [];
+            if (!window.state.progress || typeof window.state.progress !== 'object') window.state.progress = {};
+            if (!window.state.dailyStats || typeof window.state.dailyStats !== 'object') window.state.dailyStats = {};
+            if (!window.state.timeTracking || typeof window.state.timeTracking !== 'object') window.state.timeTracking = {};
+            if (!Array.isArray(window.state.simulados)) window.state.simulados = [];
+        };
+
+        window.sanitizeState = function(st) {
+            // Garante que o objeto raiz existe e tem todas as chaves necessárias
+            if (!st || typeof st !== 'object') st = {};
+            if (!st.weeks || !Array.isArray(st.weeks)) st.weeks = [];
+            // ✅ CRÍTICO: garante que `progress` sempre existe como objeto,
+            // mesmo quando o Firestore omite chaves de objetos vazios.
+            if (!st.progress || typeof st.progress !== 'object') st.progress = {};
+            if (!st.dailyStats || typeof st.dailyStats !== 'object') st.dailyStats = {};
+            if (!st.timeTracking || typeof st.timeTracking !== 'object') st.timeTracking = {};
+            if (!Array.isArray(st.simulados)) st.simulados = [];
+
+            // Sanitiza cada semana
+            st.weeks.forEach(w => {
+                if (!w) return;
+                // Garante timeSlots padrão se ausente ou vazio
+                if (!w.timeSlots || !Array.isArray(w.timeSlots) || w.timeSlots.length === 0) {
+                    w.timeSlots = ["08:00 - 12:00", "14:00 - 18:00", "18:00 - 22:00"];
+                }
+                if (!w.agenda || typeof w.agenda !== 'object') w.agenda = {};
+                if (!w.tasks || !Array.isArray(w.tasks)) w.tasks = [];
+
+                // Garante que cada tarefa tem id e entrada no progress
+                w.tasks.forEach(t => {
+                    if (!t) return;
+                    if (!t.id) t.id = 'gen_' + Math.random().toString(36).substr(2, 9);
+                    // ✅ CRÍTICO: cria entrada vazia no progress para cada tarefa,
+                    // prevenindo undefined em qualquer acesso futuro.
+                    if (!st.progress[t.id]) st.progress[t.id] = {};
+                });
+            });
+            return st;
+        };
 
         window.changeLoFiType = function(type) { window.lofiType = type; if (window.isLoFiPlaying) { window.stopLoFi(); window.startLoFi(); } }
         window.toggleLoFi = function() { window.lofiEnabled = !window.lofiEnabled; const btn = document.getElementById('lofi-btn'); if (window.lofiEnabled) { if (btn) btn.classList.replace('text-slate-400', 'text-blue-500'); if (window.isPomoRunning && window.pomoPhase !== 'descanso') window.startLoFi(); } else { if (btn) btn.classList.replace('text-blue-500', 'text-slate-400'); window.stopLoFi(); } window.showToast(window.lofiEnabled ? 'Lo-Fi Ativado 🎧' : 'Lo-Fi Desativado', 'success'); }
@@ -508,12 +565,12 @@
         window.startPomoForTask = function(taskId) {
             if(window.activePomoTaskId && window.activePomoTaskId !== taskId) { window.isPomoRunning = false; }
             window.activePomoTaskId = taskId; window.pomoPhase = 'aula'; window.pomoTotalTime = 50 * 60; window.pomoTime = 50 * 60; window.isPomoRunning = false;
+            window.expandedCards = window.expandedCards || {};
             window.expandedCards[taskId] = true;
-            window.updateUI(); // Refaz UI para mostrar o player
+            window.updateUI(); 
             setTimeout(() => { window.pomoToggle(); }, 100);
         }
 
-        // Utils locais de Undo/Redo
         window.pushState = function() { window.undoStack.push(JSON.stringify(window.state)); if(window.undoStack.length > 50) window.undoStack.shift(); window.redoStack = []; }
         window.undo = function() { if(window.undoStack.length === 0) return; window.redoStack.push(JSON.stringify(window.state)); window.state = JSON.parse(window.undoStack.pop()); window.triggerSave(); window.updateUI(); window.showToast('Ação desfeita');}
         window.redo = function() { if(window.redoStack.length === 0) return; window.undoStack.push(JSON.stringify(window.state)); window.state = JSON.parse(window.redoStack.pop()); window.triggerSave(); window.updateUI(); window.showToast('Ação refeita');}
@@ -529,28 +586,17 @@
         window.getPrioClass = function(prio, tipo) { if(tipo === 'revisao') return 'prio-rev'; if(prio === 1) return 'prio-1'; if(prio === 2) return 'prio-2'; if(prio === 3) return 'prio-3'; return 'prio-4'; }
         window.getPrioLabel = function(prio, tipo, custom) { if(tipo === 'revisao') return 'REVISÃO'; if(custom) return 'CUSTOMIZADO'; if(prio===1) return 'ALTA'; if(prio===2) return 'MÉDIA'; if(prio===3) return 'BAIXA'; return 'OPCIONAL'; }
 
-        // A ALFÂNDEGA DE DADOS (Sanitização) - O Escudo do Sistema
-        window.sanitizeState = function(st) {
-            if (!st) st = {};
-            if (!st.weeks) st.weeks = [];
-            if (!st.progress) st.progress = {};
-            if (!st.dailyStats) st.dailyStats = {};
-            if (!st.timeTracking) st.timeTracking = {};
-            if (!st.simulados) st.simulados = [];
-
-            st.weeks.forEach(w => {
-                if (!w.timeSlots || !Array.isArray(w.timeSlots) || w.timeSlots.length === 0) {
-                    w.timeSlots = ["08:00 - 12:00", "14:00 - 18:00", "18:00 - 22:00"];
-                }
-                if (!w.agenda) w.agenda = {};
-                if (!w.tasks) w.tasks = [];
-                w.tasks.forEach(t => {
-                    if (!t.id) t.id = 'gen_' + Math.random().toString(36).substr(2, 9);
-                    if (!st.progress[t.id]) st.progress[t.id] = {};
-                });
-            });
-            return st;
-        };
+        window.updateStreak = function() {
+            window.repairState();
+            let streak = 0; let d = new Date();
+            while(true) {
+                let s = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                if (window.state.dailyStats && window.state.dailyStats[s] && window.state.dailyStats[s] > 0) { streak++; d.setDate(d.getDate() - 1); } 
+                else if (s === window.getTodayStr()) d.setDate(d.getDate() - 1); 
+                else break;
+            }
+            return streak;
+        }
 
         // ----------------------------------------------------------------------
         // INICIALIZAÇÃO E FIREBASE
@@ -576,7 +622,8 @@
                         if (!data.has_onboarded) { window.location.href = "onboarding.html"; return; }
                         
                         if (data.app_state && data.app_state.weeks && data.app_state.weeks.length > 0) {
-                            // PASSA PELA ALFÂNDEGA ANTES DE RENDERIZAR
+                            // ✅ sanitizeState garante que progress/{} e demais chaves existem
+                            // mesmo que o Firestore as tenha omitido por serem vazias.
                             window.state = window.sanitizeState(data.app_state);
                             finishLoading();
                         } else {
@@ -652,10 +699,13 @@
 
             newWeeks.forEach(w => { delete w._start; delete w._end; w.tasks.sort((a,b) => b.score - a.score); });
 
-            window.state.weeks = newWeeks; window.state.progress = {}; window.state.dailyStats = {};
+            window.state.weeks = newWeeks;
+            window.state.progress = {};
+            window.state.dailyStats = {};
+            window.state.timeTracking = {};
             window.state.startDate = start.toISOString();
 
-            // ALFÂNDEGA PÓS GERAÇÃO
+            // ✅ sanitize garante entradas no progress para todas as tarefas geradas
             window.state = window.sanitizeState(window.state);
 
             await window.saveToCloud();
@@ -665,6 +715,7 @@
         function finishLoading() {
             document.getElementById('loader-overlay').style.display = 'none';
             window.toggleDarkMode(localStorage.getItem('darkMode') === '1');
+            window.expandedCards = window.expandedCards || {};
             window.updateUI();
         }
 
@@ -695,7 +746,7 @@
         window.toggleDarkMode = function(on) {
             if(on) {
                 document.documentElement.classList.add('dark');
-                document.body.classList.add('dark-mode'); // fallback
+                document.body.classList.add('dark-mode'); 
             } else {
                 document.documentElement.classList.remove('dark');
                 document.body.classList.remove('dark-mode');
@@ -706,18 +757,41 @@
         // ----------------------------------------------------------------------
         // AÇÕES NAS TAREFAS
         // ----------------------------------------------------------------------
+
+        // ✅ ensureProgress: garante a entrada no objeto de progresso ANTES de qualquer escrita.
         window.ensureProgress = function(id) { 
-            // A alfândega já protegeu, mas dupla camada nunca é demais.
-            if (!window.state.progress) window.state.progress = {};
+            window.repairState();
+            if (!id) return;
             if (!window.state.progress[id]) window.state.progress[id] = {}; 
         }
         
         window.toggleTask = function(id) { 
-            window.pushState(); window.ensureProgress(id); const p = window.state.progress[id]; p.doneStatus = !p.doneStatus; 
-            if(p.doneStatus) { p.completedDate = window.getTodayStr(); confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 }, colors: ['#10b981', '#3b82f6'] }); window.openReviewModal(id); } 
-            else { delete p.completedDate; delete p.nextReview; } window.triggerSave(); window.updateUI(); 
+            window.pushState();
+            window.ensureProgress(id);
+            // ✅ Usa getTaskProgress para leitura segura
+            const p = window.getTaskProgress(id);
+            const newStatus = !p.doneStatus;
+            window.state.progress[id].doneStatus = newStatus;
+            if(newStatus) {
+                window.state.progress[id].completedDate = window.getTodayStr();
+                confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 }, colors: ['#10b981', '#3b82f6'] });
+                window.openReviewModal(id);
+            } else {
+                delete window.state.progress[id].completedDate;
+                delete window.state.progress[id].nextReview;
+            }
+            window.triggerSave();
+            window.updateUI();
         }
-        window.toggleCrucial = function(taskId) { window.pushState(); window.ensureProgress(taskId); window.state.progress[taskId].crucial = !window.state.progress[taskId].crucial; window.triggerSave(); window.updateUI(); if(window.state.progress[taskId].crucial) window.showToast('Marcado como Crucial 🔥');}
+
+        window.toggleCrucial = function(taskId) {
+            window.pushState();
+            window.ensureProgress(taskId);
+            window.state.progress[taskId].crucial = !window.getTaskProgress(taskId).crucial;
+            window.triggerSave();
+            window.updateUI();
+            if(window.state.progress[taskId].crucial) window.showToast('Marcado como Crucial 🔥');
+        }
         
         window.calcTempAcc = function(taskId) {
             const doneInp = document.getElementById(`done_inp_${taskId}`);
@@ -737,7 +811,8 @@
             window.ensureProgress(taskId); 
             const val = parseInt(newVal) || 0; 
             if(type === 'done') {
-                const oldVal = parseInt(window.state.progress[taskId].done) || 0; 
+                // ✅ Usa getTaskProgress para leitura segura do valor antigo
+                const oldVal = parseInt(window.getTaskProgress(taskId).done) || 0; 
                 const diff = val - oldVal; 
                 window.state.progress[taskId].done = val; 
                 if (diff > 0) { 
@@ -751,49 +826,64 @@
             window.calcTempAcc(taskId); 
         }
 
-        window.toggleTaskDetails = function(taskId, event) { if(event && (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || event.target.closest('button') || event.target.closest('.custom-checkbox') || event.target.closest('.task-edit-subject') || event.target.closest('.drag-handle'))) return; window.expandedCards[taskId] = !window.expandedCards[taskId]; window.updateUI(); }
-        window.updateTaskName = function(weekIdx, taskIdx, newName) { window.pushState(); const week = window.state.weeks.find(w => w.week === weekIdx); if(week && week.tasks[taskIdx]) { week.tasks[taskIdx].subject = newName; window.triggerSave(); } };
+        window.toggleTaskDetails = function(taskId, event) {
+            if(event && (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || event.target.closest('button') || event.target.closest('.custom-checkbox') || event.target.closest('.task-edit-subject') || event.target.closest('.drag-handle'))) return;
+            window.expandedCards = window.expandedCards || {};
+            window.expandedCards[taskId] = !window.expandedCards[taskId];
+            window.updateUI();
+        }
+        window.updateTaskName = function(weekIdx, taskIdx, newName) { window.pushState(); window.repairState(); const week = window.state.weeks.find(w => w.week === weekIdx); if(week && week.tasks && week.tasks[taskIdx]) { week.tasks[taskIdx].subject = newName; window.triggerSave(); } };
         
         window.openAddTaskModal = function(weekNum) { window.activeWeek = parseInt(weekNum); document.getElementById('add-nome').value = ''; window.openModal('add-task'); }
         window.saveCustomTask = function() {
-            window.pushState(); const nome = document.getElementById('add-nome').value.trim(); const area = document.getElementById('add-area').value; const prio = parseInt(document.getElementById('add-prio').value);
+            window.pushState(); window.repairState(); const nome = document.getElementById('add-nome').value.trim(); const area = document.getElementById('add-area').value; const prio = parseInt(document.getElementById('add-prio').value);
             if(!nome) return alert("Insira o nome da tarefa."); const week = window.state.weeks.find(w => w.week === window.activeWeek);
-            if(week) { week.tasks.push({ id: `cstm_${Date.now()}`, category: area, subject: nome, prioridade: prio, customizado: true, tipo: 'materia_nova' }); window.triggerSave(); window.updateUI(); window.showToast("Tema adicionado!"); window.closeModal('add-task'); }
+            if(week) { if(!week.tasks) week.tasks = []; const newId = `cstm_${Date.now()}`; week.tasks.push({ id: newId, category: area, subject: nome, prioridade: prio, customizado: true, tipo: 'materia_nova' }); window.ensureProgress(newId); window.triggerSave(); window.updateUI(); window.showToast("Tema adicionado!"); window.closeModal('add-task'); }
         }
         window.requestDeleteTask = function(weekIdx, taskIdx) { window.pendingDeleteAction = {weekIdx, taskIdx}; window.openModal('delete'); }
-        document.getElementById('confirm-delete-btn').onclick = function() { if(window.pendingDeleteAction) { window.pushState(); const week = window.state.weeks.find(w => w.week === window.pendingDeleteAction.weekIdx); if(week) { week.tasks.splice(window.pendingDeleteAction.taskIdx, 1); window.triggerSave(); window.updateUI(); window.showToast("Tarefa removida."); } window.pendingDeleteAction = null; window.closeModal('delete'); } };
+        document.getElementById('confirm-delete-btn').onclick = function() { if(window.pendingDeleteAction) { window.pushState(); window.repairState(); const week = window.state.weeks.find(w => w.week === window.pendingDeleteAction.weekIdx); if(week && week.tasks) { week.tasks.splice(window.pendingDeleteAction.taskIdx, 1); window.triggerSave(); window.updateUI(); window.showToast("Tarefa removida."); } window.pendingDeleteAction = null; window.closeModal('delete'); } };
 
-        // Notas e Anki
         window.parseNotesLinks = function() { const text = document.getElementById('notes-textarea').value; const links = text.match(/(https?:\/\/[^\s]+)/g); const container = document.getElementById('notes-links-container'); if (links && links.length > 0) { container.innerHTML = '<p class="text-[10px] font-bold uppercase text-slate-400 tracking-widest mb-2">Links Detectados</p><div class="flex flex-col gap-2">' + links.map(l => `<a href="${l}" target="_blank" class="bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 truncate"><i class="fas fa-external-link-alt"></i> ${l}</a>`).join('') + '</div>'; container.classList.remove('hidden'); } else { container.innerHTML = ''; container.classList.add('hidden'); } }
-        window.openNotesModal = function(taskId) { window.activeNotesTaskId = taskId; window.ensureProgress(taskId); document.getElementById('notes-textarea').value = window.state.progress[taskId].notes || ''; window.parseNotesLinks(); window.openModal('notes'); }
+        window.openNotesModal = function(taskId) {
+            window.activeNotesTaskId = taskId;
+            window.ensureProgress(taskId);
+            // ✅ Usa getTaskProgress para leitura segura
+            document.getElementById('notes-textarea').value = window.getTaskProgress(taskId).notes || '';
+            window.parseNotesLinks();
+            window.openModal('notes');
+        }
         window.closeNotesModal = function() { window.activeNotesTaskId = null; window.closeModal('notes'); }
-        window.saveNotes = function() { window.pushState(); if(window.activeNotesTaskId) { window.state.progress[window.activeNotesTaskId].notes = document.getElementById('notes-textarea').value; window.triggerSave(); window.showToast('Anotação salva'); } window.closeNotesModal(); }
+        window.saveNotes = function() { window.pushState(); if(window.activeNotesTaskId) { window.ensureProgress(window.activeNotesTaskId); window.state.progress[window.activeNotesTaskId].notes = document.getElementById('notes-textarea').value; window.triggerSave(); window.showToast('Anotação salva'); } window.closeNotesModal(); }
 
-        // Agenda Editável e Drag & Drop
-        window.updateTimeSlot = function(weekIdx, slotIdx, val) { window.pushState(); const w = window.state.weeks.find(w => w.week === weekIdx); if(w) { w.timeSlots[slotIdx] = val; window.triggerSave(); } }
-        window.updateAgendaCell = function(weekIdx, dayKey, slotIdx, text) { window.pushState(); const w = window.state.weeks.find(w => w.week === weekIdx); if(w) { const k = `${dayKey}_s${slotIdx}`; if(!w.agenda) w.agenda={}; if(!w.agenda[k]) w.agenda[k]={}; w.agenda[k].text = text; window.triggerSave(); } }
-        window.addAgendaRowAt = function(weekIdx, index) { window.pushState(); const week = window.state.weeks.find(w => w.week === weekIdx); week.timeSlots.splice(index + 1, 0, "00:00 - 00:00"); const newAgenda = {}; Object.keys(week.agenda).forEach(key => { const [d, sStr] = key.split('_'); const s = parseInt(sStr.substring(1)); if (s > index) newAgenda[`${d}_s${s+1}`] = week.agenda[key]; else newAgenda[key] = week.agenda[key]; }); week.agenda = newAgenda; window.triggerSave(); window.updateUI(); }
-        window.requestRemoveAgendaRow = function(weekIdx, index) { if(confirm("Excluir esta linha inteira da agenda?")) { window.pushState(); const week = window.state.weeks.find(w => w.week === weekIdx); week.timeSlots.splice(index, 1); const newAgenda = {}; Object.keys(week.agenda).forEach(key => { const [d, sStr] = key.split('_'); const s = parseInt(sStr.substring(1)); if (s < index) newAgenda[key] = week.agenda[key]; else if (s > index) newAgenda[`${d}_s${s-1}`] = week.agenda[key]; }); week.agenda = newAgenda; window.triggerSave(); window.updateUI(); } }
+        window.updateTimeSlot = function(weekIdx, slotIdx, val) { window.pushState(); window.repairState(); const w = window.state.weeks.find(w => w.week === weekIdx); if(w) { if(!w.timeSlots) w.timeSlots=[]; w.timeSlots[slotIdx] = val; window.triggerSave(); } }
+        window.updateAgendaCell = function(weekIdx, dayKey, slotIdx, text) { window.pushState(); window.repairState(); const w = window.state.weeks.find(w => w.week === weekIdx); if(w) { const k = `${dayKey}_s${slotIdx}`; if(!w.agenda) w.agenda={}; if(!w.agenda[k]) w.agenda[k]={}; w.agenda[k].text = text; window.triggerSave(); } }
+        window.addAgendaRowAt = function(weekIdx, index) { window.pushState(); window.repairState(); const week = window.state.weeks.find(w => w.week === weekIdx); if(!week.timeSlots) week.timeSlots=[]; week.timeSlots.splice(index + 1, 0, "00:00 - 00:00"); const newAgenda = {}; Object.keys(week.agenda||{}).forEach(key => { const [d, sStr] = key.split('_'); const s = parseInt(sStr.substring(1)); if (s > index) newAgenda[`${d}_s${s+1}`] = week.agenda[key]; else newAgenda[key] = week.agenda[key]; }); week.agenda = newAgenda; window.triggerSave(); window.updateUI(); }
+        window.requestRemoveAgendaRow = function(weekIdx, index) { if(confirm("Excluir esta linha inteira da agenda?")) { window.pushState(); window.repairState(); const week = window.state.weeks.find(w => w.week === weekIdx); if(!week.timeSlots) week.timeSlots=[]; week.timeSlots.splice(index, 1); const newAgenda = {}; Object.keys(week.agenda||{}).forEach(key => { const [d, sStr] = key.split('_'); const s = parseInt(sStr.substring(1)); if (s < index) newAgenda[key] = week.agenda[key]; else if (s > index) newAgenda[`${d}_s${s-1}`] = week.agenda[key]; }); week.agenda = newAgenda; window.triggerSave(); window.updateUI(); } }
         
         window.executeReplicaAgenda = function() {
             const weeksAhead = parseInt(document.getElementById('replica-weeks-input').value) || 4;
-            window.pushState(); const sourceW = window.state.weeks.find(w => w.week === window.activeWeek); if(!sourceW) return;
-            window.state.weeks.forEach(w => { if(w.week > window.activeWeek && w.week <= window.activeWeek + weeksAhead) { w.timeSlots = [...sourceW.timeSlots]; w.agenda = JSON.parse(JSON.stringify(sourceW.agenda)); } });
+            window.pushState(); window.repairState(); const sourceW = window.state.weeks.find(w => w.week === window.activeWeek); if(!sourceW) return;
+            window.state.weeks.forEach(w => { if(w.week > window.activeWeek && w.week <= window.activeWeek + weeksAhead) { w.timeSlots = [...(sourceW.timeSlots||[])]; w.agenda = JSON.parse(JSON.stringify(sourceW.agenda||{})); } });
             window.triggerSave(); window.showToast(`Grade copiada para as próximas ${weeksAhead} semanas!`); window.closeModal('replica-agenda');
         }
 
         window.draggedTask = null; window.draggedSearchTask = null; window.sourceWeekIndex = null; window.sourceTaskIndex = null;
-        window.handleDragStart = function(e, weekIdx, taskIdx) { window.draggedTask = window.state.weeks.find(w => w.week === weekIdx).tasks[taskIdx]; window.sourceWeekIndex = window.state.weeks.findIndex(w => w.week === weekIdx); window.sourceTaskIndex = taskIdx; window.draggedSearchTask = null; e.dataTransfer.effectAllowed = 'move'; }
+        window.handleDragStart = function(e, weekIdx, taskIdx) { window.repairState(); window.draggedTask = window.state.weeks.find(w => w.week === weekIdx).tasks[taskIdx]; window.sourceWeekIndex = window.state.weeks.findIndex(w => w.week === weekIdx); window.sourceTaskIndex = taskIdx; window.draggedSearchTask = null; e.dataTransfer.effectAllowed = 'move'; }
         window.handleDragStartSearch = function(e, index) { window.draggedSearchTask = window._currentFilteredBank[index]; window.draggedTask = null; e.dataTransfer.effectAllowed = 'copy'; }
         window.handleDropWeek = function(e, targetWeekIdx) {
             e.preventDefault(); e.currentTarget.classList.remove('drop-target-week');
+            window.repairState();
             const targetWeek = window.state.weeks.find(w => w.week === targetWeekIdx); if (!targetWeek) return;
             if (window.draggedTask) {
                 const sourceWeek = window.state.weeks[window.sourceWeekIndex]; if (sourceWeek.week === targetWeekIdx) return;
-                sourceWeek.tasks.splice(window.sourceTaskIndex, 1); targetWeek.tasks.push(window.draggedTask);
+                if(sourceWeek.tasks) sourceWeek.tasks.splice(window.sourceTaskIndex, 1); 
+                if(!targetWeek.tasks) targetWeek.tasks=[]; targetWeek.tasks.push(window.draggedTask);
                 window.saveToCloud(); window.updateUI(); window.resetDrag(); window.showToast('Tarefa movida para Semana ' + targetWeekIdx);
             } else if (window.draggedSearchTask) {
-                targetWeek.tasks.push({ id: `cstm_${Date.now()}_${Math.random().toString(36).substr(2,5)}`, category: window.draggedSearchTask.area, subject: window.draggedSearchTask.tema, prioridade: window.draggedSearchTask.prioridade || 2, tipo: 'materia_nova', score: window.draggedSearchTask.score || 0 });
+                if(!targetWeek.tasks) targetWeek.tasks=[];
+                const newId = `cstm_${Date.now()}_${Math.random().toString(36).substr(2,5)}`;
+                targetWeek.tasks.push({ id: newId, category: window.draggedSearchTask.area, subject: window.draggedSearchTask.tema, prioridade: window.draggedSearchTask.prioridade || 2, tipo: 'materia_nova', score: window.draggedSearchTask.score || 0 });
+                window.ensureProgress(newId);
                 window.saveToCloud(); window.updateUI(); window.resetDrag(); window.showToast('Tarefa adicionada à Semana ' + targetWeekIdx);
             }
         }
@@ -804,9 +894,11 @@
         window.handleDropTask = function(e, targetTaskIdx) { 
             e.preventDefault(); 
             if(window.draggedTask) { 
+                window.repairState();
                 const currentWeekIdx = window.activeWeek - 1; 
                 if (window.sourceWeekIndex !== currentWeekIdx || window.sourceTaskIndex === targetTaskIdx) return; 
                 const tasks = window.state.weeks[currentWeekIdx].tasks; 
+                if(!tasks) return;
                 const [movedItem] = tasks.splice(window.sourceTaskIndex, 1); 
                 tasks.splice(targetTaskIdx, 0, movedItem); 
                 window.saveToCloud(); window.updateUI(); window.resetDrag(); 
@@ -814,27 +906,29 @@
         }
         window.resetDrag = function() { window.draggedTask = null; window.draggedSearchTask = null; window.sourceWeekIndex = null; window.sourceTaskIndex = null; }
 
-        // Remanejamento
         window.openRemanejoModal = function() {
+            window.repairState();
             let delayedCount = 0; let curW = 1; const today = new Date(); const start = window.getStartDate();
             window.state.weeks.forEach(w => { const s = new Date(start); s.setDate(start.getDate() + (w.week - 1) * 7); if (today >= s) curW = w.week; });
-            window.state.weeks.forEach(w => { if (w.week < curW) { w.tasks.forEach(t => { if (!(window.state.progress[t.id] || {}).doneStatus) delayedCount++; }); } });
+            // ✅ Usa getTaskProgress para leitura segura
+            window.state.weeks.forEach(w => { if (w.week < curW && w.tasks) { w.tasks.forEach(t => { if (!window.getTaskProgress(t.id).doneStatus) delayedCount++; }); } });
             const btnOpts = document.getElementById('remanejo-options'); const btnEmp = document.getElementById('remanejo-empty');
             if(delayedCount === 0) { btnOpts.classList.add('hidden'); btnEmp.classList.remove('hidden'); } else { btnOpts.classList.remove('hidden'); btnEmp.classList.add('hidden'); }
             window.openModal('remanejo');
         }
         window.applyRemanejo = function(strategy) {
-            window.pushState(); const delayedTasks = []; let curW = 1; const today = new Date(); const start = window.getStartDate();
+            window.pushState(); window.repairState(); const delayedTasks = []; let curW = 1; const today = new Date(); const start = window.getStartDate();
             window.state.weeks.forEach(w => { const s = new Date(start); s.setDate(start.getDate() + (w.week - 1) * 7); if (today >= s) curW = w.week; });
-            window.state.weeks.forEach(w => { if (w.week < curW) { for (let i = w.tasks.length - 1; i >= 0; i--) { const t = w.tasks[i]; if (!(window.state.progress[t.id] || {}).doneStatus) { delayedTasks.push(t); w.tasks.splice(i, 1); } } } });
+            // ✅ Usa getTaskProgress para leitura segura
+            window.state.weeks.forEach(w => { if (w.week < curW && w.tasks) { for (let i = w.tasks.length - 1; i >= 0; i--) { const t = w.tasks[i]; if (!window.getTaskProgress(t.id).doneStatus) { delayedTasks.push(t); w.tasks.splice(i, 1); } } } });
             if (strategy === 'cut') {
                 const savedTasks = delayedTasks.filter(t => t.prioridade <= 2);
-                const targetW = window.state.weeks.find(w => w.week === curW); if(targetW) targetW.tasks.push(...savedTasks);
+                const targetW = window.state.weeks.find(w => w.week === curW); if(targetW) { if(!targetW.tasks) targetW.tasks=[]; targetW.tasks.push(...savedTasks); }
                 window.showToast("Atrasos limpos. Mantivemos o essencial.");
             } else {
                 let wPtr = 0; const futWeeks = window.state.weeks.filter(w => w.week >= curW && w.week < curW + 4);
-                if(futWeeks.length === 0) futWeeks.push(window.state.weeks[window.state.weeks.length-1]);
-                delayedTasks.forEach(t => { futWeeks[wPtr % futWeeks.length].tasks.push(t); wPtr++; });
+                if(futWeeks.length === 0 && window.state.weeks.length > 0) futWeeks.push(window.state.weeks[window.state.weeks.length-1]);
+                delayedTasks.forEach(t => { if(futWeeks.length > 0) { const tg = futWeeks[wPtr % futWeeks.length]; if(!tg.tasks) tg.tasks=[]; tg.tasks.push(t); wPtr++; } });
                 window.showToast("Tarefas redistribuídas.");
             }
             window.triggerSave(); window.updateUI(); window.closeModal('remanejo');
@@ -856,6 +950,9 @@
 
         // ----------------------------------------------------------------------
         // RENDERIZADORES UI E GRÁFICOS
+        // ✅ TODOS usam window.getTaskProgress(t.id) em vez de acessar
+        //    window.state.progress[t.id] diretamente, eliminando crashes por
+        //    undefined quando o Firestore omite objetos vazios.
         // ----------------------------------------------------------------------
         window.switchView = function(viewName) {
             window.activeView = viewName;
@@ -867,15 +964,13 @@
 
         window.renderNav = function() {
             const nav = document.getElementById('week-nav'); if(!nav) return; nav.innerHTML = '';
-            
-            // Garantir que as semanas existem (Alfândega extra)
-            if(!window.state.weeks) return;
-
+            if(!window.state || !window.state.weeks) return;
             window.state.weeks.forEach(w => {
-                let done = 0; 
+                let done = 0;
                 if(w.tasks) {
-                    w.tasks.forEach(t => { 
-                        if(window.state.progress && window.state.progress[t.id] && window.state.progress[t.id].doneStatus) done++; 
+                    // ✅ Usa getTaskProgress para leitura segura em cada tarefa
+                    w.tasks.forEach(t => {
+                        if(window.getTaskProgress(t.id).doneStatus) done++;
                     });
                 }
                 const total = w.tasks ? w.tasks.length : 0;
@@ -890,9 +985,13 @@
         }
 
         window.renderHomepage = function() {
-            const content = document.getElementById('content-area'); const nome = document.getElementById('user-name').innerText.split(' ')[0] || 'Doutor(a)';
+            const content = document.getElementById('content-area');
+            const nome = document.getElementById('user-name') ? document.getElementById('user-name').innerText.split(' ')[0] : 'Doutor(a)';
+            // ✅ repairState antes de qualquer acesso a dados
+            window.repairState();
             const currW = window.state.weeks.find(w => w.week === window.activeWeek) || window.state.weeks[0]; 
-            const todayTasks = currW ? (currW.tasks || []).filter(t => !(window.state.progress[t.id] || {}).doneStatus) : [];
+            // ✅ Usa getTaskProgress para filtrar pendentes
+            const todayTasks = currW ? (currW.tasks || []).filter(t => !window.getTaskProgress(t.id).doneStatus) : [];
             const dayIdx = new Date().getDay();
             let agendaHtml = '';
             
@@ -905,7 +1004,7 @@
                 agendaHtml = `<div class="text-sm text-slate-500 italic">Horários não encontrados.</div>`;
             }
 
-            let html = `<div class="max-w-4xl mx-auto fade-enter"><div class="mb-10"><h1 class="text-4xl font-serif text-slate-900 dark:text-white tracking-tight">Bom dia, ${nome}!</h1><p class="text-slate-500 dark:text-cm-muted mt-2 text-lg">Aqui está o seu painel de comando de hoje.</p></div><div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10"><div class="card-shadow bg-white dark:bg-cm-dark2 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-center items-center text-center"><div class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Semana Atual</div><div class="text-xl font-bold text-blue-600 flex items-center gap-2"><i class="fas fa-calendar-week"></i> Semana ${currW?currW.week:''}</div></div><div class="card-shadow bg-white dark:bg-cm-dark2 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-center items-center text-center"><div class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Questões Hoje</div><div class="text-3xl font-bold text-green-500 flex items-center gap-2">${window.state.dailyStats[window.getTodayStr()]||0}</div></div><div class="card-shadow p-6 rounded-2xl flex flex-col justify-center items-center text-center bg-black text-white dark:bg-cm-green dark:text-cm-dark border-transparent cursor-pointer hover:scale-105 transition" onclick="window.startPomoTask('avulso', 'Foco Livre')"><i class="fas fa-play text-2xl mb-2 text-blue-400 dark:text-cm-dark"></i><div class="font-bold text-sm">Foco Livre</div></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><div><h3 class="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2"><i class="far fa-clock"></i> A Linha do Tempo (Hoje)</h3><div class="card-shadow bg-white dark:bg-cm-dark2 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 pt-10">${agendaHtml}<button onclick="window.switchView('week')" class="w-full text-xs font-bold text-blue-600 hover:underline mt-4 text-center">Editar grade (Aba Semanas)</button></div></div><div><h3 class="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2"><i class="fas fa-tasks"></i> Foco Principal (Sem. ${currW?currW.week:''})</h3><div class="space-y-3">`;
+            let html = `<div class="max-w-4xl mx-auto fade-enter"><div class="mb-10"><h1 class="text-4xl font-serif text-slate-900 dark:text-white tracking-tight">Bom dia, ${nome}!</h1><p class="text-slate-500 dark:text-cm-muted mt-2 text-lg">Aqui está o seu painel de comando de hoje.</p></div><div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10"><div class="card-shadow bg-white dark:bg-cm-dark2 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-center items-center text-center"><div class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Semana Atual</div><div class="text-xl font-bold text-blue-600 flex items-center gap-2"><i class="fas fa-calendar-week"></i> Semana ${currW?currW.week:''}</div></div><div class="card-shadow bg-white dark:bg-cm-dark2 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-center items-center text-center"><div class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Questões Hoje</div><div class="text-3xl font-bold text-green-500 flex items-center gap-2">${(window.state.dailyStats || {})[window.getTodayStr()]||0}</div></div><div class="card-shadow p-6 rounded-2xl flex flex-col justify-center items-center text-center bg-black text-white dark:bg-cm-green dark:text-cm-dark border-transparent cursor-pointer hover:scale-105 transition" onclick="window.startPomoTask('avulso', 'Foco Livre')"><i class="fas fa-play text-2xl mb-2 text-blue-400 dark:text-cm-dark"></i><div class="font-bold text-sm">Foco Livre</div></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><div><h3 class="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2"><i class="far fa-clock"></i> A Linha do Tempo (Hoje)</h3><div class="card-shadow bg-white dark:bg-cm-dark2 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 pt-10">${agendaHtml}<button onclick="window.switchView('week')" class="w-full text-xs font-bold text-blue-600 hover:underline mt-4 text-center">Editar grade (Aba Semanas)</button></div></div><div><h3 class="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2"><i class="fas fa-tasks"></i> Foco Principal (Sem. ${currW?currW.week:''})</h3><div class="space-y-3">`;
             todayTasks.slice(0, 6).forEach(t => { html += `<div class="card-shadow bg-white dark:bg-cm-dark2 border border-slate-200 dark:border-slate-800 rounded-xl p-4 flex items-center gap-3 ${window.getPrioClass(t.prioridade, t.tipo)} cursor-pointer" onclick="window.activeWeek=${currW?currW.week:1}; window.switchView('week');"><div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 shrink-0"><i class="fas fa-arrow-right"></i></div><div class="min-w-0"><div class="font-bold text-sm text-slate-900 dark:text-white leading-tight truncate">${t.subject}</div><span class="${window.getCategoryColor(t.category)} text-[8px] uppercase font-bold px-1.5 rounded border">${t.category}</span></div></div>`; });
             if(todayTasks.length===0) html+=`<div class="text-slate-400 text-sm text-center py-10 italic">Tudo concluído para esta semana! Descanse.</div>`;
             html += `</div></div></div></div>`; content.innerHTML = html;
@@ -932,18 +1031,25 @@
 
             let filtersHtml = `<div class="flex flex-wrap gap-2 mb-4"><button onclick="window.setWeekFilter('all')" class="filter-chip shadow-sm ${window.weekFilter==='all'?'active':''}">Todas</button><button onclick="window.setWeekFilter('pending')" class="filter-chip shadow-sm ${window.weekFilter==='pending'?'active':''}">Pendentes</button><button onclick="window.setWeekFilter('done')" class="filter-chip shadow-sm ${window.weekFilter==='done'?'active':''}">Concluídas</button></div>`;
 
-            let tasksHtml = `<div class="mb-4 flex justify-between items-center"><h3 class="text-sm font-bold uppercase tracking-widest text-slate-500"><i class="fas fa-bullseye text-blue-600 mr-1"></i> Tarefas da Semana (${tasks.length})</h3><div class="flex items-center gap-1 bg-white p-1 rounded-xl shadow-sm border border-slate-200 dark:bg-slate-800 dark:border-slate-700"><button onclick="window.toggleLoFi()" id="lofi-btn" class="text-slate-400 font-bold text-sm px-3 py-1.5 rounded-lg hover:text-blue-600 transition flex items-center gap-2"><i class="fas fa-headphones-alt"></i> Lo-Fi</button></div></div>${filtersHtml}<div class="grid gap-4 fade-enter">`;
+            let tasksHtml = `<div class="mb-4 flex justify-between items-center"><h3 class="text-sm font-bold uppercase tracking-widest text-slate-500"><i class="fas fa-bullseye text-blue-600 mr-1"></i> Tarefas da Semana (${tasks.length})</h3><div class="flex items-center gap-1 bg-white p-1 rounded-xl shadow-sm border border-slate-200 dark:bg-cm-dark2 dark:border-gray-800"><button onclick="window.toggleLoFi()" id="lofi-btn" class="text-slate-400 font-bold text-sm px-3 py-1.5 rounded-lg hover:text-blue-600 transition flex items-center gap-2"><i class="fas fa-headphones-alt"></i> Lo-Fi</button></div></div>${filtersHtml}<div class="grid gap-4 fade-enter">`;
             
             let tasksToRender = tasks;
-            if(window.weekFilter === 'pending') tasksToRender = tasksToRender.filter(t => !window.state.progress[t.id]?.doneStatus);
-            if(window.weekFilter === 'done') tasksToRender = tasksToRender.filter(t => window.state.progress[t.id]?.doneStatus);
+            // ✅ Usa getTaskProgress para os filtros
+            if(window.weekFilter === 'pending') tasksToRender = tasksToRender.filter(t => !window.getTaskProgress(t.id).doneStatus);
+            if(window.weekFilter === 'done') tasksToRender = tasksToRender.filter(t => window.getTaskProgress(t.id).doneStatus);
             
             tasksToRender.forEach((t, idx) => {
-                const p = window.state.progress[t.id] || {}; const isChecked = p.doneStatus; const prioClass = window.getPrioClass(t.prioridade, t.tipo);
+                // ✅ PONTO CENTRAL: toda leitura de progresso passa por getTaskProgress
+                const p = window.getTaskProgress(t.id);
+                const isChecked = p.doneStatus;
+                const prioClass = window.getPrioClass(t.prioridade, t.tipo);
                 const labels = window.getPrioLabel(t.prioridade, t.tipo, t.customizado);
-                const doneVal = parseInt(p.done) || 0; const correctVal = parseInt(p.correct) || 0; const acc = doneVal > 0 ? Math.round((correctVal / doneVal) * 100) : 0;
+                const doneVal = parseInt(p.done) || 0;
+                const correctVal = parseInt(p.correct) || 0;
+                const acc = doneVal > 0 ? Math.round((correctVal / doneVal) * 100) : 0;
                 
                 let isPomoActiveForThis = (window.activePomoTaskId === t.id);
+                window.expandedCards = window.expandedCards || {};
                 const isExpanded = window.expandedCards[t.id] || isPomoActiveForThis;
                 const accColor = doneVal > 0 ? window.getAccuracyColorClass(acc) : 'text-slate-400';
                 
@@ -975,7 +1081,7 @@
                             <div class="pl-3 border-l border-slate-200 dark:border-slate-700 text-center min-w-[3.5rem]"><span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">%</span><span id="pct_span_${t.id}" class="text-lg font-bold ${accColor}">${acc}%</span></div>
                         </div>
                         
-                        <div class="flex items-center gap-2 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-700 pt-3 lg:pt-0 lg:pl-4 w-full lg:w-auto">
+                        <div class="flex items-center gap-2 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-800 pt-3 lg:pt-0 lg:pl-4 w-full lg:w-auto">
                             <button onclick="window.openNotesModal('${t.id}')" class="w-9 h-9 rounded-full bg-white border border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-slate-500 hover:bg-blue-100 hover:text-blue-600 transition flex items-center justify-center shadow-sm" title="Anotações e Links"><i class="fas fa-book-open"></i></button>
                             <button onclick="window.requestDeleteTask(${window.activeWeek}, ${idx})" class="w-9 h-9 rounded-full bg-white border border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-slate-500 hover:bg-red-100 hover:text-red-600 transition flex items-center justify-center shadow-sm" title="Excluir"><i class="fas fa-trash-alt"></i></button>
                             <button onclick="window.startPomoForTask('${t.id}')" class="px-4 py-2 rounded-full bg-slate-900 dark:bg-cm-mid text-white text-[10px] font-bold uppercase tracking-wider hover:bg-slate-700 transition shadow-sm flex items-center gap-2 ml-auto ${isPomoActiveForThis ? 'hidden' : ''}"><i class="fas fa-stopwatch text-blue-400"></i> Sessão</button>
@@ -991,6 +1097,8 @@
         window.renderDashboard = function() { 
             const content = document.getElementById('content-area'); 
             content.classList.add('fade-enter');
+            // ✅ repairState antes de qualquer acesso a dados
+            window.repairState();
             
             let totalFocoSeconds = 0; Object.values(window.state.timeTracking || {}).forEach(v => totalFocoSeconds += v);
             const hrs = Math.floor(totalFocoSeconds / 3600); const mins = Math.floor((totalFocoSeconds % 3600) / 60);
@@ -1001,15 +1109,17 @@
             window.state.weeks.forEach(w => {
                 if(w.tasks) {
                     w.tasks.forEach(t => {
-                        const p = window.state.progress[t.id] || {};
-                        totalDone += parseInt(p.done) || 0; totalCorrect += parseInt(p.correct) || 0;
+                        // ✅ Usa getTaskProgress para leitura segura
+                        const p = window.getTaskProgress(t.id);
+                        totalDone += parseInt(p.done) || 0;
+                        totalCorrect += parseInt(p.correct) || 0;
                     });
                 }
             });
             const precisao = window.calculateAccuracy(totalDone, totalCorrect);
             const streak = window.updateStreak();
 
-            let html = `<h2 class="text-3xl font-black text-slate-900 dark:text-white mb-6 tracking-tight flex items-center gap-3"><i class="fas fa-chart-pie text-blue-600"></i> Dashboard & Metas</h2>`;
+            let html = `<h2 class="text-3xl font-black text-slate-800 dark:text-white mb-6 tracking-tight flex items-center gap-3"><i class="fas fa-chart-pie text-blue-600"></i> Dashboard & Metas</h2>`;
             
             // BLOCO 1: KPIs
             html += `<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -1048,9 +1158,11 @@
                             if (!match && area === "Clínica Médica" && !["Cirurgia","Pediatria","Preventiva","Ginecologia","Obstetrícia"].includes(cat)) match = true;
                             if(match) {
                                 areaTasks++;
-                                const p = window.state.progress[t.id] || {};
+                                // ✅ Usa getTaskProgress para leitura segura
+                                const p = window.getTaskProgress(t.id);
                                 if(p.doneStatus) areaDone++;
-                                areaTotalQ += parseInt(p.done) || 0; areaCorrect += parseInt(p.correct) || 0;
+                                areaTotalQ += parseInt(p.done) || 0;
+                                areaCorrect += parseInt(p.correct) || 0;
                             }
                         });
                     }
@@ -1076,7 +1188,7 @@
             for(let i=29; i>=0; i--) {
                 let d = new Date(); d.setDate(d.getDate() - i);
                 let ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-                let count = window.state.dailyStats[ds] || 0; 
+                let count = (window.state.dailyStats || {})[ds] || 0; 
                 let colorClass = 'bg-slate-100 dark:bg-slate-700/50';
                 if(count > 0) colorClass = 'bg-emerald-200 dark:bg-emerald-900/40'; 
                 if(count >= 10) colorClass = 'bg-emerald-400 dark:bg-emerald-700/60'; 
@@ -1104,7 +1216,8 @@
                 if(!currW.tasks || currW.tasks.length === 0) weekHtml += `<div class="text-xs text-slate-500 italic">Nenhuma tarefa.</div>`;
                 else {
                     currW.tasks.forEach(t => {
-                        const p = window.state.progress[t.id] || {};
+                        // ✅ Usa getTaskProgress para leitura segura
+                        const p = window.getTaskProgress(t.id);
                         weekHtml += `<div class="flex items-center gap-3 p-2.5 rounded-xl border ${p.doneStatus ? 'bg-slate-50 border-transparent dark:bg-slate-800/50 opacity-60' : 'bg-white border-slate-200 dark:bg-cm-mid dark:border-gray-700'}"><div class="w-5 h-5 rounded-full border-2 ${p.doneStatus ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-gray-300 dark:border-gray-600'} flex items-center justify-center text-[10px] shrink-0"><i class="fas fa-check ${p.doneStatus?'block':'hidden'}"></i></div><div class="flex-1 min-w-0"><div class="font-bold text-xs text-slate-800 dark:text-white truncate">${t.subject}</div><div class="text-[9px] uppercase tracking-widest text-slate-500 font-bold mt-0.5 truncate">${t.category}</div></div></div>`;
                     });
                 }
@@ -1119,7 +1232,7 @@
                 const ctx = document.getElementById('chart-questions');
                 if (ctx) {
                     const labels = []; const data = [];
-                    for (let i = 13; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); labels.push(`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`); data.push(window.state.dailyStats[`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`] || 0); }
+                    for (let i = 13; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); labels.push(`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`); data.push((window.state.dailyStats || {})[`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`] || 0); }
                     new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label: 'Questões', data, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 3, fill: true, tension: 0.4, pointBackgroundColor: '#3b82f6', pointBorderColor: '#fff' }] }, options: { plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } } } });
                 }
             }, 100);
@@ -1127,7 +1240,9 @@
         
         window.renderSearch = function() { 
             const content = document.getElementById('content-area'); 
-            content.classList.add('fade-enter'); 
+            content.classList.add('fade-enter');
+            // ✅ repairState antes de qualquer acesso a dados
+            window.repairState();
             
             const bd = window.bancoDeMaterias || [];
             
@@ -1184,6 +1299,7 @@
                 });
                 window._currentFilteredBank = filtered;
                 
+                // ✅ Usa getTaskProgress ao verificar se está agendado via nome
                 const scheduledIds = new Set();
                 window.state.weeks.forEach(w => { if(w.tasks) w.tasks.forEach(t => scheduledIds.add(t.subject)); });
 
@@ -1197,14 +1313,17 @@
                 }
                 
                 // Re-render filter row 1
-                const areaContainer = document.querySelector('.filter-chip').parentElement;
-                if(areaContainer) {
-                    areaContainer.innerHTML = ['Todas', ...mainCategories].map(area => {
-                        const count = counts[area] || 0;
-                        const activeClass = window.searchFilterArea === area ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50';
-                        const badgeClass = window.searchFilterArea === area ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500';
-                        return `<button onclick="window.toggleSearchArea('${area}')" class="filter-chip shadow-sm ${activeClass}"><span>${area === 'Clínica' ? 'Clínica Médica' : area}</span> <span class="filter-badge ${badgeClass}">${count}</span></button>`;
-                    }).join('');
+                const firstChip = document.querySelector('.filter-chip');
+                if(firstChip) {
+                    const areaContainer = firstChip.parentElement;
+                    if(areaContainer) {
+                        areaContainer.innerHTML = ['Todas', ...mainCategories].map(area => {
+                            const count = counts[area] || 0;
+                            const activeClass = window.searchFilterArea === area ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50';
+                            const badgeClass = window.searchFilterArea === area ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500';
+                            return `<button onclick="window.toggleSearchArea('${area}')" class="filter-chip shadow-sm ${activeClass}"><span>${area === 'Clínica' ? 'Clínica Médica' : area}</span> <span class="filter-badge ${badgeClass}">${count}</span></button>`;
+                        }).join('');
+                    }
                 }
             }
             searchInput.addEventListener('input', (e) => filterAndRender(e.target.value)); filterAndRender('');
@@ -1217,20 +1336,26 @@
                     if(week) {
                         window.pushState();
                         if(!week.tasks) week.tasks = [];
-                        week.tasks.push({ id: `cstm_${Date.now()}`, category: taskToAdd.area, subject: taskToAdd.tema, prioridade: taskToAdd.prioridade || 2, customizado: true, tipo: 'materia_nova', score: taskToAdd.score || 0 });
+                        const newId = `cstm_${Date.now()}`;
+                        week.tasks.push({ id: newId, category: taskToAdd.area, subject: taskToAdd.tema, prioridade: taskToAdd.prioridade || 2, customizado: true, tipo: 'materia_nova', score: taskToAdd.score || 0 });
+                        // ✅ Garante entrada no progress para a nova tarefa
+                        window.ensureProgress(newId);
                         window.triggerSave(); window.showToast(`Adicionado à Semana ${targetWeek}!`); window.updateUI();
                     }
                 }
             }
         }
         
-        window.updateGlobalProgress = function() { 
+        window.updateGlobalProgress = function() {
+            // ✅ repairState garante que progress existe antes de iterar
+            window.repairState();
             let totalTasks = 0; let completed = 0; 
             window.state.weeks.forEach(w => { 
                 if(w.tasks) {
                     totalTasks += w.tasks.length; 
                     w.tasks.forEach(t => { 
-                        if (window.state.progress && window.state.progress[t.id] && window.state.progress[t.id].doneStatus) completed++; 
+                        // ✅ Usa getTaskProgress para leitura segura
+                        if (window.getTaskProgress(t.id).doneStatus) completed++; 
                     }); 
                 }
             }); 
@@ -1240,7 +1365,18 @@
             window.updateStreak(); 
         }
         
-        window.updateUI = function() { window.renderNav(); if(window.activeView === 'homepage') window.renderHomepage(); else if(window.activeView === 'dashboard') window.renderDashboard(); else if (window.activeView === 'search') window.renderSearch(); else window.renderWeek(); window.updateGlobalProgress(); window.pomoUpdateUI(); }
+        window.updateUI = function() { 
+            // ✅ repairState é sempre o primeiro passo — blindagem absoluta
+            window.repairState();
+            window.expandedCards = window.expandedCards || {};
+            window.renderNav(); 
+            if(window.activeView === 'homepage') window.renderHomepage(); 
+            else if(window.activeView === 'dashboard') window.renderDashboard(); 
+            else if (window.activeView === 'search') window.renderSearch(); 
+            else window.renderWeek(); 
+            window.updateGlobalProgress(); 
+            window.pomoUpdateUI(); 
+        }
         
         // Loop principal para Tempo de Foco (Sessão)
         setInterval(() => {
@@ -1251,7 +1387,10 @@
                     if (window.pomoPhase !== 'descanso') {
                         window.sessionStudySeconds += delta;
                         if (window.sessionStudySeconds >= 60) {
-                            const today = window.getTodayStr(); window.state.timeTracking[today] = (window.state.timeTracking[today] || 0) + window.sessionStudySeconds; window.sessionStudySeconds = 0;
+                            const today = window.getTodayStr();
+                            window.repairState();
+                            window.state.timeTracking[today] = (window.state.timeTracking[today] || 0) + window.sessionStudySeconds;
+                            window.sessionStudySeconds = 0;
                         }
                     }
                     if(window.pomoTime <= 0) window.pomoNextPhase(); else window.pomoUpdateUI();
