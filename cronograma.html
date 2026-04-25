@@ -889,6 +889,7 @@
         }
 
         window.renderWeek = function() {
+            if (!window.state.progress) window.state.progress = {};
             const w = window.state.weeks.find(d => d.week === window.activeWeek); 
             const content = document.getElementById('content-area'); 
             if(!w) {
