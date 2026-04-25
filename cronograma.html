@@ -565,7 +565,11 @@
                         
                         if (data.app_state && data.app_state.weeks && data.app_state.weeks.length > 0) {
                             window.state = data.app_state;
+                            // REDE DE SEGURANÇA CONTRA O BUG DE OBJETOS VAZIOS:
+                            if(!window.state.progress) window.state.progress = {};
+                            if(!window.state.dailyStats) window.state.dailyStats = {};
                             if(!window.state.timeTracking) window.state.timeTracking = {};
+                            if(!window.state.simulados) window.state.simulados = [];
                             finishLoading();
                         } else {
                             generateSchedule(data.onboarding_data);
@@ -640,7 +644,7 @@
 
             newWeeks.forEach(w => { delete w._start; delete w._end; w.tasks.sort((a,b) => b.score - a.score); });
 
-            window.state.weeks = newWeeks; window.state.progress = {}; window.state.dailyStats = {};
+            window.state.weeks = newWeeks; window.state.progress = {}; window.state.dailyStats = {}; window.state.timeTracking = {};
             window.state.startDate = start.toISOString();
 
             await window.saveToCloud();
@@ -693,7 +697,10 @@
         // ----------------------------------------------------------------------
         // AÇÕES NAS TAREFAS
         // ----------------------------------------------------------------------
-        window.ensureProgress = function(id) { if (!window.state.progress[id]) window.state.progress[id] = {}; }
+        window.ensureProgress = function(id) { 
+            if (!window.state.progress) window.state.progress = {};
+            if (!window.state.progress[id]) window.state.progress[id] = {}; 
+        }
         window.toggleTask = function(id) { 
             window.pushState(); window.ensureProgress(id); const p = window.state.progress[id]; p.doneStatus = !p.doneStatus; 
             if(p.doneStatus) { p.completedDate = window.getTodayStr(); confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 }, colors: ['#10b981', '#3b82f6'] }); window.openReviewModal(id); } 
@@ -981,7 +988,7 @@
                 else break;
             }
 
-            let html = `<h2 class="text-3xl font-black text-slate-900 dark:text-white mb-6 tracking-tight flex items-center gap-3"><i class="fas fa-chart-pie text-blue-600"></i> Dashboard & Metas</h2>`;
+            let html = `<h2 class="text-3xl font-black text-slate-800 dark:text-white mb-6 tracking-tight flex items-center gap-3"><i class="fas fa-chart-pie text-blue-600"></i> Dashboard & Metas</h2>`;
             
             // BLOCO 1: KPIs
             html += `<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -1126,7 +1133,7 @@
                 return `<button onclick="window.toggleSearchPrio('${p.v}')" class="filter-chip shadow-sm ${activeClass}">${p.l}</button>`;
             }).join('') + `</div>`;
 
-            const html = `<div class="bg-white dark:bg-cm-dark2 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-gray-800 min-h-[600px]"><div class="mb-10"><h2 class="text-3xl font-black text-slate-900 dark:text-white mb-6 tracking-tight">Buscar Tarefas</h2><input type="text" id="global-search-input" placeholder="Digite o tema, categoria ou palavra-chave..." class="w-full text-lg p-5 border border-slate-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none bg-slate-50 dark:bg-cm-mid transition shadow-sm mb-6 font-medium dark:text-white"><div class="flex flex-col"><div class="flex flex-wrap gap-2">${filterButtonsArea}</div>${subAreaHtml}${prioHtml}</div></div><div id="search-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div></div>`;
+            const html = `<div class="bg-white dark:bg-cm-dark2 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-gray-800 min-h-[600px]"><div class="mb-10"><h2 class="text-3xl font-black text-slate-800 dark:text-white mb-6 tracking-tight">Buscar Tarefas</h2><input type="text" id="global-search-input" placeholder="Digite o tema, categoria ou palavra-chave..." class="w-full text-lg p-5 border border-slate-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none bg-slate-50 dark:bg-cm-mid transition shadow-sm mb-6 font-medium dark:text-white"><div class="flex flex-col"><div class="flex flex-wrap gap-2">${filterButtonsArea}</div>${subAreaHtml}${prioHtml}</div></div><div id="search-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div></div>`;
             content.innerHTML = html; 
             setTimeout(() => content.classList.remove('fade-enter'), 500); 
             
@@ -1189,7 +1196,7 @@
         
         window.updateGlobalProgress = function() { 
             let totalTasks = 0; let completed = 0; 
-            window.state.weeks.forEach(w => { totalTasks += w.tasks.length; w.tasks.forEach(t => { if (window.state.progress[t.id] && window.state.progress[t.id].doneStatus) completed++; }); }); 
+            window.state.weeks.forEach(w => { totalTasks += w.tasks.length; w.tasks.forEach(t => { if (window.state.progress && window.state.progress[t.id] && window.state.progress[t.id].doneStatus) completed++; }); }); 
             const percent = totalTasks > 0 ? (completed / totalTasks) * 100 : 0; 
             const bar = document.getElementById('global-progress'); const text = document.getElementById('global-percent-text'); 
             if(bar) bar.style.width = `${percent}%`; if(text) text.innerText = `${Math.round(percent)}%`; 
