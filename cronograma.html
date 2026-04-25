@@ -14,6 +14,7 @@
 
     <script>
         tailwind.config = {
+            darkMode: 'class', // Habilita o modo noturno seguro nativo do Tailwind
             theme: {
                 extend: {
                     colors: {
@@ -98,7 +99,13 @@
         .settings-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 1000; display: none; }
         .settings-overlay.open { display: block; }
 
-        /* Reminders Balloon */
+        /* DARK MODE CSS - LIMPO PARA NÃO CONFLITAR */
+        body.dark .agenda-table { border-color: #334155; }
+        body.dark .agenda-table td { border-color: #334155; }
+        body.dark .time-col { background-color: #0f172a !important; color: #94a3b8 !important; border-right-color: #334155 !important;}
+        body.dark .agenda-cell { background-color: #1e293b !important; color: #f8fafc !important; border-left: 4px solid var(--agenda-color, transparent); border-radius: 4px; }
+        
+        /* REMINDERS BALLOON */
         .reminder-balloon { position: fixed; bottom: 84px; right: 24px; z-index: 150; } 
         @media (min-width: 768px) { .reminder-balloon { bottom: 24px; } }
         .reminder-fab { width: 52px; height: 52px; border-radius: 50%; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 4px 16px rgba(59,130,246,0.3); transition: transform 0.2s; }
@@ -111,12 +118,12 @@
         body.focus-mode #main-scroll { padding: 2rem !important; }
         .focus-exit-btn { display: none; } body.focus-mode .focus-exit-btn { display: flex !important; }
 
-        #loader-overlay { position: fixed; inset: 0; background: #f8fafc; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #loader-overlay { position: fixed; inset: 0; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 
         .task-details-wrapper { transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out; max-height: 0; opacity: 0; overflow: hidden; }
         .task-details-wrapper.expanded { max-height: 600px; opacity: 1; }
         
-        /* Linhas de Prioridade */
+        /* Prioridades Fixes */
         .prio-1 { border-left: 4px solid #ef4444 !important; }
         .prio-2 { border-left: 4px solid #f59e0b !important; }
         .prio-3 { border-left: 4px solid #3b82f6 !important; }
@@ -124,12 +131,12 @@
         .prio-rev { border-left: 4px dashed #10b981 !important; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 overflow-hidden" onkeydown="window.handleGlobalKeydown(event)">
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 overflow-hidden" onkeydown="window.handleGlobalKeydown(event)">
 
     <!-- OVERLAY DE CARREGAMENTO -->
-    <div id="loader-overlay">
+    <div id="loader-overlay" class="bg-slate-50 dark:bg-slate-900">
         <i class="fas fa-circle-notch fa-spin text-5xl text-blue-600 mb-4"></i>
-        <h2 class="text-2xl font-black text-slate-800 font-serif">A carregar o seu Cronograma...</h2>
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-white font-serif">A carregar o seu Cronograma...</h2>
         <p class="text-slate-500 mt-2 font-medium" id="loader-text">A sincronizar inteligência com a base de dados...</p>
     </div>
 
@@ -157,26 +164,26 @@
                         <div id="global-progress" class="bg-blue-500 h-2 rounded-full transition-all duration-700 shadow-[0_0_10px_rgba(59,130,246,0.5)] absolute top-0 left-0" style="width: 0%"></div>
                     </div>
                 </div>
-                <div class="text-xl font-black text-white w-12 text-right hidden sm:block" id="global-percent-text">0%</div>
-                <!-- Avatar para não quebrar o JS -->
+                <div class="text-xl font-bold text-white w-12 text-right hidden sm:block" id="global-percent-text">0%</div>
+                <!-- Avatar -->
                 <div id="user-avatar" class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center uppercase cursor-pointer" onclick="window.openSettingsSidebar()">U</div>
             </div>
         </header>
 
         <div class="flex flex-1 overflow-hidden relative">
             <!-- SIDEBAR -->
-            <aside id="main-sidebar" class="w-80 bg-white border-r border-slate-200 sidebar flex flex-col z-40 shadow-xl hidden md:flex transition-colors duration-300">
-                <div class="p-6 border-b border-slate-100 bg-slate-50/50 space-y-3 shrink-0">
-                    <button onclick="window.switchView('homepage')" id="nav-homepage" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-black text-white border border-transparent text-left">
+            <aside id="main-sidebar" class="w-80 bg-white dark:bg-cm-dark2 border-r border-slate-200 dark:border-slate-800 sidebar flex flex-col z-40 shadow-xl hidden md:flex transition-colors duration-300">
+                <div class="p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-transparent space-y-3 shrink-0">
+                    <button onclick="window.switchView('homepage')" id="nav-homepage" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-md bg-black text-white border border-transparent text-left">
                         <i class="fas fa-home text-lg w-5 text-center"></i><span>Página Inicial</span>
                     </button>
-                    <button onclick="window.switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-left">
+                    <button onclick="window.switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 text-left">
                         <i class="fas fa-chart-line text-lg w-5 text-center"></i><span>Dashboard &amp; Metas</span>
                     </button>
-                    <button onclick="window.switchView('search')" id="nav-search" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-left">
+                    <button onclick="window.switchView('search')" id="nav-search" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 text-left">
                         <i class="fas fa-search text-lg w-5 text-center"></i><span>Busca de Tarefas</span>
                     </button>
-                    <button onclick="window.openRemanejoModal()" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-purple-50 border border-purple-200 text-purple-700 hover:bg-purple-100 text-left">
+                    <button onclick="window.openRemanejoModal()" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-left">
                         <i class="fas fa-wand-magic-sparkles text-lg w-5 text-center"></i><span>Remanejamento IA</span>
                     </button>
                 </div>
@@ -184,14 +191,14 @@
             </aside>
 
             <!-- MAIN CONTENT -->
-            <main class="flex-1 p-4 md:p-8 overflow-y-auto bg-slate-50 relative w-full transition-colors duration-300" id="main-scroll">
-                <button onclick="window.toggleFocusMode()" class="focus-exit-btn fixed top-6 right-6 z-[999] bg-red-600 text-white px-5 py-2.5 rounded-full font-black shadow-xl hover:bg-red-700 transition items-center gap-2"><i class="fas fa-compress-arrows-alt"></i> Sair do Foco</button>
+            <main class="flex-1 p-4 md:p-8 overflow-y-auto bg-slate-50 dark:bg-slate-900 relative w-full transition-colors duration-300" id="main-scroll">
+                <button onclick="window.toggleFocusMode()" class="focus-exit-btn fixed top-6 right-6 z-[999] bg-red-600 text-white px-5 py-2.5 rounded-full font-bold shadow-xl hover:bg-red-700 transition items-center gap-2"><i class="fas fa-compress-arrows-alt"></i> Sair do Foco</button>
                 <div id="content-area" class="container mx-auto max-w-6xl pb-24"></div>
             </main>
         </div>
 
         <!-- MOBILE NAV -->
-        <nav class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 flex justify-around p-3 z-50">
+        <nav class="md:hidden fixed bottom-0 left-0 w-full bg-white dark:bg-cm-dark2 border-t border-slate-200 dark:border-slate-800 flex justify-around p-3 z-50">
             <button onclick="window.switchView('homepage')" class="flex flex-col items-center text-slate-500 hover:text-blue-600 transition-colors"><i class="fas fa-home text-lg mb-1"></i><span class="text-[9px] font-bold">Início</span></button>
             <button onclick="window.switchView('week')" class="flex flex-col items-center text-slate-500 hover:text-blue-600 transition-colors"><i class="fas fa-calendar-alt text-lg mb-1"></i><span class="text-[9px] font-bold">Semana</span></button>
             <button onclick="window.switchView('dashboard')" class="flex flex-col items-center text-slate-500 hover:text-blue-600 transition-colors"><i class="fas fa-chart-pie text-lg mb-1"></i><span class="text-[9px] font-bold">Resumo</span></button>
@@ -203,40 +210,49 @@
 
     <!-- CONFIGURAÇÕES (SIDEBAR) -->
     <div id="settings-overlay" class="settings-overlay" onclick="window.closeSettingsSidebar()"></div>
-    <div id="settings-sidebar" class="settings-sidebar bg-white">
-        <div class="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-900 text-white">
-            <h3 class="font-black text-lg flex items-center gap-2"><i class="fas fa-cog"></i> Configurações</h3>
+    <div id="settings-sidebar" class="settings-sidebar bg-white dark:bg-cm-dark2 dark:border-slate-800">
+        <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-900 text-white">
+            <h3 class="font-bold text-lg flex items-center gap-2"><i class="fas fa-cog"></i> Configurações</h3>
             <button onclick="window.closeSettingsSidebar()" class="text-slate-300 hover:text-white transition"><i class="fas fa-times text-xl"></i></button>
         </div>
         <div class="p-6 space-y-6">
             <div>
-                <h4 class="text-xs font-bold uppercase text-slate-400 tracking-widest mb-4">Conta</h4>
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-3">
-                    <div class="font-bold text-sm text-slate-800 truncate" id="user-name">Usuário</div>
+                <h4 class="text-xs font-bold uppercase text-slate-500 tracking-widest mb-4">Conta</h4>
+                <div class="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 mb-3">
+                    <div class="font-bold text-sm text-slate-900 dark:text-white truncate" id="user-name">Usuário</div>
                     <div class="text-[10px] text-slate-500 truncate" id="user-email">email@email.com</div>
                 </div>
-                <button onclick="window.recalculateRoute()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-200 bg-white hover:bg-blue-50 text-blue-700 font-bold text-sm transition card-shadow mb-2"><i class="fas fa-sync-alt"></i> Recalcular Rota (Novo Ano)</button>
-                <button onclick="window.handleLogout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-200 bg-white hover:bg-red-50 text-red-600 font-bold text-sm transition card-shadow"><i class="fas fa-sign-out-alt"></i> Sair da Conta</button>
+                <button onclick="window.recalculateRoute()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700 text-blue-700 dark:text-blue-400 font-bold text-sm transition card-shadow mb-2"><i class="fas fa-sync-alt"></i> Recalcular Rota (Novo Ano)</button>
+                <button onclick="window.handleLogout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-slate-700 text-red-600 dark:text-red-400 font-bold text-sm transition card-shadow"><i class="fas fa-sign-out-alt"></i> Sair da Conta</button>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold uppercase text-slate-500 tracking-widest mb-4">Aparência</h4>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+                        <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white"><i class="fas fa-moon text-sm"></i></div><div><div class="font-bold text-sm text-slate-900 dark:text-white">Modo Noturno</div></div></div>
+                        <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="dark-mode-toggle" class="sr-only peer" onchange="window.toggleDarkMode(this.checked)"><div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div></label>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- MODAL: ADD TAREFA AVULSA -->
     <div class="modal-overlay" id="modal-add-task">
-        <div class="modal-content">
+        <div class="modal-content dark:bg-cm-dark2 dark:border-slate-700">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-black text-slate-900">Nova Tarefa</h3>
-                <button onclick="window.closeModal('add-task')" class="text-slate-400 hover:text-slate-800 w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition"><i class="fas fa-times text-lg"></i></button>
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white">Nova Tarefa</h3>
+                <button onclick="window.closeModal('add-task')" class="text-slate-400 hover:text-slate-800 dark:hover:text-white w-8 h-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition"><i class="fas fa-times text-lg"></i></button>
             </div>
-            <div class="space-y-4 mb-6">
+            <div class="space-y-4 mb-6 text-left">
                 <div>
                     <label class="block text-xs font-bold uppercase text-slate-500 tracking-widest mb-1.5">Nome do Tema</label>
-                    <input type="text" id="add-nome" placeholder="Ex: Aula da Faculdade" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500">
+                    <input type="text" id="add-nome" placeholder="Ex: Aula da Faculdade" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm outline-none focus:border-blue-500 dark:text-white">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold uppercase text-slate-500 tracking-widest mb-1.5">Área</label>
-                        <select id="add-area" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 cursor-pointer">
+                        <select id="add-area" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm outline-none focus:border-blue-500 cursor-pointer dark:text-white">
                             <option value="Cirurgia">Cirurgia</option>
                             <option value="Clínica Médica">Clínica Médica</option>
                             <option value="Ginecologia e Obstetrícia">Gineco e Obstetrícia</option>
@@ -247,7 +263,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold uppercase text-slate-500 tracking-widest mb-1.5">Prioridade</label>
-                        <select id="add-prio" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 cursor-pointer">
+                        <select id="add-prio" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm outline-none focus:border-blue-500 cursor-pointer dark:text-white">
                             <option value="1">Alta (1)</option>
                             <option value="2" selected>Média (2)</option>
                             <option value="3">Baixa (3)</option>
@@ -256,21 +272,21 @@
                     </div>
                 </div>
             </div>
-            <button onclick="window.saveCustomTask()" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold hover:bg-blue-700 transition">Adicionar à Semana</button>
+            <button onclick="window.saveCustomTask()" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold hover:bg-blue-700 transition shadow-md">Adicionar à Semana</button>
         </div>
     </div>
 
     <!-- MODAL: REPLICAR AGENDA -->
     <div class="modal-overlay" id="modal-replica-agenda">
-        <div class="modal-content text-center">
+        <div class="modal-content dark:bg-cm-dark2 dark:border-slate-700 text-center">
             <div class="flex justify-between items-center mb-2">
-                <h3 class="text-xl font-black text-slate-900 mx-auto">Replicar Grade</h3>
-                <button onclick="window.closeModal('replica-agenda')" class="text-slate-400 hover:text-slate-800 absolute right-6 top-6 w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition"><i class="fas fa-times"></i></button>
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white mx-auto">Replicar Grade</h3>
+                <button onclick="window.closeModal('replica-agenda')" class="text-slate-400 hover:text-slate-800 dark:hover:text-white absolute right-6 top-6 w-8 h-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition"><i class="fas fa-times"></i></button>
             </div>
-            <div class="mb-5 text-blue-500 bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mt-4"><i class="fas fa-copy text-2xl"></i></div>
+            <div class="mb-5 text-blue-500 bg-blue-50 dark:bg-blue-900/30 w-16 h-16 rounded-full flex items-center justify-center mx-auto mt-4"><i class="fas fa-copy text-2xl"></i></div>
             <p class="text-sm text-slate-500 mb-6">Quantas semanas à frente deseja manter esta rotina de horários?</p>
             <div class="space-y-4">
-                <input type="number" id="replica-weeks-input" value="4" min="1" class="w-24 text-center bg-slate-50 border border-slate-200 text-lg font-black px-4 py-3 rounded-xl mx-auto block focus:outline-none focus:border-blue-500">
+                <input type="number" id="replica-weeks-input" value="4" min="1" class="w-24 text-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-lg font-bold px-4 py-3 rounded-xl mx-auto block focus:outline-none focus:border-blue-500 dark:text-white">
                 <button onclick="window.executeReplicaAgenda()" class="w-full py-3.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition shadow-md">Replicar Grade</button>
             </div>
         </div>
@@ -278,16 +294,16 @@
 
     <!-- MODAL: CADERNO DE ANOTAÇÕES -->
     <div id="modal-notes" class="modal-overlay">
-        <div class="modal-content flex flex-col">
+        <div class="modal-content dark:bg-cm-dark2 dark:border-slate-700 flex flex-col text-left">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-black text-slate-900 flex items-center gap-2"><i class="fas fa-book-medical text-blue-600"></i> Anotações e Links</h3>
-                <button onclick="window.closeNotesModal()" class="text-slate-400 hover:text-slate-800 w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition"><i class="fas fa-times"></i></button>
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2"><i class="fas fa-book-medical text-blue-600"></i> Anotações e Links</h3>
+                <button onclick="window.closeNotesModal()" class="text-slate-400 hover:text-slate-800 dark:hover:text-white w-8 h-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition"><i class="fas fa-times"></i></button>
             </div>
             <p class="text-xs text-slate-500 mb-4">Cole links de videoaulas, resumos ou cartões do Anki para este tema.</p>
-            <textarea id="notes-textarea" rows="6" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm text-slate-700 focus:outline-none focus:border-blue-500 transition resize-none custom-scrollbar" placeholder="Cole aqui..." oninput="window.parseNotesLinks()"></textarea>
+            <textarea id="notes-textarea" rows="6" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-sm text-slate-700 dark:text-white focus:outline-none focus:border-blue-500 transition resize-none custom-scrollbar" placeholder="Cole aqui..." oninput="window.parseNotesLinks()"></textarea>
             <div id="notes-links-container" class="hidden mt-4 w-full"></div>
-            <div class="flex gap-3 mt-6 pt-4 border-t border-slate-100">
-                <button onclick="window.closeNotesModal()" class="flex-1 py-3 rounded-xl font-bold text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Fechar</button>
+            <div class="flex gap-3 mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <button onclick="window.closeNotesModal()" class="flex-1 py-3 rounded-xl font-bold text-sm bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">Fechar</button>
                 <button onclick="window.saveNotes()" class="flex-1 py-3 rounded-xl font-bold text-sm bg-black text-white hover:bg-slate-800 transition">Salvar na Nuvem</button>
             </div>
         </div>
@@ -295,12 +311,12 @@
 
     <!-- MODAL: DELETE -->
     <div id="modal-delete" class="modal-overlay">
-        <div class="modal-content text-center max-w-sm">
-            <div class="mb-5 text-red-500 bg-red-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto"><i class="fas fa-trash-alt text-2xl"></i></div>
-            <h3 class="text-xl font-black text-slate-900 mb-2">Excluir Item?</h3>
+        <div class="modal-content dark:bg-cm-dark2 dark:border-slate-700 text-center max-w-sm">
+            <div class="mb-5 text-red-500 bg-red-50 dark:bg-red-900/30 w-16 h-16 rounded-full flex items-center justify-center mx-auto"><i class="fas fa-trash-alt text-2xl"></i></div>
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Excluir Item?</h3>
             <p class="text-sm text-slate-500 mb-8">Esta ação removerá a tarefa da sua semana.</p>
             <div class="flex gap-3 justify-center">
-                <button onclick="window.closeModal('delete')" class="px-6 py-3 rounded-xl font-bold text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 transition flex-1">Cancelar</button>
+                <button onclick="window.closeModal('delete')" class="px-6 py-3 rounded-xl font-bold text-sm bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex-1">Cancelar</button>
                 <button id="confirm-delete-btn" class="px-6 py-3 rounded-xl font-bold text-sm bg-red-600 text-white hover:bg-red-700 transition flex-1 shadow-md">Sim, Excluir</button>
             </div>
         </div>
@@ -308,27 +324,27 @@
 
     <!-- MODAL: REMANEJO -->
     <div id="modal-remanejo" class="modal-overlay">
-        <div class="modal-content">
+        <div class="modal-content dark:bg-cm-dark2 dark:border-slate-700">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-black text-slate-900 flex items-center gap-2"><i class="fas fa-magic text-purple-600"></i> Remanejamento IA</h3>
-                <button onclick="window.closeModal('remanejo')" class="text-slate-400 hover:text-slate-800 w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition"><i class="fas fa-times"></i></button>
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2"><i class="fas fa-magic text-purple-600"></i> Remanejamento IA</h3>
+                <button onclick="window.closeModal('remanejo')" class="text-slate-400 hover:text-slate-800 dark:hover:text-white w-8 h-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition"><i class="fas fa-times"></i></button>
             </div>
             <p class="text-sm text-slate-500 mb-6">O sistema detectou tarefas atrasadas de semanas anteriores. Como quer reorganizar o seu estudo?</p>
             
             <div id="remanejo-options" class="space-y-3">
-                <button onclick="window.applyRemanejo('dilute')" class="w-full text-left p-4 rounded-xl border border-slate-200 hover:border-purple-400 hover:bg-purple-50 transition group shadow-sm">
-                    <div class="font-bold text-slate-800 group-hover:text-purple-700">Diluir Suavemente</div>
+                <button onclick="window.applyRemanejo('dilute')" class="w-full text-left p-4 rounded-xl border border-slate-200 dark:border-slate-700 dark:bg-slate-800 hover:border-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition group shadow-sm">
+                    <div class="font-bold text-slate-900 dark:text-white group-hover:text-purple-700 dark:group-hover:text-purple-400">Diluir Suavemente</div>
                     <div class="text-xs text-slate-500 mt-1">Redistribui os atrasos pelas próximas semanas de forma equilibrada.</div>
                 </button>
-                <button onclick="window.applyRemanejo('cut')" class="w-full text-left p-4 rounded-xl border border-slate-200 hover:border-red-400 hover:bg-red-50 transition group shadow-sm">
-                    <div class="font-bold text-slate-800 group-hover:text-red-700">Corte de Gordura (Intensivo)</div>
+                <button onclick="window.applyRemanejo('cut')" class="w-full text-left p-4 rounded-xl border border-slate-200 dark:border-slate-700 dark:bg-slate-800 hover:border-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition group shadow-sm">
+                    <div class="font-bold text-slate-900 dark:text-white group-hover:text-red-700 dark:group-hover:text-red-400">Corte de Gordura (Intensivo)</div>
                     <div class="text-xs text-slate-500 mt-1">Elimina atrasos de Prioridade Baixa, mantendo apenas o essencial.</div>
                 </button>
             </div>
             
             <div id="remanejo-empty" class="hidden text-center py-8">
                 <i class="fas fa-check-circle text-4xl text-green-500 mb-3"></i>
-                <div class="font-bold text-slate-800">Não há atrasos!</div>
+                <div class="font-bold text-slate-900 dark:text-white">Não há atrasos!</div>
                 <div class="text-sm text-slate-500">O seu cronograma está perfeitamente em dia.</div>
             </div>
         </div>
@@ -336,53 +352,53 @@
 
     <!-- MODAL: REVISÃO -->
     <div id="modal-review" class="modal-overlay">
-        <div class="modal-content text-center max-w-sm">
-            <div class="mb-5 text-blue-600 bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto"><i class="fas fa-calendar-check text-2xl"></i></div>
-            <h3 class="text-xl font-black text-slate-900 mb-2">Tarefa Concluída!</h3>
+        <div class="modal-content dark:bg-cm-dark2 dark:border-slate-700 text-center max-w-sm">
+            <div class="mb-5 text-blue-600 bg-blue-50 dark:bg-blue-900/30 w-16 h-16 rounded-full flex items-center justify-center mx-auto"><i class="fas fa-calendar-check text-2xl"></i></div>
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Tarefa Concluída!</h3>
             <p class="text-sm text-slate-500 mb-6">Deseja agendar uma revisão espaçada para este tema?</p>
             <div class="grid gap-3">
-                <button onclick="window.scheduleReview(10)" class="w-full py-3.5 rounded-xl font-bold text-sm bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 transition flex justify-between px-6"><span>Difícil</span> <span>10 dias</span></button>
-                <button onclick="window.scheduleReview(15)" class="w-full py-3.5 rounded-xl font-bold text-sm bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 transition flex justify-between px-6"><span>Médio</span> <span>15 dias</span></button>
-                <button onclick="window.scheduleReview(20)" class="w-full py-3.5 rounded-xl font-bold text-sm bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition flex justify-between px-6"><span>Fácil</span> <span>20 dias</span></button>
-                <button onclick="window.closeModal('review')" class="w-full py-3 rounded-xl font-bold text-xs text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition mt-2">Não agendar</button>
+                <button onclick="window.scheduleReview(10)" class="w-full py-3.5 rounded-xl font-bold text-sm bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 border border-red-200 dark:border-red-800 transition flex justify-between px-6"><span>Difícil</span> <span>10 dias</span></button>
+                <button onclick="window.scheduleReview(15)" class="w-full py-3.5 rounded-xl font-bold text-sm bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800 transition flex justify-between px-6"><span>Médio</span> <span>15 dias</span></button>
+                <button onclick="window.scheduleReview(20)" class="w-full py-3.5 rounded-xl font-bold text-sm bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-800 transition flex justify-between px-6"><span>Fácil</span> <span>20 dias</span></button>
+                <button onclick="window.closeModal('review')" class="w-full py-3 rounded-xl font-bold text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition mt-2">Não agendar</button>
             </div>
         </div>
     </div>
 
     <!-- REMINDERS (BALÃO FLUTUANTE) -->
     <div class="reminder-balloon z-[150]">
-        <div id="reminder-panel" class="reminder-panel bg-white">
-            <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
-                <h4 class="font-black text-sm text-slate-800 flex items-center gap-2"><i class="fas fa-bell text-amber-500"></i> Seus Lembretes</h4>
-                <button onclick="window.toggleReminderPanel()" class="text-slate-400 hover:text-slate-800 transition w-6 h-6 rounded-full hover:bg-slate-100 flex items-center justify-center"><i class="fas fa-times"></i></button>
+        <div id="reminder-panel" class="reminder-panel dark:bg-cm-dark2 dark:border-slate-700">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-100 dark:border-slate-800 pb-3">
+                <h4 class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2"><i class="fas fa-bell text-amber-500"></i> Seus Lembretes</h4>
+                <button onclick="window.toggleReminderPanel()" class="text-slate-400 hover:text-slate-800 dark:hover:text-white transition w-6 h-6 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
             <div id="reminder-list" class="mb-4 max-h-48 overflow-y-auto custom-scrollbar"></div>
-            <div class="space-y-3 pt-4 border-t border-slate-100">
-                <input type="text" id="reminder-text" placeholder="O que não pode esquecer?" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs outline-none focus:border-blue-500 transition">
+            <div class="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <input type="text" id="reminder-text" placeholder="O que não pode esquecer?" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-xs outline-none focus:border-blue-500 dark:text-white transition">
                 <div class="flex gap-2">
-                    <input type="date" id="reminder-date" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-2 py-2.5 text-xs outline-none focus:border-blue-500">
-                    <select id="reminder-type" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-2 py-2.5 text-[10px] font-bold uppercase outline-none focus:border-blue-500">
+                    <input type="date" id="reminder-date" class="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2 py-2.5 text-xs outline-none focus:border-blue-500 dark:text-white">
+                    <select id="reminder-type" class="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2 py-2.5 text-[10px] font-bold uppercase outline-none focus:border-blue-500 dark:text-white">
                         <option value="day">Para Hoje</option><option value="week">Esta Semana</option><option value="future">Outra Data</option>
                     </select>
                 </div>
-                <button onclick="window.addReminder()" class="w-full bg-slate-900 text-white py-3 rounded-xl text-xs font-black hover:bg-slate-800 transition shadow-md">Salvar Lembrete</button>
+                <button onclick="window.addReminder()" class="w-full bg-slate-900 dark:bg-blue-600 text-white py-3 rounded-xl text-xs font-bold hover:bg-slate-800 dark:hover:bg-blue-700 transition shadow-md">Salvar Lembrete</button>
             </div>
         </div>
-        <button class="reminder-fab bg-black" onclick="window.toggleReminderPanel()" title="Lembretes" style="position:relative"><i class="fas fa-bell"></i><span id="reminder-badge" class="hidden absolute -top-1 -right-1 w-5 h-5 bg-red-500 border-2 border-white rounded-full text-white text-[9px] font-bold flex items-center justify-center"></span></button>
+        <button class="reminder-fab bg-black dark:bg-blue-600" onclick="window.toggleReminderPanel()" title="Lembretes" style="position:relative"><i class="fas fa-bell"></i><span id="reminder-badge" class="hidden absolute -top-1 -right-1 w-5 h-5 bg-red-500 border-2 border-white dark:border-slate-800 rounded-full text-white text-[9px] font-bold flex items-center justify-center"></span></button>
     </div>
 
     <!-- MINI PLAYER POMODORO FLUTUANTE -->
-    <div id="mini-player" class="mini-player">
+    <div id="mini-player" class="mini-player dark:bg-cm-dark2 dark:border-slate-700">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 animate-pulse"><i class="fas fa-clock"></i></div>
+            <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 animate-pulse"><i class="fas fa-clock"></i></div>
             <div class="flex flex-col">
                 <span class="text-[10px] font-bold uppercase text-slate-500 tracking-widest leading-none mb-1" id="mp-phase">Foco: Aula</span>
-                <span class="font-mono font-black text-lg text-slate-800 leading-none" id="mp-time">50:00</span>
+                <span class="font-mono font-bold text-lg text-slate-900 dark:text-white leading-none" id="mp-time">50:00</span>
             </div>
         </div>
-        <div class="flex items-center gap-2 border-l border-slate-200 pl-3">
-            <button onclick="window.togglePomo()" class="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center hover:scale-105 transition shadow-md" id="mp-play-btn"><i class="fas fa-pause"></i></button>
-            <button onclick="window.stopPomo()" class="w-8 h-8 rounded-full text-slate-400 hover:text-red-500 hover:bg-slate-100 transition flex items-center justify-center"><i class="fas fa-times"></i></button>
+        <div class="flex items-center gap-2 border-l border-slate-200 dark:border-slate-700 pl-3">
+            <button onclick="window.togglePomo()" class="w-10 h-10 rounded-full bg-slate-900 dark:bg-blue-600 text-white flex items-center justify-center hover:scale-105 transition shadow-md" id="mp-play-btn"><i class="fas fa-pause"></i></button>
+            <button onclick="window.stopPomo()" class="w-8 h-8 rounded-full text-slate-400 hover:text-red-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-center"><i class="fas fa-times"></i></button>
         </div>
     </div>
 
@@ -497,7 +513,7 @@
             setTimeout(() => { window.pomoToggle(); }, 100);
         }
 
-        // Utils
+        // Utils locais de Undo/Redo
         window.pushState = function() { window.undoStack.push(JSON.stringify(window.state)); if(window.undoStack.length > 50) window.undoStack.shift(); window.redoStack = []; }
         window.undo = function() { if(window.undoStack.length === 0) return; window.redoStack.push(JSON.stringify(window.state)); window.state = JSON.parse(window.undoStack.pop()); window.triggerSave(); window.updateUI(); window.showToast('Ação desfeita');}
         window.redo = function() { if(window.redoStack.length === 0) return; window.undoStack.push(JSON.stringify(window.state)); window.state = JSON.parse(window.redoStack.pop()); window.triggerSave(); window.updateUI(); window.showToast('Ação refeita');}
@@ -575,7 +591,6 @@
             const MAX_TASKS_PER_WEEK = 15;
             const maxTasksAllowed = totalSemanas * MAX_TASKS_PER_WEEK;
 
-            // Garantia de fallback se banco não carregar
             const bd = window.bancoDeMaterias || [];
             let filteredDB = [...bd].sort((a, b) => b.score - a.score);
             if (obData.horas === '2h') filteredDB = filteredDB.filter(t => t.prioridade <= 2);
@@ -634,7 +649,7 @@
 
         function finishLoading() {
             document.getElementById('loader-overlay').style.display = 'none';
-            if(localStorage.getItem('darkMode') === '1') window.toggleDarkMode(true);
+            window.toggleDarkMode(localStorage.getItem('darkMode') === '1');
             
             // Força a página inicial na inicialização
             window.switchView('homepage');
@@ -663,7 +678,17 @@
         window.openSettingsSidebar = function() { document.getElementById('settings-sidebar').classList.add('open'); document.getElementById('settings-overlay').classList.add('open'); }
         window.closeSettingsSidebar = function() { document.getElementById('settings-sidebar').classList.remove('open'); document.getElementById('settings-overlay').classList.remove('open'); }
         window.toggleSidebar = function() { document.getElementById('main-sidebar').classList.toggle('sidebar-hidden'); }
-        window.toggleDarkMode = function(on) { document.body.classList.toggle('dark-mode', on); localStorage.setItem('darkMode', on ? '1' : '0'); }
+        
+        window.toggleDarkMode = function(on) {
+            if(on) {
+                document.documentElement.classList.add('dark');
+                document.body.classList.add('dark-mode'); // fallback
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.body.classList.remove('dark-mode');
+            }
+            localStorage.setItem('darkMode', on ? '1' : '0');
+        }
         
         // ----------------------------------------------------------------------
         // AÇÕES NAS TAREFAS
@@ -686,7 +711,7 @@
                 const c = parseInt(corrInp.value) || 0;
                 const acc = d > 0 ? Math.round((c / d) * 100) : 0;
                 pctSpan.innerText = acc + '%';
-                pctSpan.className = `text-base font-black ${d > 0 ? window.getAccuracyColorClass(acc) : 'text-slate-400'}`;
+                pctSpan.className = `text-lg font-bold ${d > 0 ? window.getAccuracyColorClass(acc) : 'text-slate-400'}`;
             }
         }
         
@@ -713,7 +738,7 @@
         window.toggleTaskDetails = function(taskId, event) { if(event && (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || event.target.closest('button') || event.target.closest('.custom-checkbox') || event.target.closest('.task-edit-subject') || event.target.closest('.drag-handle'))) return; window.expandedCards[taskId] = !window.expandedCards[taskId]; window.updateUI(); }
         window.updateTaskName = function(weekIdx, taskIdx, newName) { window.pushState(); const week = window.state.weeks.find(w => w.week === weekIdx); if(week && week.tasks[taskIdx]) { week.tasks[taskIdx].subject = newName; window.triggerSave(); } };
         
-        window.openAddTaskModal = function(weekNum) { window.activeWeek = weekNum; document.getElementById('add-nome').value = ''; window.openModal('add-task'); }
+        window.openAddTaskModal = function(weekNum) { window.activeWeek = parseInt(weekNum); document.getElementById('add-nome').value = ''; window.openModal('add-task'); }
         window.saveCustomTask = function() {
             window.pushState(); const nome = document.getElementById('add-nome').value.trim(); const area = document.getElementById('add-area').value; const prio = parseInt(document.getElementById('add-prio').value);
             if(!nome) return alert("Insira o nome da tarefa."); const week = window.state.weeks.find(w => w.week === window.activeWeek);
@@ -723,7 +748,7 @@
         document.getElementById('confirm-delete-btn').onclick = function() { if(window.pendingDeleteAction) { window.pushState(); const week = window.state.weeks.find(w => w.week === window.pendingDeleteAction.weekIdx); if(week) { week.tasks.splice(window.pendingDeleteAction.taskIdx, 1); window.triggerSave(); window.updateUI(); window.showToast("Tarefa removida."); } window.pendingDeleteAction = null; window.closeModal('delete'); } };
 
         // Notas e Anki
-        window.parseNotesLinks = function() { const text = document.getElementById('notes-textarea').value; const links = text.match(/(https?:\/\/[^\s]+)/g); const container = document.getElementById('notes-links-container'); if (links && links.length > 0) { container.innerHTML = '<p class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Links Detectados</p><div class="flex flex-col gap-2">' + links.map(l => `<a href="${l}" target="_blank" class="bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 truncate"><i class="fas fa-external-link-alt"></i> ${l}</a>`).join('') + '</div>'; container.classList.remove('hidden'); } else { container.innerHTML = ''; container.classList.add('hidden'); } }
+        window.parseNotesLinks = function() { const text = document.getElementById('notes-textarea').value; const links = text.match(/(https?:\/\/[^\s]+)/g); const container = document.getElementById('notes-links-container'); if (links && links.length > 0) { container.innerHTML = '<p class="text-[10px] font-bold uppercase text-slate-400 tracking-widest mb-2">Links Detectados</p><div class="flex flex-col gap-2">' + links.map(l => `<a href="${l}" target="_blank" class="bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 truncate"><i class="fas fa-external-link-alt"></i> ${l}</a>`).join('') + '</div>'; container.classList.remove('hidden'); } else { container.innerHTML = ''; container.classList.add('hidden'); } }
         window.openNotesModal = function(taskId) { window.activeNotesTaskId = taskId; window.ensureProgress(taskId); document.getElementById('notes-textarea').value = window.state.progress[taskId].notes || ''; window.parseNotesLinks(); window.openModal('notes'); }
         window.closeNotesModal = function() { window.activeNotesTaskId = null; window.closeModal('notes'); }
         window.saveNotes = function() { window.pushState(); if(window.activeNotesTaskId) { window.state.progress[window.activeNotesTaskId].notes = document.getElementById('notes-textarea').value; window.triggerSave(); window.showToast('Anotação salva'); } window.closeNotesModal(); }
@@ -818,8 +843,8 @@
         // ----------------------------------------------------------------------
         window.switchView = function(viewName) {
             window.activeView = viewName;
-            ['nav-dashboard', 'nav-search', 'nav-homepage'].forEach(id => { const el = document.getElementById(id); if (el) { el.classList.remove('bg-black', 'text-white', 'border-transparent'); el.classList.add('bg-white', 'text-slate-600', 'border-slate-200'); } });
-            const activeEl = document.getElementById(`nav-${viewName}`); if (activeEl) { activeEl.classList.remove('bg-white', 'text-slate-600', 'border-slate-200'); activeEl.classList.add('bg-black', 'text-white', 'border-transparent'); }
+            ['nav-dashboard', 'nav-search', 'nav-homepage'].forEach(id => { const el = document.getElementById(id); if (el) { el.classList.remove('bg-black', 'text-white', 'border-transparent', 'shadow-md'); el.classList.add('bg-white', 'text-slate-600', 'border-slate-200'); } });
+            const activeEl = document.getElementById(`nav-${viewName}`); if (activeEl) { activeEl.classList.remove('bg-white', 'text-slate-600', 'border-slate-200'); activeEl.classList.add('bg-black', 'text-white', 'border-transparent', 'shadow-md'); }
             if(viewName !== 'week') window.activeWeek = 0; 
             window.updateUI();
         }
@@ -833,7 +858,7 @@
                 let statusClass = done === w.tasks.length && w.tasks.length > 0 ? "bg-emerald-50 text-emerald-900 border-l-4 border-emerald-500" : done > 0 ? "bg-amber-50 text-amber-900 border-l-4 border-amber-400" : "bg-white text-slate-600 border-l-4 border-transparent hover:bg-slate-50";
                 const dateRange = window.getWeekDateRange(w.week);
                 
-                nav.innerHTML += `<div onclick="window.activeWeek=${w.week}; window.switchView('week');" class="px-4 py-3.5 rounded-xl mb-2 cursor-pointer transition-all border border-slate-200 ${statusClass} ${active} flex justify-between items-center" ondragover="window.handleDragOverWeek(event)" ondragleave="window.handleDragLeaveWeek(event)" ondrop="window.handleDropWeek(event, ${w.week})"><div><span class="block text-[11px] font-black uppercase tracking-wide opacity-80 pointer-events-none">Semana ${w.week}</span><span class="text-[9px] text-slate-500 font-mono mt-0.5 block font-medium pointer-events-none">${dateRange}</span></div><span class="text-xs font-black bg-white/60 px-2 py-1 rounded shadow-sm pointer-events-none">${pct}%</span></div>`;
+                nav.innerHTML += `<div onclick="window.activeWeek=${w.week}; window.switchView('week');" class="px-4 py-3.5 rounded-xl mb-2 cursor-pointer transition-all border border-slate-200 ${statusClass} ${active} flex justify-between items-center" ondragover="window.handleDragOverWeek(event)" ondragleave="window.handleDragLeaveWeek(event)" ondrop="window.handleDropWeek(event, ${w.week})"><div><span class="block text-[11px] font-bold uppercase tracking-wide opacity-80 pointer-events-none">Semana ${w.week}</span><span class="text-[9px] text-slate-500 font-mono mt-0.5 block font-medium pointer-events-none">${dateRange}</span></div><span class="text-xs font-bold bg-white/60 px-2 py-1 rounded shadow-sm pointer-events-none">${pct}%</span></div>`;
             });
         }
 
@@ -846,29 +871,37 @@
             if(currW && currW.timeSlots) {
                 currW.timeSlots.forEach((slot, sIdx) => {
                     const cell = currW.agenda ? currW.agenda[`d${dayIdx}_s${sIdx}`] : null; const txt = cell ? cell.text : '- Estudo/Livre -';
-                    agendaHtml += `<div class="flex items-start gap-4 timeline-item"><div class="text-[10px] font-bold font-mono text-slate-400 mt-1 w-20 shrink-0">${slot}</div><div class="font-bold text-sm text-slate-800 dark:text-white bg-white dark:bg-cm-mid px-4 py-2 border border-slate-200 dark:border-transparent rounded-xl flex-1 shadow-sm break-words" style="${cell && cell.color ? `--agenda-color: ${cell.color};` : ''}">${txt}</div></div>`;
+                    agendaHtml += `<div class="flex items-start gap-4 timeline-item"><div class="text-[10px] font-bold font-mono text-slate-500 mt-1 w-20 shrink-0">${slot}</div><div class="font-bold text-sm text-slate-900 dark:text-white bg-white dark:bg-cm-mid px-4 py-2 border border-slate-200 dark:border-transparent rounded-xl flex-1 shadow-sm break-words" style="${cell && cell.color ? `--agenda-color: ${cell.color};` : ''}">${txt}</div></div>`;
                 });
             }
 
-            let html = `<div class="max-w-4xl mx-auto fade-enter"><div class="mb-10"><h1 class="text-4xl font-serif text-slate-900 dark:text-white tracking-tight">Bom dia, ${nome}!</h1><p class="text-slate-500 dark:text-cm-muted mt-2 text-lg">Aqui está o seu painel de comando de hoje.</p></div><div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10"><div class="card-ui p-6 flex flex-col justify-center items-center text-center"><div class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Semana Atual</div><div class="text-xl font-black text-blue-500 flex items-center gap-2"><i class="fas fa-calendar-week"></i> Semana ${currW?currW.week:''}</div></div><div class="card-ui p-6 flex flex-col justify-center items-center text-center"><div class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Questões Hoje</div><div class="text-3xl font-black text-green-500 flex items-center gap-2">${window.state.dailyStats[window.getTodayStr()]||0}</div></div><div class="card-ui p-6 flex flex-col justify-center items-center text-center bg-black text-white dark:bg-cm-green dark:text-cm-dark border-transparent cursor-pointer hover:scale-105 transition shadow-md" onclick="window.startPomoTask('avulso', 'Foco Livre')"><i class="fas fa-play text-2xl mb-2 text-blue-400 dark:text-cm-dark"></i><div class="font-bold text-sm">Foco Livre</div></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><div><h3 class="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2"><i class="far fa-clock"></i> A Linha do Tempo (Hoje)</h3><div class="card-ui p-8 pt-10">${agendaHtml}<button onclick="window.switchView('week')" class="w-full text-xs font-bold text-blue-600 hover:underline mt-4 text-center">Editar grade (Aba Semanas)</button></div></div><div><h3 class="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2"><i class="fas fa-tasks"></i> Foco Principal (Sem. ${currW?currW.week:''})</h3><div class="space-y-3">`;
-            todayTasks.slice(0, 6).forEach(t => { html += `<div class="card-ui p-4 flex items-center gap-3 ${window.getPrioClass(t.prioridade, t.tipo)} cursor-pointer" onclick="window.activeWeek=${currW?currW.week:1}; window.switchView('week');"><div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-cm-dark2 flex items-center justify-center text-slate-400 shrink-0"><i class="fas fa-arrow-right"></i></div><div class="min-w-0"><div class="font-bold text-sm text-slate-800 dark:text-white leading-tight truncate">${t.subject}</div><span class="${window.getCategoryColor(t.category)} text-[8px] uppercase font-bold px-1.5 rounded mt-1 inline-block">${t.category}</span></div></div>`; });
+            let html = `<div class="max-w-4xl mx-auto fade-enter"><div class="mb-10"><h1 class="text-4xl font-serif text-slate-900 dark:text-white tracking-tight">Bom dia, ${nome}!</h1><p class="text-slate-500 dark:text-cm-muted mt-2 text-lg">Aqui está o seu painel de comando de hoje.</p></div><div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10"><div class="card-shadow bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-center items-center text-center"><div class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Semana Atual</div><div class="text-xl font-bold text-blue-600 flex items-center gap-2"><i class="fas fa-calendar-week"></i> Semana ${currW?currW.week:''}</div></div><div class="card-shadow bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-center items-center text-center"><div class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Questões Hoje</div><div class="text-3xl font-bold text-green-500 flex items-center gap-2">${window.state.dailyStats[window.getTodayStr()]||0}</div></div><div class="card-shadow p-6 rounded-2xl flex flex-col justify-center items-center text-center bg-black text-white dark:bg-cm-green dark:text-cm-dark border-transparent cursor-pointer hover:scale-105 transition" onclick="window.startPomoTask('avulso', 'Foco Livre')"><i class="fas fa-play text-2xl mb-2 text-blue-400 dark:text-cm-dark"></i><div class="font-bold text-sm">Foco Livre</div></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><div><h3 class="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2"><i class="far fa-clock"></i> A Linha do Tempo (Hoje)</h3><div class="card-shadow bg-white rounded-2xl border border-slate-200 p-8 pt-10">${agendaHtml}<button onclick="window.switchView('week')" class="w-full text-xs font-bold text-blue-600 hover:underline mt-4 text-center">Editar grade (Aba Semanas)</button></div></div><div><h3 class="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2"><i class="fas fa-tasks"></i> Foco Principal (Sem. ${currW?currW.week:''})</h3><div class="space-y-3">`;
+            todayTasks.slice(0, 6).forEach(t => { html += `<div class="card-shadow bg-white border border-slate-200 rounded-xl p-4 flex items-center gap-3 ${window.getPrioClass(t.prioridade, t.tipo)} cursor-pointer" onclick="window.activeWeek=${currW?currW.week:1}; window.switchView('week');"><div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-cm-dark2 flex items-center justify-center text-slate-400 shrink-0"><i class="fas fa-arrow-right"></i></div><div class="min-w-0"><div class="font-bold text-sm text-slate-900 dark:text-white leading-tight truncate">${t.subject}</div><span class="${window.getCategoryColor(t.category)} text-[8px] uppercase font-bold px-1.5 rounded border">${t.category}</span></div></div>`; });
             if(todayTasks.length===0) html+=`<div class="text-slate-400 text-sm text-center py-10 italic">Tudo concluído para esta semana! Descanse.</div>`;
             html += `</div></div></div></div>`; content.innerHTML = html;
         }
 
         window.renderWeek = function() {
-            const w = window.state.weeks.find(d => d.week === window.activeWeek); const content = document.getElementById('content-area'); if(!w) return; const days = window.getWeekDates(window.activeWeek);
+            const w = window.state.weeks.find(d => d.week === window.activeWeek); 
+            const content = document.getElementById('content-area'); 
+            if(!w) {
+                content.innerHTML = `<div class="text-center py-20 text-slate-500">Semana não encontrada.</div>`;
+                return;
+            }
+            const days = window.getWeekDates(window.activeWeek);
+            const timeSlots = w.timeSlots || ["08:00 - 12:00", "14:00 - 18:00", "18:00 - 22:00"];
+            const agenda = w.agenda || {};
             
-            let agendaHtml = `<div class="mb-12 fade-enter"><div class="flex justify-between items-center mb-6"><div><h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Semana ${w.week}</h2><span class="text-sm font-bold text-slate-500 dark:text-emerald-500">${w.phase}</span></div><button onclick="window.openModal('replica-agenda')" class="text-xs font-bold bg-white dark:bg-cm-mid border border-slate-200 dark:border-gray-700 px-4 py-2 rounded-xl shadow-sm hover:border-blue-500 transition"><i class="fas fa-copy mr-1 text-blue-500"></i> Configurar Grade</button></div><div class="overflow-x-auto rounded-xl shadow-sm border border-slate-200 dark:border-gray-800 bg-white dark:bg-cm-dark2"><table class="agenda-table min-w-[700px]"><thead><tr><th class="p-3 w-24 bg-slate-900 text-white border-none">Horário</th>${days.map(d=>`<th class="p-3 bg-slate-900 text-white border-l border-slate-700 text-center"><div class="font-bold text-sm uppercase tracking-widest">${d.name}</div><div class="text-[10px] text-slate-400 font-mono mt-1">${d.date}</div></th>`).join('')}</tr></thead><tbody>`;
-            w.timeSlots.forEach((slot, sIdx) => {
+            let agendaHtml = `<div class="mb-12 fade-enter"><div class="flex justify-between items-center mb-6"><div><h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Semana ${w.week}</h2><span class="text-sm font-bold text-slate-500 dark:text-emerald-500">${w.phase}</span></div><button onclick="window.openModal('replica-agenda')" class="text-xs font-bold bg-white dark:bg-cm-mid border border-slate-200 dark:border-gray-700 px-4 py-2 rounded-xl shadow-sm hover:border-blue-500 transition"><i class="fas fa-copy mr-1 text-blue-600"></i> Configurar Grade</button></div><div class="overflow-x-auto rounded-xl shadow-sm border border-slate-200 dark:border-gray-800 bg-white dark:bg-cm-dark2"><table class="agenda-table min-w-[700px]"><thead><tr><th class="p-3 w-24 bg-slate-900 text-white border-none">Horário</th>${days.map(d=>`<th class="p-3 bg-slate-900 text-white border-l border-slate-700 text-center"><div class="font-bold text-sm uppercase tracking-widest">${d.name}</div><div class="text-[10px] text-slate-400 font-mono mt-1">${d.date}</div></th>`).join('')}</tr></thead><tbody>`;
+            timeSlots.forEach((slot, sIdx) => {
                 agendaHtml += `<tr><td class="p-0 w-24 align-middle time-col relative border-r border-slate-200 dark:border-gray-800 bg-slate-50/50 dark:bg-cm-mid/30"><div class="w-full text-center font-mono text-[10px] font-bold outline-none p-3" contenteditable="true" onblur="window.updateTimeSlot(${window.activeWeek}, ${sIdx}, this.innerText)">${slot}</div><div class="row-controls"><button onclick="window.addAgendaRowAt(${window.activeWeek}, ${sIdx})" class="text-[10px] text-blue-600 hover:bg-blue-50 py-1"><i class="fas fa-plus"></i></button><button onclick="window.requestRemoveAgendaRow(${window.activeWeek}, ${sIdx})" class="text-[10px] text-red-600 hover:bg-red-50 py-1"><i class="fas fa-minus"></i></button></div></td>`;
-                days.forEach((d, dIdx) => { const c = w.agenda[`${d.key}_s${sIdx}`] || {}; const bgColor = c.color || '#ffffff'; agendaHtml += `<td class="p-0 h-16 relative"><div class="agenda-cell w-full h-full p-2 outline-none flex items-center justify-center text-xs font-medium text-slate-700 dark:text-white" style="background-color: ${bgColor}; --agenda-color: ${bgColor};" contenteditable="true" onblur="window.updateAgendaCell(${window.activeWeek}, '${d.key}', ${sIdx}, this.innerText)">${c.text||''}</div></td>`; }); agendaHtml += `</tr>`;
+                days.forEach((d, dIdx) => { const c = agenda[`${d.key}_s${sIdx}`] || {}; const bgColor = c.color || '#ffffff'; agendaHtml += `<td class="p-0 h-16 relative"><div class="agenda-cell w-full h-full p-2 outline-none flex items-center justify-center text-xs font-medium text-slate-800 dark:text-white" style="background-color: ${bgColor}; --agenda-color: ${bgColor};" contenteditable="true" onblur="window.updateAgendaCell(${window.activeWeek}, '${d.key}', ${sIdx}, this.innerText)">${c.text||''}</div></td>`; }); agendaHtml += `</tr>`;
             });
-            agendaHtml += `</tbody></table></div><p class="text-[10px] text-slate-400 mt-2"><i class="fas fa-info-circle text-blue-400"></i> Edite a tabela acima para configurar as suas aulas. As alterações são guardadas na nuvem.</p></div>`;
+            agendaHtml += `</tbody></table></div><p class="text-[10px] text-slate-500 mt-2"><i class="fas fa-info-circle text-blue-500"></i> Edite a tabela acima para configurar as suas aulas. As alterações são guardadas na nuvem.</p></div>`;
 
-            let filtersHtml = `<div class="flex flex-wrap gap-2 mb-4"><button onclick="window.setWeekFilter('all')" class="px-4 py-2 rounded-xl text-xs font-bold border transition shadow-sm ${window.weekFilter==='all'?'bg-slate-900 text-white border-slate-900':'bg-white text-slate-500 border-slate-200 hover:bg-slate-50 dark:bg-cm-dark2'}">Todas</button><button onclick="window.setWeekFilter('pending')" class="px-4 py-2 rounded-xl text-xs font-bold border transition shadow-sm ${window.weekFilter==='pending'?'bg-slate-900 text-white border-slate-900':'bg-white text-slate-500 border-slate-200 hover:bg-slate-50 dark:bg-cm-dark2'}">Pendentes</button><button onclick="window.setWeekFilter('done')" class="px-4 py-2 rounded-xl text-xs font-bold border transition shadow-sm ${window.weekFilter==='done'?'bg-emerald-600 text-white border-emerald-600':'bg-white text-slate-500 border-slate-200 hover:bg-slate-50 dark:bg-cm-dark2'}">Concluídas</button></div>`;
+            let filtersHtml = `<div class="flex flex-wrap gap-2 mb-4"><button onclick="window.setWeekFilter('all')" class="filter-chip shadow-sm ${window.weekFilter==='all'?'active':''}">Todas</button><button onclick="window.setWeekFilter('pending')" class="filter-chip shadow-sm ${window.weekFilter==='pending'?'active':''}">Pendentes</button><button onclick="window.setWeekFilter('done')" class="filter-chip shadow-sm ${window.weekFilter==='done'?'active':''}">Concluídas</button></div>`;
 
-            let tasksHtml = `<div class="mb-4 flex justify-between items-center"><h3 class="text-sm font-bold uppercase tracking-widest text-slate-500"><i class="fas fa-bullseye text-blue-500 mr-1"></i> Tarefas da Semana (${w.tasks.length})</h3><div class="flex items-center gap-1 bg-white p-1 rounded-xl shadow-sm border border-slate-200 dark:bg-cm-dark2 dark:border-gray-800"><button onclick="window.toggleLoFi()" id="lofi-btn" class="text-slate-400 font-bold text-sm px-3 py-1.5 rounded-lg hover:text-blue-500 transition flex items-center gap-2"><i class="fas fa-headphones-alt"></i> Lo-Fi</button></div></div>${filtersHtml}<div class="grid gap-4 fade-enter">`;
+            let tasksHtml = `<div class="mb-4 flex justify-between items-center"><h3 class="text-sm font-bold uppercase tracking-widest text-slate-500"><i class="fas fa-bullseye text-blue-600 mr-1"></i> Tarefas da Semana (${w.tasks.length})</h3><div class="flex items-center gap-1 bg-white p-1 rounded-xl shadow-sm border border-slate-200 dark:bg-cm-dark2 dark:border-gray-800"><button onclick="window.toggleLoFi()" id="lofi-btn" class="text-slate-400 font-bold text-sm px-3 py-1.5 rounded-lg hover:text-blue-600 transition flex items-center gap-2"><i class="fas fa-headphones-alt"></i> Lo-Fi</button></div></div>${filtersHtml}<div class="grid gap-4 fade-enter">`;
             
             let tasksToRender = w.tasks;
             if(window.weekFilter === 'pending') tasksToRender = tasksToRender.filter(t => !window.state.progress[t.id]?.doneStatus);
@@ -887,15 +920,15 @@
                 if (isPomoActiveForThis) {
                     let displayTime = "50:00"; const m = Math.floor(window.pomoTime / 60); const s = window.pomoTime % 60; displayTime = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
                     let pct1 = 0, pct2 = 0, pct3 = 0; if (window.pomoPhase === 'aula') pct1 = ((window.pomoTotalTime - window.pomoTime) / window.pomoTotalTime) * 100; else if (window.pomoPhase === 'descanso') { pct1 = 100; pct2 = ((window.pomoTotalTime - window.pomoTime) / window.pomoTotalTime) * 100; } else if (window.pomoPhase === 'questoes') { pct1 = 100; pct2 = 100; pct3 = ((window.pomoTotalTime - window.pomoTime) / window.pomoTotalTime) * 100; }
-                    pomoUI = `<div class="mt-4 bg-slate-50 dark:bg-cm-mid border border-slate-200 dark:border-gray-800 p-5 rounded-2xl w-full shadow-inner"><div class="flex justify-between text-[9px] font-black uppercase tracking-widest mb-3"><span id="pomo-lbl-1-${t.id}" class="${window.pomoPhase === 'aula' ? 'text-blue-600' : 'text-slate-400'}"><i class="fas fa-book-open"></i> Aula</span><span id="pomo-lbl-2-${t.id}" class="${window.pomoPhase === 'descanso' ? 'text-amber-500' : 'text-slate-400'}"><i class="fas fa-coffee"></i> Pausa</span><span id="pomo-lbl-3-${t.id}" class="${window.pomoPhase === 'questoes' ? 'text-emerald-600' : 'text-slate-400'}"><i class="fas fa-pen"></i> Questões</span></div><div class="flex gap-2 h-2 mb-5"><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="pomo-bar-1-${t.id}" class="h-full bg-blue-500 transition-all duration-1000" style="width: ${pct1}%"></div></div><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="pomo-bar-2-${t.id}" class="h-full bg-amber-400 transition-all duration-1000" style="width: ${pct2}%"></div></div><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="pomo-bar-3-${t.id}" class="h-full bg-emerald-500 transition-all duration-1000" style="width: ${pct3}%"></div></div></div><div class="flex justify-between items-center"><div id="pomo-display-${t.id}" class="font-mono font-black text-4xl text-slate-800 dark:text-white tracking-tight">${displayTime}</div><div class="flex gap-2 items-center"><button id="pomo-btn-play-${t.id}" onclick="window.pomoToggle('${t.id}')" class="w-10 h-10 flex items-center justify-center text-white rounded-xl shadow-md ${window.isPomoRunning ? 'bg-red-500' : 'bg-slate-900 dark:bg-cm-green'}">${window.isPomoRunning ? '<i class="fas fa-pause text-xs"></i>' : '<i class="fas fa-play text-xs ml-0.5"></i>'}</button><button onclick="window.pomoSkip()" class="px-4 py-2.5 bg-white dark:bg-cm-dark2 border border-slate-200 text-slate-700 dark:text-gray-300 rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-slate-50 transition shadow-sm">Pular <i class="fas fa-forward"></i></button><button onclick="window.pomoStop()" class="px-4 py-2.5 bg-red-50 border border-red-200 text-red-600 rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-red-100 transition shadow-sm"><i class="fas fa-times"></i> Fechar</button></div></div></div>`;
+                    pomoUI = `<div class="mt-4 bg-slate-50 dark:bg-cm-mid border border-slate-200 dark:border-gray-800 p-5 rounded-2xl w-full shadow-inner"><div class="flex justify-between text-[9px] font-bold uppercase tracking-widest mb-3"><span id="pomo-lbl-1-${t.id}" class="${window.pomoPhase === 'aula' ? 'text-blue-600' : 'text-slate-500'}"><i class="fas fa-book-open"></i> Aula</span><span id="pomo-lbl-2-${t.id}" class="${window.pomoPhase === 'descanso' ? 'text-amber-500' : 'text-slate-500'}"><i class="fas fa-coffee"></i> Pausa</span><span id="pomo-lbl-3-${t.id}" class="${window.pomoPhase === 'questoes' ? 'text-emerald-600' : 'text-slate-500'}"><i class="fas fa-pen"></i> Questões</span></div><div class="flex gap-2 h-2 mb-5"><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="pomo-bar-1-${t.id}" class="h-full bg-blue-500 transition-all duration-1000" style="width: ${pct1}%"></div></div><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="pomo-bar-2-${t.id}" class="h-full bg-amber-400 transition-all duration-1000" style="width: ${pct2}%"></div></div><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="pomo-bar-3-${t.id}" class="h-full bg-emerald-500 transition-all duration-1000" style="width: ${pct3}%"></div></div></div><div class="flex justify-between items-center"><div id="pomo-display-${t.id}" class="font-mono font-bold text-4xl text-slate-900 dark:text-white tracking-tight">${displayTime}</div><div class="flex gap-2 items-center"><button id="pomo-btn-play-${t.id}" onclick="window.pomoToggle('${t.id}')" class="w-10 h-10 flex items-center justify-center text-white rounded-xl shadow-md ${window.isPomoRunning ? 'bg-red-500' : 'bg-slate-900 dark:bg-cm-green'}">${window.isPomoRunning ? '<i class="fas fa-pause text-xs"></i>' : '<i class="fas fa-play text-xs ml-0.5"></i>'}</button><button onclick="window.pomoSkip()" class="px-4 py-2.5 bg-white dark:bg-cm-dark2 border border-slate-200 text-slate-700 dark:text-gray-300 rounded-xl text-[10px] font-bold uppercase tracking-wider hover:bg-slate-50 transition shadow-sm">Pular <i class="fas fa-forward"></i></button><button onclick="window.pomoStop()" class="px-4 py-2.5 bg-red-50 border border-red-200 text-red-600 rounded-xl text-[10px] font-bold uppercase tracking-wider hover:bg-red-100 transition shadow-sm"><i class="fas fa-times"></i> Fechar</button></div></div></div>`;
                 }
 
                 tasksHtml += `<div class="card-shadow p-5 flex flex-col lg:flex-row gap-5 bg-white dark:bg-cm-dark2 border border-slate-200 dark:border-gray-800 rounded-2xl relative group draggable-item ${prioClass} ${isChecked?'opacity-60 bg-slate-50 dark:bg-slate-800':''}" draggable="true" ondragstart="window.handleDragStart(event, ${window.activeWeek}, ${idx})" ondragover="window.handleDragOverTask(event)" ondragleave="window.handleDragLeaveTask(event)" ondrop="window.handleDropTask(event, ${idx})">
                     <div class="flex items-center gap-4 flex-1 min-w-0">
                         <div class="cursor-move text-slate-300 hover:text-blue-500 drag-handle transition shrink-0"><i class="fas fa-grip-vertical text-lg"></i></div>
-                        <div class="relative shrink-0"><input type="checkbox" class="peer appearance-none w-6 h-6 border-2 border-slate-300 rounded-lg checked:bg-black checked:border-black transition cursor-pointer" ${isChecked?'checked':''} onchange="window.toggleTask('${t.id}')"><i class="fas fa-check text-white absolute top-1 left-1 pointer-events-none opacity-0 peer-checked:opacity-100 text-xs transition"></i></div>
+                        <div class="relative shrink-0"><input type="checkbox" class="peer appearance-none w-6 h-6 border-2 border-slate-300 rounded-lg checked:bg-slate-900 checked:border-slate-900 transition cursor-pointer" ${isChecked?'checked':''} onchange="window.toggleTask('${t.id}')"><i class="fas fa-check text-white absolute top-1 left-1 pointer-events-none opacity-0 peer-checked:opacity-100 text-xs transition"></i></div>
                         <div class="flex-1 cursor-pointer min-w-0" onclick="window.toggleTaskDetails('${t.id}', event)">
-                            <div class="font-bold text-slate-800 dark:text-white text-lg leading-snug truncate outline-none task-edit-subject" contenteditable="true" onblur="window.updateTaskName(${window.activeWeek}, ${idx}, this.innerText)">${t.subject}</div>
+                            <div class="font-bold text-slate-900 dark:text-white text-lg leading-snug truncate outline-none task-edit-subject" contenteditable="true" onblur="window.updateTaskName(${window.activeWeek}, ${idx}, this.innerText)">${t.subject}</div>
                             <div class="flex items-center gap-2 mt-1.5">
                                 <span class="${window.getCategoryColor(t.category)} text-[8px] font-bold uppercase px-1.5 rounded border">${t.category}</span>
                                 <span class="bg-slate-100 dark:bg-cm-mid text-slate-500 text-[8px] font-bold uppercase px-1.5 rounded border border-slate-200 dark:border-gray-700">${labels}</span>
@@ -906,9 +939,9 @@
                     
                     <div class="flex items-center gap-4 shrink-0 flex-wrap lg:flex-nowrap">
                         <div class="flex items-center gap-3 bg-slate-50 dark:bg-slate-800 p-2.5 rounded-xl border border-slate-200 dark:border-gray-700 shadow-inner">
-                            <div class="text-center"><span class="text-[9px] font-bold text-slate-500 uppercase block tracking-wider mb-1">Feitas</span><input type="number" id="done_inp_${t.id}" value="${doneVal || ''}" onblur="window.saveTaskQuestions('${t.id}', 'done', this.value)" oninput="window.calcTempAcc('${t.id}')" class="w-10 bg-transparent text-center font-bold text-slate-800 dark:text-white outline-none border-b-2 border-slate-300 focus:border-blue-500 py-0.5 transition" placeholder="-"></div>
-                            <div class="text-center"><span class="text-[9px] font-bold text-slate-500 uppercase block tracking-wider mb-1">Acertos</span><input type="number" id="corr_inp_${t.id}" value="${correctVal || ''}" onblur="window.saveTaskQuestions('${t.id}', 'correct', this.value)" oninput="window.calcTempAcc('${t.id}')" class="w-10 bg-transparent text-center font-bold text-slate-800 dark:text-white outline-none border-b-2 border-slate-300 focus:border-blue-500 py-0.5 transition" placeholder="-"></div>
-                            <div class="pl-3 border-l border-slate-200 dark:border-gray-700 text-center min-w-[3.5rem]"><span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">%</span><span id="pct_span_${t.id}" class="text-base font-black ${accColor}">${acc}%</span></div>
+                            <div class="text-center"><span class="text-[9px] font-bold text-slate-500 uppercase block tracking-wider mb-1">Feitas</span><input type="number" id="done_inp_${t.id}" value="${doneVal || ''}" onblur="window.saveTaskQuestions('${t.id}', 'done', this.value)" oninput="window.calcTempAcc('${t.id}')" class="w-10 bg-transparent text-center font-bold text-slate-900 dark:text-white outline-none border-b-2 border-slate-300 focus:border-blue-500 py-0.5 transition" placeholder="-"></div>
+                            <div class="text-center"><span class="text-[9px] font-bold text-slate-500 uppercase block tracking-wider mb-1">Acertos</span><input type="number" id="corr_inp_${t.id}" value="${correctVal || ''}" onblur="window.saveTaskQuestions('${t.id}', 'correct', this.value)" oninput="window.calcTempAcc('${t.id}')" class="w-10 bg-transparent text-center font-bold text-slate-900 dark:text-white outline-none border-b-2 border-slate-300 focus:border-blue-500 py-0.5 transition" placeholder="-"></div>
+                            <div class="pl-3 border-l border-slate-200 dark:border-gray-700 text-center min-w-[3.5rem]"><span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">%</span><span id="pct_span_${t.id}" class="text-lg font-bold ${accColor}">${acc}%</span></div>
                         </div>
                         
                         <div class="flex items-center gap-2 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-gray-800 pt-3 lg:pt-0 lg:pl-4 w-full lg:w-auto">
@@ -948,32 +981,32 @@
                 else break;
             }
 
-            let html = `<h2 class="text-3xl font-black text-slate-800 dark:text-white mb-6 tracking-tight flex items-center gap-3"><i class="fas fa-chart-pie text-blue-600"></i> Dashboard & Metas</h2>`;
+            let html = `<h2 class="text-3xl font-black text-slate-900 dark:text-white mb-6 tracking-tight flex items-center gap-3"><i class="fas fa-chart-pie text-blue-600"></i> Dashboard & Metas</h2>`;
             
             // BLOCO 1: KPIs
             html += `<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                 <div class="bg-white dark:bg-cm-dark2 p-5 rounded-2xl border border-slate-200 dark:border-gray-800 shadow-sm">
-                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1 flex justify-between"><span>Tempo de Foco</span> <i class="fas fa-stopwatch text-blue-500"></i></div>
-                    <div class="text-2xl font-black text-slate-800 dark:text-white">${hrs}<span class="text-sm text-slate-400 font-medium">h</span> ${mins}<span class="text-sm text-slate-400 font-medium">m</span></div>
+                    <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1 flex justify-between"><span>Tempo de Foco</span> <i class="fas fa-stopwatch text-blue-500"></i></div>
+                    <div class="text-2xl font-bold text-slate-900 dark:text-white">${hrs}<span class="text-sm text-slate-500 font-medium">h</span> ${mins}<span class="text-sm text-slate-500 font-medium">m</span></div>
                 </div>
                 <div class="bg-white dark:bg-cm-dark2 p-5 rounded-2xl border border-slate-200 dark:border-gray-800 shadow-sm">
-                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1 flex justify-between"><span>Questões Feitas</span> <i class="fas fa-pen-alt text-emerald-500"></i></div>
-                    <div class="text-2xl font-black text-slate-800 dark:text-white">${totalQuestões}</div>
+                    <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1 flex justify-between"><span>Questões Feitas</span> <i class="fas fa-pen-alt text-emerald-500"></i></div>
+                    <div class="text-2xl font-bold text-slate-900 dark:text-white">${totalQuestões}</div>
                 </div>
                 <div class="bg-white dark:bg-cm-dark2 p-5 rounded-2xl border border-slate-200 dark:border-gray-800 shadow-sm">
-                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1 flex justify-between"><span>Precisão Média</span> <i class="fas fa-bullseye text-purple-500"></i></div>
-                    <div class="text-2xl font-black text-slate-800 dark:text-white">${precisao}%</div>
+                    <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1 flex justify-between"><span>Precisão Média</span> <i class="fas fa-bullseye text-purple-500"></i></div>
+                    <div class="text-2xl font-bold text-slate-900 dark:text-white">${precisao}%</div>
                 </div>
                 <div class="bg-white dark:bg-cm-dark2 p-5 rounded-2xl border border-slate-200 dark:border-gray-800 shadow-sm">
-                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1 flex justify-between"><span>Ofensiva</span> <i class="fas fa-fire text-orange-500"></i></div>
-                    <div class="text-2xl font-black text-slate-800 dark:text-white">${streak} <span class="text-sm text-slate-400 font-medium">dias</span></div>
+                    <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1 flex justify-between"><span>Ofensiva</span> <i class="fas fa-fire text-orange-500"></i></div>
+                    <div class="text-2xl font-bold text-slate-900 dark:text-white">${streak} <span class="text-sm text-slate-500 font-medium">dias</span></div>
                 </div>
             </div>`;
             
             // BLOCO 2 & 3: Especialidades e Heatmap
             html += `<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
                 <div class="lg:col-span-2 bg-white dark:bg-cm-dark2 p-6 rounded-3xl border border-slate-200 dark:border-gray-800 shadow-sm flex flex-col">
-                    <h3 class="text-sm font-black text-slate-700 dark:text-white uppercase tracking-wider mb-6 flex items-center gap-2"><i class="fas fa-layer-group text-blue-500"></i> Domínio por Especialidade</h3>
+                    <h3 class="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider mb-6 flex items-center gap-2"><i class="fas fa-layer-group text-blue-500"></i> Domínio por Especialidade</h3>
                     <div class="space-y-5 flex-1">`;
                     
             const mapping = { "Clínica Médica": ["Clínica", "Cardiologia", "Endocrino", "Gastro", "Hemato", "Infecto", "Nefrologia", "Neuro", "Pneumo", "Psiquiatria", "Reumato", "Dermato", "Hepato", "Oftalmo", "Otorrino"], "Cirurgia": ["Cirurgia", "Urologia", "Ortopedia", "Trauma", "Cirurgia Pediátrica", "Cirurgia Plástica", "Cirurgia Vascular", "Cirurgia Torácica"], "Ginecologia e Obstetrícia": ["Ginecologia", "Obstetrícia", "Ginecologia e Obstetrícia"], "Pediatria": ["Pediatria"], "Preventiva": ["Preventiva"] };
@@ -1022,24 +1055,24 @@
 
             html += `<div class="lg:col-span-1 bg-white dark:bg-cm-dark2 p-6 rounded-3xl border border-slate-200 dark:border-gray-800 shadow-sm flex flex-col justify-between">
                 <div>
-                    <h3 class="text-sm font-black text-slate-700 dark:text-white uppercase tracking-wider mb-1 flex items-center gap-2"><i class="fas fa-fire text-orange-500"></i> Mapa de Constância</h3>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-6">Últimos 30 dias</p>
+                    <h3 class="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider mb-1 flex items-center gap-2"><i class="fas fa-fire text-orange-500"></i> Mapa de Constância</h3>
+                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-6">Últimos 30 dias</p>
                 </div>
                 <div class="flex flex-wrap gap-1.5 justify-start content-start flex-1">${heatmapHtml}</div>
-                <div class="flex items-center gap-2 mt-4 text-[9px] text-slate-400 font-bold uppercase tracking-widest justify-end">Menos <div class="w-3 h-3 rounded-sm bg-slate-100 dark:bg-slate-700/50"></div><div class="w-3 h-3 rounded-sm bg-emerald-400"></div><div class="w-3 h-3 rounded-sm bg-emerald-700"></div> Mais</div>
+                <div class="flex items-center gap-2 mt-4 text-[9px] text-slate-500 font-bold uppercase tracking-widest justify-end">Menos <div class="w-3 h-3 rounded-sm bg-slate-100 dark:bg-slate-700/50"></div><div class="w-3 h-3 rounded-sm bg-emerald-400"></div><div class="w-3 h-3 rounded-sm bg-emerald-700"></div> Mais</div>
             </div></div>`;
 
             // BLOCO 4 & 5: Gráfico e Resumo da Semana
-            const qCanvas = `<div class="bg-white dark:bg-cm-dark2 p-6 rounded-3xl border border-slate-200 dark:border-gray-800 shadow-sm relative h-[280px] w-full flex flex-col"><h3 class="font-black text-sm text-slate-700 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2"><i class="fas fa-chart-line text-blue-500"></i> Evolução de Questões (14 dias)</h3><div class="relative flex-1 w-full"><canvas id="chart-questions"></canvas></div></div>`;
+            const qCanvas = `<div class="bg-white dark:bg-cm-dark2 p-6 rounded-3xl border border-slate-200 dark:border-gray-800 shadow-sm relative h-[280px] w-full flex flex-col"><h3 class="font-bold text-sm text-slate-800 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2"><i class="fas fa-chart-line text-blue-500"></i> Evolução de Questões (14 dias)</h3><div class="relative flex-1 w-full"><canvas id="chart-questions"></canvas></div></div>`;
             
             const currW = window.state.weeks.find(w => w.week === window.activeWeek) || window.state.weeks[0];
-            let weekHtml = `<div class="bg-white dark:bg-cm-dark2 p-6 rounded-3xl border border-slate-200 dark:border-gray-800 shadow-sm h-[280px] flex flex-col"><div class="flex justify-between items-center mb-4"><h3 class="font-black text-sm text-slate-700 dark:text-white uppercase tracking-wider flex items-center gap-2"><i class="fas fa-bullseye text-green-500"></i> Semana Atual (${currW ? currW.week : ''})</h3><button onclick="window.switchView('week')" class="text-[10px] font-bold bg-slate-900 text-white px-3 py-1.5 rounded-lg hover:bg-slate-700 transition shadow-sm">Estudar</button></div><div class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-2.5">`;
+            let weekHtml = `<div class="bg-white dark:bg-cm-dark2 p-6 rounded-3xl border border-slate-200 dark:border-gray-800 shadow-sm h-[280px] flex flex-col"><div class="flex justify-between items-center mb-4"><h3 class="font-bold text-sm text-slate-800 dark:text-white uppercase tracking-wider flex items-center gap-2"><i class="fas fa-bullseye text-green-500"></i> Semana Atual (${currW ? currW.week : ''})</h3><button onclick="window.switchView('week')" class="text-[10px] font-bold bg-slate-900 text-white px-3 py-1.5 rounded-lg hover:bg-slate-700 transition shadow-sm">Estudar</button></div><div class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-2.5">`;
             
             if (currW) {
-                if(currW.tasks.length === 0) weekHtml += `<div class="text-xs text-slate-400 italic">Nenhuma tarefa.</div>`;
+                if(currW.tasks.length === 0) weekHtml += `<div class="text-xs text-slate-500 italic">Nenhuma tarefa.</div>`;
                 currW.tasks.forEach(t => {
                     const p = window.state.progress[t.id] || {};
-                    weekHtml += `<div class="flex items-center gap-3 p-2.5 rounded-xl border ${p.doneStatus ? 'bg-slate-50 border-transparent dark:bg-slate-800/50 opacity-60' : 'bg-white border-slate-200 dark:bg-cm-mid dark:border-gray-700'}"><div class="w-5 h-5 rounded-full border-2 ${p.doneStatus ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-gray-300 dark:border-gray-600'} flex items-center justify-center text-[10px] shrink-0"><i class="fas fa-check ${p.doneStatus?'block':'hidden'}"></i></div><div class="flex-1 min-w-0"><div class="font-bold text-xs text-slate-700 dark:text-white truncate">${t.subject}</div><div class="text-[9px] uppercase tracking-widest text-slate-400 font-bold mt-0.5 truncate">${t.category}</div></div></div>`;
+                    weekHtml += `<div class="flex items-center gap-3 p-2.5 rounded-xl border ${p.doneStatus ? 'bg-slate-50 border-transparent dark:bg-slate-800/50 opacity-60' : 'bg-white border-slate-200 dark:bg-cm-mid dark:border-gray-700'}"><div class="w-5 h-5 rounded-full border-2 ${p.doneStatus ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-gray-300 dark:border-gray-600'} flex items-center justify-center text-[10px] shrink-0"><i class="fas fa-check ${p.doneStatus?'block':'hidden'}"></i></div><div class="flex-1 min-w-0"><div class="font-bold text-xs text-slate-800 dark:text-white truncate">${t.subject}</div><div class="text-[9px] uppercase tracking-widest text-slate-500 font-bold mt-0.5 truncate">${t.category}</div></div></div>`;
                 });
             }
             weekHtml += `</div></div>`;
@@ -1088,12 +1121,12 @@
 
             // Prioridades
             const prios = [{l:'Todas', v:'Todas'}, {l:'Alta (1)', v:1}, {l:'Média (2)', v:2}, {l:'Baixa (3)', v:3}, {l:'Opcional (4)', v:4}];
-            const prioHtml = `<div class="flex flex-wrap items-center gap-2 mt-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest"><i class="fas fa-filter mr-1"></i> Prioridade: ` + prios.map(p => {
+            const prioHtml = `<div class="flex flex-wrap items-center gap-2 mt-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest"><i class="fas fa-filter mr-1"></i> Prioridade: ` + prios.map(p => {
                 const activeClass = window.searchFilterPrio === p.v ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50';
                 return `<button onclick="window.toggleSearchPrio('${p.v}')" class="filter-chip shadow-sm ${activeClass}">${p.l}</button>`;
             }).join('') + `</div>`;
 
-            const html = `<div class="bg-white dark:bg-cm-dark2 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-gray-800 min-h-[600px]"><div class="mb-10"><h2 class="text-3xl font-black text-slate-800 dark:text-white mb-6 tracking-tight">Buscar Tarefas</h2><input type="text" id="global-search-input" placeholder="Digite o tema, categoria ou palavra-chave..." class="w-full text-lg p-5 border border-slate-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none bg-slate-50 dark:bg-cm-mid transition shadow-sm mb-6 font-medium dark:text-white"><div class="flex flex-col"><div class="flex flex-wrap gap-2">${filterButtonsArea}</div>${subAreaHtml}${prioHtml}</div></div><div id="search-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div></div>`;
+            const html = `<div class="bg-white dark:bg-cm-dark2 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-gray-800 min-h-[600px]"><div class="mb-10"><h2 class="text-3xl font-black text-slate-900 dark:text-white mb-6 tracking-tight">Buscar Tarefas</h2><input type="text" id="global-search-input" placeholder="Digite o tema, categoria ou palavra-chave..." class="w-full text-lg p-5 border border-slate-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none bg-slate-50 dark:bg-cm-mid transition shadow-sm mb-6 font-medium dark:text-white"><div class="flex flex-col"><div class="flex flex-wrap gap-2">${filterButtonsArea}</div>${subAreaHtml}${prioHtml}</div></div><div id="search-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div></div>`;
             content.innerHTML = html; 
             setTimeout(() => content.classList.remove('fade-enter'), 500); 
             
@@ -1110,7 +1143,7 @@
                     const textMatch = t.tema.toLowerCase().includes(lowerQ) || t.area.toLowerCase().includes(lowerQ) || t.subarea.toLowerCase().includes(lowerQ);
                     let areaMatch = true; if (window.searchFilterArea !== 'Todas') areaMatch = (areaMapping[t.area] || "Outros") === window.searchFilterArea;
                     let subMatch = true; if (window.searchFilterSub !== 'Todas') subMatch = t.subarea === window.searchFilterSub;
-                    let prioMatch = true; if (window.searchFilterPrio !== 'Todas') prioMatch = t.prioridade === window.searchFilterPrio;
+                    let prioMatch = true; if (window.searchFilterPrio !== 'Todas') prioMatch = t.prioridade == window.searchFilterPrio;
                     return textMatch && areaMatch && subMatch && prioMatch;
                 });
                 window._currentFilteredBank = filtered;
@@ -1118,12 +1151,12 @@
                 const scheduledIds = new Set();
                 window.state.weeks.forEach(w => w.tasks.forEach(t => scheduledIds.add(t.subject)));
 
-                if(filtered.length === 0) { resultsContainer.innerHTML = `<div class="col-span-full text-center py-24"><i class="fas fa-search-minus text-4xl text-slate-300 dark:text-gray-700 mb-4 block"></i><p class="text-slate-400 font-medium">Nenhuma tarefa encontrada no banco para estes filtros.</p></div>`; } 
+                if(filtered.length === 0) { resultsContainer.innerHTML = `<div class="col-span-full text-center py-24"><i class="fas fa-search-minus text-4xl text-slate-300 dark:text-gray-700 mb-4 block"></i><p class="text-slate-500 font-medium">Nenhuma tarefa encontrada no banco para estes filtros.</p></div>`; } 
                 else { 
                     resultsContainer.innerHTML = filtered.map((item, index) => { 
                         const isUsed = scheduledIds.has(item.tema);
                         const statusBadge = isUsed ? `<span class="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded text-[9px] font-bold border border-emerald-200"><i class="fas fa-check"></i> Na Agenda</span>` : `<span class="bg-slate-100 text-slate-500 px-2 py-0.5 rounded text-[9px] font-bold border border-slate-200">Não agendado</span>`;
-                        return `<div class="p-5 border border-slate-200 dark:border-gray-800 rounded-2xl bg-white dark:bg-cm-mid hover:shadow-md transition-all hover:border-blue-300 card-shadow flex flex-col justify-between items-start draggable-item" draggable="true" ondragstart="window.handleDragStartSearch(event, ${index})"><div class="flex-1 w-full"><div class="font-bold text-sm text-slate-800 dark:text-white leading-tight mb-2">${item.tema}</div><div class="flex flex-wrap items-center gap-2 mb-4"><div class="text-[9px] font-black uppercase text-slate-400 tracking-wide">${item.area}</div>${statusBadge}</div></div><div class="flex justify-between w-full items-center"><div class="text-[10px] text-slate-400 font-medium flex items-center gap-1 bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded"><i class="fas fa-arrows-alt text-slate-300"></i> Arraste p/ semana</div><button onclick="window.addFromBank(${index})" class="bg-slate-900 dark:bg-gray-700 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-blue-600 transition shadow-sm flex-shrink-0" title="Adicionar à Semana Atual"><i class="fas fa-plus"></i> Add</button></div></div>`; 
+                        return `<div class="p-5 border border-slate-200 dark:border-gray-800 rounded-2xl bg-white dark:bg-cm-mid hover:shadow-md transition-all hover:border-blue-300 card-shadow flex flex-col justify-between items-start draggable-item" draggable="true" ondragstart="window.handleDragStartSearch(event, ${index})"><div class="flex-1 w-full"><div class="font-bold text-sm text-slate-900 dark:text-white leading-tight mb-2">${item.tema}</div><div class="flex flex-wrap items-center gap-2 mb-4"><div class="text-[9px] font-black uppercase text-slate-500 tracking-wide">${item.area}</div>${statusBadge}</div></div><div class="flex justify-between w-full items-center"><div class="text-[10px] text-slate-500 font-medium flex items-center gap-1 bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded"><i class="fas fa-arrows-alt text-slate-400"></i> Arraste p/ semana</div><button onclick="window.addFromBank(${index})" class="bg-slate-900 dark:bg-gray-700 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-blue-600 transition shadow-sm flex-shrink-0" title="Adicionar à Semana Atual"><i class="fas fa-plus"></i> Add</button></div></div>`; 
                     }).join(''); 
                 }
                 
