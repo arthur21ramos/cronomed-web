@@ -166,6 +166,7 @@
                     </div>
                 </div>
                 <div class="text-xl font-bold text-white w-12 text-right hidden sm:block" id="global-percent-text">0%</div>
+                <!-- Avatar para não quebrar o JS -->
                 <div id="user-avatar" class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center uppercase cursor-pointer" onclick="window.openSettingsSidebar()">U</div>
             </div>
         </header>
@@ -179,6 +180,10 @@
                     </button>
                     <button onclick="window.switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 text-left">
                         <i class="fas fa-chart-line text-lg w-5 text-center"></i><span>Dashboard &amp; Metas</span>
+                    </button>
+                    <!-- NOVO BOTÃO DE SIMULADOS -->
+                    <button onclick="window.switchView('simulados')" id="nav-simulados" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 text-left">
+                        <i class="fas fa-file-signature text-lg w-5 text-center"></i><span>Meus Simulados</span>
                     </button>
                     <button onclick="window.switchView('search')" id="nav-search" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 text-left">
                         <i class="fas fa-search text-lg w-5 text-center"></i><span>Busca de Tarefas</span>
@@ -201,7 +206,7 @@
         <nav class="md:hidden fixed bottom-0 left-0 w-full bg-white dark:bg-cm-dark2 border-t border-slate-200 dark:border-slate-800 flex justify-around p-3 z-50">
             <button onclick="window.switchView('homepage')" class="flex flex-col items-center text-slate-500 hover:text-blue-600 transition-colors"><i class="fas fa-home text-lg mb-1"></i><span class="text-[9px] font-bold">Início</span></button>
             <button onclick="window.switchView('week')" class="flex flex-col items-center text-slate-500 hover:text-blue-600 transition-colors"><i class="fas fa-calendar-alt text-lg mb-1"></i><span class="text-[9px] font-bold">Semana</span></button>
-            <button onclick="window.switchView('dashboard')" class="flex flex-col items-center text-slate-500 hover:text-blue-600 transition-colors"><i class="fas fa-chart-pie text-lg mb-1"></i><span class="text-[9px] font-bold">Resumo</span></button>
+            <button onclick="window.switchView('simulados')" class="flex flex-col items-center text-slate-500 hover:text-blue-600 transition-colors"><i class="fas fa-file-signature text-lg mb-1"></i><span class="text-[9px] font-bold">Provas</span></button>
             <button onclick="window.switchView('search')" class="flex flex-col items-center text-slate-500 hover:text-blue-600 transition-colors"><i class="fas fa-search text-lg mb-1"></i><span class="text-[9px] font-bold">Buscar</span></button>
         </nav>
     </div>
@@ -431,7 +436,7 @@
         
         window.pendingDeleteAction = null; window.pendingReviewTaskId = null; window.activeNotesTaskId = null; window.currentCalendarDate = new Date(); 
         
-        window.activeView = 'homepage';
+        window.activeView = 'homepage'; // ABRE SEMPRE NA PÁGINA INICIAL
         window.activeWeek = 1; 
         window.undoStack = []; window.redoStack = [];
         window.isFocusMode = false;
@@ -448,9 +453,6 @@
 
         // ======================================================================
         // ✅ FUNÇÃO CENTRAL DE ACESSO SEGURO AO PROGRESSO
-        // Esta é a única forma correta de ler o progresso de uma tarefa.
-        // Garante retorno de objeto vazio em vez de crash quando `progress`
-        // ou a chave da tarefa não existem (ex: após leitura do Firestore).
         // ======================================================================
         window.getTaskProgress = function(taskId) {
             if (!taskId) return {};
@@ -471,32 +473,24 @@
         };
 
         window.sanitizeState = function(st) {
-            // Garante que o objeto raiz existe e tem todas as chaves necessárias
             if (!st || typeof st !== 'object') st = {};
             if (!st.weeks || !Array.isArray(st.weeks)) st.weeks = [];
-            // ✅ CRÍTICO: garante que `progress` sempre existe como objeto,
-            // mesmo quando o Firestore omite chaves de objetos vazios.
             if (!st.progress || typeof st.progress !== 'object') st.progress = {};
             if (!st.dailyStats || typeof st.dailyStats !== 'object') st.dailyStats = {};
             if (!st.timeTracking || typeof st.timeTracking !== 'object') st.timeTracking = {};
             if (!Array.isArray(st.simulados)) st.simulados = [];
 
-            // Sanitiza cada semana
             st.weeks.forEach(w => {
                 if (!w) return;
-                // Garante timeSlots padrão se ausente ou vazio
                 if (!w.timeSlots || !Array.isArray(w.timeSlots) || w.timeSlots.length === 0) {
                     w.timeSlots = ["08:00 - 12:00", "14:00 - 18:00", "18:00 - 22:00"];
                 }
                 if (!w.agenda || typeof w.agenda !== 'object') w.agenda = {};
                 if (!w.tasks || !Array.isArray(w.tasks)) w.tasks = [];
 
-                // Garante que cada tarefa tem id e entrada no progress
                 w.tasks.forEach(t => {
                     if (!t) return;
                     if (!t.id) t.id = 'gen_' + Math.random().toString(36).substr(2, 9);
-                    // ✅ CRÍTICO: cria entrada vazia no progress para cada tarefa,
-                    // prevenindo undefined em qualquer acesso futuro.
                     if (!st.progress[t.id]) st.progress[t.id] = {};
                 });
             });
@@ -584,7 +578,7 @@
         window.getTodayStr = function() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
         window.getCategoryColor = function(category) { const map = { "Cirurgia": "bg-red-50 text-red-600 border-red-200", "Clínica Médica": "bg-blue-50 text-blue-600 border-blue-200", "Ginecologia e Obstetrícia": "bg-pink-50 text-pink-600 border-pink-200", "Pediatria": "bg-yellow-50 text-yellow-700 border-yellow-200", "Preventiva": "bg-emerald-50 text-emerald-600 border-emerald-200" }; const mapped = areaMapping[category] || "Clínica Médica"; return map[mapped] || map["Clínica Médica"]; }
         window.getPrioClass = function(prio, tipo) { if(tipo === 'revisao') return 'prio-rev'; if(prio === 1) return 'prio-1'; if(prio === 2) return 'prio-2'; if(prio === 3) return 'prio-3'; return 'prio-4'; }
-        window.getPrioLabel = function(prio, tipo, custom) { if(tipo === 'revisao') return 'REVISÃO'; if(custom) return 'CUSTOMIZADO'; if(prio===1) return 'ALTA'; if(prio===2) return 'MÉDIA'; if(prio===3) return 'BAIXA'; return 'OPCIONAL'; }
+        window.getPrioLabel = function(prio, tipo, custom) { if(tipo === 'revisao') return 'REVISÃO'; if(custom) return 'CUSTOMIZADO'; if(prio==1) return 'ALTA'; if(prio==2) return 'MÉDIA'; if(prio==3) return 'BAIXA'; return 'OPCIONAL'; }
 
         window.updateStreak = function() {
             window.repairState();
@@ -622,8 +616,6 @@
                         if (!data.has_onboarded) { window.location.href = "onboarding.html"; return; }
                         
                         if (data.app_state && data.app_state.weeks && data.app_state.weeks.length > 0) {
-                            // ✅ sanitizeState garante que progress/{} e demais chaves existem
-                            // mesmo que o Firestore as tenha omitido por serem vazias.
                             window.state = window.sanitizeState(data.app_state);
                             finishLoading();
                         } else {
@@ -638,6 +630,7 @@
             finishLoading();
         }
 
+        // ✅ REGRAS 1: ALGORITMO DE RETA FINAL (Pacing)
         async function generateSchedule(obData) {
             document.getElementById('loader-text').innerText = "A processar matriz de prioridades...";
             
@@ -647,31 +640,41 @@
             const end = new Date(endStr.split('T')[0] + 'T12:00:00');
             const totalSemanas = Math.max(4, Math.ceil((end - start) / (1000 * 60 * 60 * 24 * 7)));
             
-            const MAX_TASKS_PER_WEEK = 15;
-            const maxTasksAllowed = totalSemanas * MAX_TASKS_PER_WEEK;
+            // Separa as últimas 6 semanas para Reta Final
+            const validWeeksCount = totalSemanas > 6 ? totalSemanas - 6 : totalSemanas;
 
             const bd = window.bancoDeMaterias || [];
             let filteredDB = [...bd].sort((a, b) => b.score - a.score);
             if (obData.horas === '2h') filteredDB = filteredDB.filter(t => t.prioridade <= 2);
             else if (obData.horas === '4h') filteredDB = filteredDB.filter(t => t.prioridade <= 3);
             
+            // Reduz limite máximo de tarefas por semana
+            const MAX_TASKS_PER_WEEK = 12;
+            const maxTasksAllowed = validWeeksCount * MAX_TASKS_PER_WEEK;
             if (filteredDB.length > maxTasksAllowed) filteredDB = filteredDB.slice(0, maxTasksAllowed);
             
             const newWeeks = [];
             for(let i=0; i<totalSemanas; i++) {
                 const wStart = new Date(start); wStart.setDate(start.getDate() + (i*7));
                 const wEnd = new Date(wStart); wEnd.setDate(wStart.getDate() + 6);
-                newWeeks.push({ week: i+1, _start: wStart, _end: wEnd, phase: "Estudo Misto", timeSlots: ["08:00 - 12:00", "14:00 - 18:00", "18:00 - 22:00"], agenda: {}, tasks: [] });
+                let phaseName = "Estudo Misto";
+                if(totalSemanas > 6 && i >= validWeeksCount) phaseName = "Reta Final / Revisão Geral";
+                newWeeks.push({ week: i+1, _start: wStart, _end: wEnd, phase: phaseName, timeSlots: ["08:00 - 12:00", "14:00 - 18:00", "18:00 - 22:00"], agenda: {}, tasks: [] });
             }
 
-            const spreadTasks = (tasks, targetWeeks, isRevision = false) => {
-                if(targetWeeks.length === 0) targetWeeks = newWeeks;
-                tasks.forEach((t, i) => { const wIdx = i % targetWeeks.length; targetWeeks[wIdx].tasks.push({ id: `gen_${Date.now()}_${Math.random().toString(36).substr(2,6)}`, category: t.area, subject: t.tema, prioridade: t.prioridade, tipo: isRevision ? 'revisao' : 'materia_nova', score: t.score }); });
+            const validWeeksArray = newWeeks.slice(0, validWeeksCount);
+
+            const spreadTasks = (tasks, targetWeeks) => {
+                if(!targetWeeks || targetWeeks.length === 0) targetWeeks = validWeeksArray;
+                tasks.forEach((t, i) => { 
+                    const wIdx = i % targetWeeks.length; 
+                    targetWeeks[wIdx].tasks.push({ id: `gen_${Date.now()}_${Math.random().toString(36).substr(2,6)}`, category: t.area, subject: t.tema, prioridade: t.prioridade, tipo: 'materia_nova', score: t.score }); 
+                });
             };
 
             if (obData.internato === 'sim' && obData.datasRodizios) {
                 const mapArea = { 'Cirurgia': 'cirurgia', 'Clínica Médica': 'clinica', 'Ginecologia e Obstetrícia': 'go', 'Pediatria': 'ped' };
-                newWeeks.forEach(w => {
+                validWeeksArray.forEach(w => {
                     let phaseStr = [];
                     Object.keys(obData.datasRodizios).forEach(rKey => {
                         const r = obData.datasRodizios[rKey];
@@ -688,24 +691,27 @@
                     const tasks = tasksByArea[area]; const rKey = mapArea[area];
                     if (rKey) {
                         const r = obData.datasRodizios[rKey];
-                        if (r && r.concluido) { spreadTasks(tasks.filter(t => t.prioridade === 1), newWeeks, true); } 
-                        else if (r && r.in && r.fim) { const rStart = new Date(r.in + 'T12:00:00'); const rEnd = new Date(r.fim + 'T12:00:00'); rEnd.setMonth(rEnd.getMonth() + 1); const validWeeks = newWeeks.filter(w => w._start >= rStart && w._start <= rEnd); spreadTasks(tasks, validWeeks.length > 0 ? validWeeks : newWeeks); } 
-                        else spreadTasks(tasks, newWeeks);
-                    } else spreadTasks(tasks, newWeeks);
+                        if (r && r.concluido) { spreadTasks(tasks.filter(t => t.prioridade === 1), validWeeksArray); } 
+                        else if (r && r.in && r.fim) { 
+                            const rStart = new Date(r.in + 'T12:00:00'); const rEnd = new Date(r.fim + 'T12:00:00'); rEnd.setMonth(rEnd.getMonth() + 1); 
+                            const matchingWeeks = validWeeksArray.filter(w => w._start >= rStart && w._start <= rEnd); 
+                            spreadTasks(tasks, matchingWeeks.length > 0 ? matchingWeeks : validWeeksArray); 
+                        } 
+                        else spreadTasks(tasks, validWeeksArray);
+                    } else spreadTasks(tasks, validWeeksArray);
                 });
             } else {
-                filteredDB.forEach((task, index) => { const wIdx = index % totalSemanas; newWeeks[wIdx].tasks.push({ id: `gen_${index}_${Date.now()}`, category: task.area, subject: task.tema, prioridade: task.prioridade, tipo: "materia_nova", score: task.score }); });
+                filteredDB.forEach((task, index) => { 
+                    const wIdx = index % validWeeksArray.length; 
+                    validWeeksArray[wIdx].tasks.push({ id: `gen_${index}_${Date.now()}`, category: task.area, subject: task.tema, prioridade: task.prioridade, tipo: "materia_nova", score: task.score }); 
+                });
             }
 
             newWeeks.forEach(w => { delete w._start; delete w._end; w.tasks.sort((a,b) => b.score - a.score); });
 
-            window.state.weeks = newWeeks;
-            window.state.progress = {};
-            window.state.dailyStats = {};
-            window.state.timeTracking = {};
+            window.state.weeks = newWeeks; window.state.progress = {}; window.state.dailyStats = {}; window.state.timeTracking = {}; window.state.simulados = [];
             window.state.startDate = start.toISOString();
 
-            // ✅ sanitize garante entradas no progress para todas as tarefas geradas
             window.state = window.sanitizeState(window.state);
 
             await window.saveToCloud();
@@ -715,7 +721,6 @@
         function finishLoading() {
             document.getElementById('loader-overlay').style.display = 'none';
             window.toggleDarkMode(localStorage.getItem('darkMode') === '1');
-            window.expandedCards = window.expandedCards || {};
             window.updateUI();
         }
 
@@ -755,10 +760,41 @@
         }
         
         // ----------------------------------------------------------------------
-        // AÇÕES NAS TAREFAS
+        // AÇÕES NAS TAREFAS E FÉRIAS
         // ----------------------------------------------------------------------
+        
+        // ✅ REGRA 2: Função Férias
+        window.toggleVacation = function() {
+            window.pushState(); window.repairState();
+            const w = window.state.weeks.find(x => x.week === window.activeWeek);
+            if (!w) return;
+            w.isVacation = !w.isVacation;
+            if (w.isVacation && w.tasks) {
+                const pending = [];
+                w.tasks = w.tasks.filter(t => {
+                    if (!window.getTaskProgress(t.id).doneStatus) {
+                        pending.push(t); return false;
+                    }
+                    return true; // mantém apenas as já concluídas na semana de férias
+                });
+                if (pending.length > 0) {
+                    let nextWeek = window.state.weeks.find(x => x.week > w.week && !x.isVacation && x.phase !== "Reta Final / Revisão Geral");
+                    if (nextWeek) {
+                        if(!nextWeek.tasks) nextWeek.tasks = [];
+                        nextWeek.tasks.push(...pending);
+                        window.showToast(`Férias ativadas! ${pending.length} tarefas empurradas para a Semana ${nextWeek.week}`);
+                    } else {
+                        window.showToast(`Férias ativadas, mas não há semanas futuras para alocar as tarefas.`);
+                    }
+                } else {
+                    window.showToast('Modo Férias ativado para esta semana.');
+                }
+            } else {
+                window.showToast('Semana retomada com sucesso.');
+            }
+            window.triggerSave(); window.updateUI();
+        }
 
-        // ✅ ensureProgress: garante a entrada no objeto de progresso ANTES de qualquer escrita.
         window.ensureProgress = function(id) { 
             window.repairState();
             if (!id) return;
@@ -766,9 +802,7 @@
         }
         
         window.toggleTask = function(id) { 
-            window.pushState();
-            window.ensureProgress(id);
-            // ✅ Usa getTaskProgress para leitura segura
+            window.pushState(); window.ensureProgress(id);
             const p = window.getTaskProgress(id);
             const newStatus = !p.doneStatus;
             window.state.progress[id].doneStatus = newStatus;
@@ -780,18 +814,10 @@
                 delete window.state.progress[id].completedDate;
                 delete window.state.progress[id].nextReview;
             }
-            window.triggerSave();
-            window.updateUI();
+            window.triggerSave(); window.updateUI();
         }
 
-        window.toggleCrucial = function(taskId) {
-            window.pushState();
-            window.ensureProgress(taskId);
-            window.state.progress[taskId].crucial = !window.getTaskProgress(taskId).crucial;
-            window.triggerSave();
-            window.updateUI();
-            if(window.state.progress[taskId].crucial) window.showToast('Marcado como Crucial 🔥');
-        }
+        window.toggleCrucial = function(taskId) { window.pushState(); window.ensureProgress(taskId); window.state.progress[taskId].crucial = !window.getTaskProgress(taskId).crucial; window.triggerSave(); window.updateUI(); if(window.state.progress[taskId].crucial) window.showToast('Marcado como Crucial 🔥');}
         
         window.calcTempAcc = function(taskId) {
             const doneInp = document.getElementById(`done_inp_${taskId}`);
@@ -811,7 +837,6 @@
             window.ensureProgress(taskId); 
             const val = parseInt(newVal) || 0; 
             if(type === 'done') {
-                // ✅ Usa getTaskProgress para leitura segura do valor antigo
                 const oldVal = parseInt(window.getTaskProgress(taskId).done) || 0; 
                 const diff = val - oldVal; 
                 window.state.progress[taskId].done = val; 
@@ -826,12 +851,7 @@
             window.calcTempAcc(taskId); 
         }
 
-        window.toggleTaskDetails = function(taskId, event) {
-            if(event && (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || event.target.closest('button') || event.target.closest('.custom-checkbox') || event.target.closest('.task-edit-subject') || event.target.closest('.drag-handle'))) return;
-            window.expandedCards = window.expandedCards || {};
-            window.expandedCards[taskId] = !window.expandedCards[taskId];
-            window.updateUI();
-        }
+        window.toggleTaskDetails = function(taskId, event) { if(event && (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || event.target.closest('button') || event.target.closest('.custom-checkbox') || event.target.closest('.task-edit-subject') || event.target.closest('.drag-handle'))) return; window.expandedCards = window.expandedCards || {}; window.expandedCards[taskId] = !window.expandedCards[taskId]; window.updateUI(); }
         window.updateTaskName = function(weekIdx, taskIdx, newName) { window.pushState(); window.repairState(); const week = window.state.weeks.find(w => w.week === weekIdx); if(week && week.tasks && week.tasks[taskIdx]) { week.tasks[taskIdx].subject = newName; window.triggerSave(); } };
         
         window.openAddTaskModal = function(weekNum) { window.activeWeek = parseInt(weekNum); document.getElementById('add-nome').value = ''; window.openModal('add-task'); }
@@ -844,14 +864,7 @@
         document.getElementById('confirm-delete-btn').onclick = function() { if(window.pendingDeleteAction) { window.pushState(); window.repairState(); const week = window.state.weeks.find(w => w.week === window.pendingDeleteAction.weekIdx); if(week && week.tasks) { week.tasks.splice(window.pendingDeleteAction.taskIdx, 1); window.triggerSave(); window.updateUI(); window.showToast("Tarefa removida."); } window.pendingDeleteAction = null; window.closeModal('delete'); } };
 
         window.parseNotesLinks = function() { const text = document.getElementById('notes-textarea').value; const links = text.match(/(https?:\/\/[^\s]+)/g); const container = document.getElementById('notes-links-container'); if (links && links.length > 0) { container.innerHTML = '<p class="text-[10px] font-bold uppercase text-slate-400 tracking-widest mb-2">Links Detectados</p><div class="flex flex-col gap-2">' + links.map(l => `<a href="${l}" target="_blank" class="bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 truncate"><i class="fas fa-external-link-alt"></i> ${l}</a>`).join('') + '</div>'; container.classList.remove('hidden'); } else { container.innerHTML = ''; container.classList.add('hidden'); } }
-        window.openNotesModal = function(taskId) {
-            window.activeNotesTaskId = taskId;
-            window.ensureProgress(taskId);
-            // ✅ Usa getTaskProgress para leitura segura
-            document.getElementById('notes-textarea').value = window.getTaskProgress(taskId).notes || '';
-            window.parseNotesLinks();
-            window.openModal('notes');
-        }
+        window.openNotesModal = function(taskId) { window.activeNotesTaskId = taskId; window.ensureProgress(taskId); document.getElementById('notes-textarea').value = window.getTaskProgress(taskId).notes || ''; window.parseNotesLinks(); window.openModal('notes'); }
         window.closeNotesModal = function() { window.activeNotesTaskId = null; window.closeModal('notes'); }
         window.saveNotes = function() { window.pushState(); if(window.activeNotesTaskId) { window.ensureProgress(window.activeNotesTaskId); window.state.progress[window.activeNotesTaskId].notes = document.getElementById('notes-textarea').value; window.triggerSave(); window.showToast('Anotação salva'); } window.closeNotesModal(); }
 
@@ -880,7 +893,7 @@
                 if(!targetWeek.tasks) targetWeek.tasks=[]; targetWeek.tasks.push(window.draggedTask);
                 window.saveToCloud(); window.updateUI(); window.resetDrag(); window.showToast('Tarefa movida para Semana ' + targetWeekIdx);
             } else if (window.draggedSearchTask) {
-                if(!targetWeek.tasks) targetWeek.tasks=[];
+                if(!targetWeek.tasks) targetWeek.tasks=[]; 
                 const newId = `cstm_${Date.now()}_${Math.random().toString(36).substr(2,5)}`;
                 targetWeek.tasks.push({ id: newId, category: window.draggedSearchTask.area, subject: window.draggedSearchTask.tema, prioridade: window.draggedSearchTask.prioridade || 2, tipo: 'materia_nova', score: window.draggedSearchTask.score || 0 });
                 window.ensureProgress(newId);
@@ -910,7 +923,6 @@
             window.repairState();
             let delayedCount = 0; let curW = 1; const today = new Date(); const start = window.getStartDate();
             window.state.weeks.forEach(w => { const s = new Date(start); s.setDate(start.getDate() + (w.week - 1) * 7); if (today >= s) curW = w.week; });
-            // ✅ Usa getTaskProgress para leitura segura
             window.state.weeks.forEach(w => { if (w.week < curW && w.tasks) { w.tasks.forEach(t => { if (!window.getTaskProgress(t.id).doneStatus) delayedCount++; }); } });
             const btnOpts = document.getElementById('remanejo-options'); const btnEmp = document.getElementById('remanejo-empty');
             if(delayedCount === 0) { btnOpts.classList.add('hidden'); btnEmp.classList.remove('hidden'); } else { btnOpts.classList.remove('hidden'); btnEmp.classList.add('hidden'); }
@@ -919,14 +931,13 @@
         window.applyRemanejo = function(strategy) {
             window.pushState(); window.repairState(); const delayedTasks = []; let curW = 1; const today = new Date(); const start = window.getStartDate();
             window.state.weeks.forEach(w => { const s = new Date(start); s.setDate(start.getDate() + (w.week - 1) * 7); if (today >= s) curW = w.week; });
-            // ✅ Usa getTaskProgress para leitura segura
             window.state.weeks.forEach(w => { if (w.week < curW && w.tasks) { for (let i = w.tasks.length - 1; i >= 0; i--) { const t = w.tasks[i]; if (!window.getTaskProgress(t.id).doneStatus) { delayedTasks.push(t); w.tasks.splice(i, 1); } } } });
             if (strategy === 'cut') {
                 const savedTasks = delayedTasks.filter(t => t.prioridade <= 2);
                 const targetW = window.state.weeks.find(w => w.week === curW); if(targetW) { if(!targetW.tasks) targetW.tasks=[]; targetW.tasks.push(...savedTasks); }
                 window.showToast("Atrasos limpos. Mantivemos o essencial.");
             } else {
-                let wPtr = 0; const futWeeks = window.state.weeks.filter(w => w.week >= curW && w.week < curW + 4);
+                let wPtr = 0; const futWeeks = window.state.weeks.filter(w => w.week >= curW && w.week < curW + 4 && !w.isVacation);
                 if(futWeeks.length === 0 && window.state.weeks.length > 0) futWeeks.push(window.state.weeks[window.state.weeks.length-1]);
                 delayedTasks.forEach(t => { if(futWeeks.length > 0) { const tg = futWeeks[wPtr % futWeeks.length]; if(!tg.tasks) tg.tasks=[]; tg.tasks.push(t); wPtr++; } });
                 window.showToast("Tarefas redistribuídas.");
@@ -948,15 +959,120 @@
             window.closeReviewModal(); 
         }
 
+        // ======================================================================
+        // ✅ REGRA 4: ABA DE SIMULADOS
+        // ======================================================================
+        window.addSimulado = function() {
+            window.repairState(); window.pushState();
+            const name = document.getElementById('sim-name').value.trim();
+            const date = document.getElementById('sim-date').value;
+            const done = parseInt(document.getElementById('sim-done').value) || 0;
+            const correct = parseInt(document.getElementById('sim-correct').value) || 0;
+            
+            if(!name || !date || done <= 0) return alert('Preencha os dados corretamente.');
+            
+            window.state.simulados.push({ id: Date.now(), name, date, done, correct });
+            window.state.simulados.sort((a,b) => new Date(a.date) - new Date(b.date));
+            
+            window.triggerSave(); window.updateUI(); window.showToast('Simulado Registrado!');
+        }
+
+        window.deleteSimulado = function(id) {
+            if(confirm("Excluir este simulado?")) {
+                window.pushState(); window.repairState();
+                window.state.simulados = window.state.simulados.filter(s => s.id !== id);
+                window.triggerSave(); window.updateUI();
+            }
+        }
+
+        window.renderSimulados = function() {
+            const content = document.getElementById('content-area'); 
+            content.classList.add('fade-enter'); window.repairState();
+            
+            const simulados = window.state.simulados || [];
+            let avgAcc = 0; let totalQ = 0;
+            if(simulados.length > 0) {
+                let tDone = 0; let tCorr = 0;
+                simulados.forEach(s => { tDone += s.done; tCorr += s.correct; });
+                avgAcc = Math.round((tCorr / tDone) * 100);
+                totalQ = tDone;
+            }
+
+            let listHtml = '';
+            if(simulados.length === 0) {
+                listHtml = `<div class="text-center py-10 text-slate-400 italic">Nenhum simulado registrado ainda.</div>`;
+            } else {
+                [...simulados].reverse().forEach(s => {
+                    const acc = Math.round((s.correct / s.done) * 100);
+                    const dateFmt = new Date(s.date).toLocaleDateString('pt-BR');
+                    listHtml += `<div class="flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl mb-3"><div class="flex-1"><div class="font-bold text-slate-800 dark:text-white text-sm">${s.name}</div><div class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">${dateFmt} • ${s.done} questões</div></div><div class="flex items-center gap-4"><div class="text-right"><div class="text-lg font-black ${window.getAccuracyColorClass(acc)}">${acc}%</div><div class="text-[9px] text-slate-400 uppercase font-bold tracking-widest">Precisão</div></div><button onclick="window.deleteSimulado(${s.id})" class="w-8 h-8 rounded-full bg-white dark:bg-cm-dark2 text-slate-400 hover:text-red-500 shadow-sm transition"><i class="fas fa-trash-alt"></i></button></div></div>`;
+                });
+            }
+
+            const html = `
+            <div class="mb-10">
+                <h2 class="text-3xl font-black text-slate-900 dark:text-white mb-6 tracking-tight flex items-center gap-3"><i class="fas fa-file-signature text-blue-600"></i> Meus Simulados</h2>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Esquerda: Adicionar + Lista -->
+                    <div class="lg:col-span-1 flex flex-col gap-8">
+                        <div class="bg-white dark:bg-cm-dark2 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                            <h3 class="font-bold text-sm text-slate-800 dark:text-white uppercase tracking-wider mb-5 flex items-center gap-2"><i class="fas fa-plus-circle text-blue-500"></i> Registrar Simulado</h3>
+                            <div class="space-y-4">
+                                <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 block">Instituição / Nome</label><input type="text" id="sim-name" placeholder="Ex: ENARE 2024" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm outline-none focus:border-blue-500 dark:text-white transition"></div>
+                                <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 block">Data da Prova</label><input type="date" id="sim-date" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm outline-none focus:border-blue-500 dark:text-white transition"></div>
+                                <div class="flex gap-3">
+                                    <div class="flex-1"><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 block">Total Questões</label><input type="number" id="sim-done" placeholder="100" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm outline-none focus:border-blue-500 dark:text-white transition text-center"></div>
+                                    <div class="flex-1"><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 block">Acertos</label><input type="number" id="sim-correct" placeholder="80" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm outline-none focus:border-blue-500 dark:text-white transition text-center"></div>
+                                </div>
+                                <button onclick="window.addSimulado()" class="w-full bg-slate-900 dark:bg-blue-600 text-white font-bold text-sm py-3 rounded-xl hover:bg-slate-800 transition shadow-md mt-2">Salvar Registro</button>
+                            </div>
+                        </div>
+                        <div class="bg-white dark:bg-cm-dark2 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex-1">
+                            <h3 class="font-bold text-sm text-slate-800 dark:text-white uppercase tracking-wider mb-5">Histórico</h3>
+                            ${listHtml}
+                        </div>
+                    </div>
+
+                    <!-- Direita: Graficos e KPIs -->
+                    <div class="lg:col-span-2 flex flex-col gap-8">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-white dark:bg-cm-dark2 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                                <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1 flex justify-between"><span>Provas Feitas</span> <i class="fas fa-file-alt text-blue-500"></i></div>
+                                <div class="text-3xl font-bold text-slate-900 dark:text-white">${simulados.length}</div>
+                            </div>
+                            <div class="bg-white dark:bg-cm-dark2 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                                <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1 flex justify-between"><span>Precisão Global</span> <i class="fas fa-bullseye text-purple-500"></i></div>
+                                <div class="text-3xl font-bold text-slate-900 dark:text-white">${avgAcc}%</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white dark:bg-cm-dark2 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm relative h-[350px] w-full flex flex-col">
+                            <h3 class="font-bold text-sm text-slate-800 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2"><i class="fas fa-chart-line text-blue-500"></i> Curva de Desempenho</h3>
+                            <div class="relative flex-1 w-full"><canvas id="chart-simulados"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+            content.innerHTML = html;
+
+            setTimeout(() => {
+                const sCanvas = document.getElementById('chart-simulados');
+                if (sCanvas && simulados.length > 0) {
+                    const labels = simulados.map(s => s.name);
+                    const data = simulados.map(s => Math.round((s.correct / s.done) * 100));
+                    if(window._chartSim) window._chartSim.destroy();
+                    window._chartSim = new Chart(sCanvas, { type: 'line', data: { labels, datasets: [{ label: '% de Acerto', data, borderColor: '#8b5cf6', backgroundColor: 'rgba(139, 92, 246, 0.1)', borderWidth: 3, fill: true, tension: 0.3, pointBackgroundColor: '#8b5cf6', pointBorderColor: '#fff', pointRadius: 5 }] }, options: { plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } } } });
+                }
+            }, 100);
+        }
+
         // ----------------------------------------------------------------------
         // RENDERIZADORES UI E GRÁFICOS
-        // ✅ TODOS usam window.getTaskProgress(t.id) em vez de acessar
-        //    window.state.progress[t.id] diretamente, eliminando crashes por
-        //    undefined quando o Firestore omite objetos vazios.
         // ----------------------------------------------------------------------
         window.switchView = function(viewName) {
             window.activeView = viewName;
-            ['nav-dashboard', 'nav-search', 'nav-homepage'].forEach(id => { const el = document.getElementById(id); if (el) { el.classList.remove('bg-black', 'text-white', 'border-transparent', 'shadow-md'); el.classList.add('bg-white', 'text-slate-700', 'border-slate-200'); } });
+            ['nav-dashboard', 'nav-search', 'nav-homepage', 'nav-simulados'].forEach(id => { const el = document.getElementById(id); if (el) { el.classList.remove('bg-black', 'text-white', 'border-transparent', 'shadow-md'); el.classList.add('bg-white', 'text-slate-700', 'border-slate-200'); } });
             const activeEl = document.getElementById(`nav-${viewName}`); if (activeEl) { activeEl.classList.remove('bg-white', 'text-slate-700', 'border-slate-200'); activeEl.classList.add('bg-black', 'text-white', 'border-transparent', 'shadow-md'); }
             if(viewName !== 'week') window.activeWeek = 0; 
             window.updateUI();
@@ -964,33 +1080,36 @@
 
         window.renderNav = function() {
             const nav = document.getElementById('week-nav'); if(!nav) return; nav.innerHTML = '';
-            if(!window.state || !window.state.weeks) return;
+            if(!window.state.weeks) return;
             window.state.weeks.forEach(w => {
-                let done = 0;
+                let done = 0; 
                 if(w.tasks) {
-                    // ✅ Usa getTaskProgress para leitura segura em cada tarefa
-                    w.tasks.forEach(t => {
-                        if(window.getTaskProgress(t.id).doneStatus) done++;
+                    w.tasks.forEach(t => { 
+                        if(window.getTaskProgress(t.id).doneStatus) done++; 
                     });
                 }
                 const total = w.tasks ? w.tasks.length : 0;
                 const pct = total > 0 ? Math.round((done/total)*100) : 0;
                 
                 const active = (window.activeView === 'week' && window.activeWeek === w.week) ? 'ring-2 ring-slate-900 shadow-md font-bold z-10' : '';
-                let statusClass = done === total && total > 0 ? "bg-emerald-50 text-emerald-900 border-l-4 border-emerald-500" : done > 0 ? "bg-amber-50 text-amber-900 border-l-4 border-amber-400" : "bg-white text-slate-700 border-l-4 border-transparent hover:bg-slate-50 dark:bg-cm-dark2 dark:text-slate-200";
-                const dateRange = window.getWeekDateRange(w.week);
                 
-                nav.innerHTML += `<div onclick="window.activeWeek=${w.week}; window.switchView('week');" class="px-4 py-3.5 rounded-xl mb-2 cursor-pointer transition-all border border-slate-200 dark:border-slate-700 ${statusClass} ${active} flex justify-between items-center" ondragover="window.handleDragOverWeek(event)" ondragleave="window.handleDragLeaveWeek(event)" ondrop="window.handleDropWeek(event, ${w.week})"><div><span class="block text-[11px] font-bold uppercase tracking-wide opacity-80 pointer-events-none">Semana ${w.week}</span><span class="text-[9px] text-slate-500 font-mono mt-0.5 block font-medium pointer-events-none">${dateRange}</span></div><span class="text-xs font-bold bg-white/60 dark:bg-slate-800 px-2 py-1 rounded shadow-sm pointer-events-none">${pct}%</span></div>`;
+                // Tratar aparência de Férias/Reta Final no menu lateral
+                let statusClass = "bg-white text-slate-700 border-l-4 border-transparent hover:bg-slate-50 dark:bg-cm-dark2 dark:text-slate-200";
+                if (w.isVacation) statusClass = "bg-orange-50 text-orange-900 border-l-4 border-orange-400";
+                else if (w.phase === "Reta Final / Revisão Geral") statusClass = "bg-purple-50 text-purple-900 border-l-4 border-purple-500";
+                else if (done === total && total > 0) statusClass = "bg-emerald-50 text-emerald-900 border-l-4 border-emerald-500";
+                else if (done > 0) statusClass = "bg-amber-50 text-amber-900 border-l-4 border-amber-400";
+                
+                const dateRange = window.getWeekDateRange(w.week);
+                const tagIcon = w.isVacation ? '<i class="fas fa-umbrella-beach text-orange-500"></i>' : (w.phase === "Reta Final / Revisão Geral" ? '<i class="fas fa-flag-checkered text-purple-500"></i>' : `${pct}%`);
+                
+                nav.innerHTML += `<div onclick="window.activeWeek=${w.week}; window.switchView('week');" class="px-4 py-3.5 rounded-xl mb-2 cursor-pointer transition-all border border-slate-200 dark:border-slate-700 ${statusClass} ${active} flex justify-between items-center" ondragover="window.handleDragOverWeek(event)" ondragleave="window.handleDragLeaveWeek(event)" ondrop="window.handleDropWeek(event, ${w.week})"><div><span class="block text-[11px] font-bold uppercase tracking-wide opacity-80 pointer-events-none">Semana ${w.week}</span><span class="text-[9px] text-slate-500 font-mono mt-0.5 block font-medium pointer-events-none">${dateRange}</span></div><span class="text-xs font-bold bg-white/60 dark:bg-slate-800 px-2 py-1 rounded shadow-sm pointer-events-none">${tagIcon}</span></div>`;
             });
         }
 
         window.renderHomepage = function() {
-            const content = document.getElementById('content-area');
-            const nome = document.getElementById('user-name') ? document.getElementById('user-name').innerText.split(' ')[0] : 'Doutor(a)';
-            // ✅ repairState antes de qualquer acesso a dados
-            window.repairState();
+            const content = document.getElementById('content-area'); const nome = document.getElementById('user-name').innerText.split(' ')[0] || 'Doutor(a)';
             const currW = window.state.weeks.find(w => w.week === window.activeWeek) || window.state.weeks[0]; 
-            // ✅ Usa getTaskProgress para filtrar pendentes
             const todayTasks = currW ? (currW.tasks || []).filter(t => !window.getTaskProgress(t.id).doneStatus) : [];
             const dayIdx = new Date().getDay();
             let agendaHtml = '';
@@ -1005,24 +1124,33 @@
             }
 
             let html = `<div class="max-w-4xl mx-auto fade-enter"><div class="mb-10"><h1 class="text-4xl font-serif text-slate-900 dark:text-white tracking-tight">Bom dia, ${nome}!</h1><p class="text-slate-500 dark:text-cm-muted mt-2 text-lg">Aqui está o seu painel de comando de hoje.</p></div><div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10"><div class="card-shadow bg-white dark:bg-cm-dark2 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-center items-center text-center"><div class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Semana Atual</div><div class="text-xl font-bold text-blue-600 flex items-center gap-2"><i class="fas fa-calendar-week"></i> Semana ${currW?currW.week:''}</div></div><div class="card-shadow bg-white dark:bg-cm-dark2 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-center items-center text-center"><div class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Questões Hoje</div><div class="text-3xl font-bold text-green-500 flex items-center gap-2">${(window.state.dailyStats || {})[window.getTodayStr()]||0}</div></div><div class="card-shadow p-6 rounded-2xl flex flex-col justify-center items-center text-center bg-black text-white dark:bg-cm-green dark:text-cm-dark border-transparent cursor-pointer hover:scale-105 transition" onclick="window.startPomoTask('avulso', 'Foco Livre')"><i class="fas fa-play text-2xl mb-2 text-blue-400 dark:text-cm-dark"></i><div class="font-bold text-sm">Foco Livre</div></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><div><h3 class="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2"><i class="far fa-clock"></i> A Linha do Tempo (Hoje)</h3><div class="card-shadow bg-white dark:bg-cm-dark2 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 pt-10">${agendaHtml}<button onclick="window.switchView('week')" class="w-full text-xs font-bold text-blue-600 hover:underline mt-4 text-center">Editar grade (Aba Semanas)</button></div></div><div><h3 class="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2"><i class="fas fa-tasks"></i> Foco Principal (Sem. ${currW?currW.week:''})</h3><div class="space-y-3">`;
-            todayTasks.slice(0, 6).forEach(t => { html += `<div class="card-shadow bg-white dark:bg-cm-dark2 border border-slate-200 dark:border-slate-800 rounded-xl p-4 flex items-center gap-3 ${window.getPrioClass(t.prioridade, t.tipo)} cursor-pointer" onclick="window.activeWeek=${currW?currW.week:1}; window.switchView('week');"><div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 shrink-0"><i class="fas fa-arrow-right"></i></div><div class="min-w-0"><div class="font-bold text-sm text-slate-900 dark:text-white leading-tight truncate">${t.subject}</div><span class="${window.getCategoryColor(t.category)} text-[8px] uppercase font-bold px-1.5 rounded border">${t.category}</span></div></div>`; });
-            if(todayTasks.length===0) html+=`<div class="text-slate-400 text-sm text-center py-10 italic">Tudo concluído para esta semana! Descanse.</div>`;
+            
+            if(currW && currW.isVacation) {
+                html += `<div class="text-center py-10 text-orange-500 font-bold bg-orange-50 rounded-2xl border border-orange-100"><i class="fas fa-umbrella-beach text-3xl mb-2 block"></i>Você está de férias esta semana!</div>`;
+            } else {
+                todayTasks.slice(0, 6).forEach(t => { html += `<div class="card-shadow bg-white dark:bg-cm-dark2 border border-slate-200 dark:border-slate-800 rounded-xl p-4 flex items-center gap-3 ${window.getPrioClass(t.prioridade, t.tipo)} cursor-pointer" onclick="window.activeWeek=${currW?currW.week:1}; window.switchView('week');"><div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 shrink-0"><i class="fas fa-arrow-right"></i></div><div class="min-w-0"><div class="font-bold text-sm text-slate-900 dark:text-white leading-tight truncate">${t.subject}</div><span class="${window.getCategoryColor(t.category)} text-[8px] uppercase font-bold px-1.5 rounded border">${t.category}</span></div></div>`; });
+                if(todayTasks.length===0) html+=`<div class="text-slate-400 text-sm text-center py-10 italic">Tudo concluído para esta semana! Descanse.</div>`;
+            }
             html += `</div></div></div></div>`; content.innerHTML = html;
         }
 
         window.renderWeek = function() {
             const w = window.state.weeks.find(d => d.week === window.activeWeek); 
             const content = document.getElementById('content-area'); 
-            if(!w) {
-                content.innerHTML = `<div class="text-center py-20 text-slate-500">Semana não encontrada. Recalcule a Rota.</div>`;
+            if(!w) { content.innerHTML = `<div class="text-center py-20 text-slate-500">Semana não encontrada. Recalcule a Rota.</div>`; return; }
+            
+            // ✅ REGRA 2: Férias Banner
+            if (w.isVacation) {
+                content.innerHTML = `<div class="mb-12 fade-enter"><div class="flex justify-between items-center mb-6"><div><h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Semana ${w.week}</h2><span class="text-sm font-bold text-slate-500 dark:text-emerald-500">${w.phase || 'Estudo Livre'}</span></div><button onclick="window.toggleVacation()" class="text-xs font-bold bg-white text-slate-500 border border-slate-200 px-4 py-2 rounded-xl shadow-sm hover:text-orange-500 hover:border-orange-300 transition"><i class="fas fa-undo mr-1"></i> Retomar Semana</button></div><div class="text-center py-24 bg-orange-50 dark:bg-orange-900/10 rounded-3xl border border-orange-200 dark:border-orange-900/30 mt-8 shadow-sm"><i class="fas fa-umbrella-beach text-6xl text-orange-400 mb-6 drop-shadow-md"></i><h2 class="text-3xl font-black text-orange-800 dark:text-orange-400 tracking-tight">Semana de Férias / Pausa</h2><p class="text-orange-600 dark:text-orange-300 mt-3 text-lg font-medium">As tarefas desta semana foram transferidas em segurança.</p></div></div>`;
                 return;
             }
+
             const days = window.getWeekDates(window.activeWeek);
             const timeSlots = w.timeSlots || ["08:00 - 12:00", "14:00 - 18:00", "18:00 - 22:00"];
             const agenda = w.agenda || {};
             const tasks = w.tasks || [];
             
-            let agendaHtml = `<div class="mb-12 fade-enter"><div class="flex justify-between items-center mb-6"><div><h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Semana ${w.week}</h2><span class="text-sm font-bold text-slate-500 dark:text-emerald-500">${w.phase || 'Estudo Livre'}</span></div><button onclick="window.openModal('replica-agenda')" class="text-xs font-bold bg-white dark:bg-cm-mid border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl shadow-sm hover:border-blue-500 transition"><i class="fas fa-copy mr-1 text-blue-600"></i> Configurar Grade</button></div><div class="overflow-x-auto rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-cm-dark2"><table class="agenda-table min-w-[700px]"><thead><tr><th class="p-3 w-24 bg-slate-900 text-white border-none">Horário</th>${days.map(d=>`<th class="p-3 bg-slate-900 text-white border-l border-slate-700 text-center"><div class="font-bold text-sm uppercase tracking-widest">${d.name}</div><div class="text-[10px] text-slate-400 font-mono mt-1">${d.date}</div></th>`).join('')}</tr></thead><tbody>`;
+            let agendaHtml = `<div class="mb-12 fade-enter"><div class="flex justify-between items-center mb-6"><div><h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Semana ${w.week}</h2><span class="text-sm font-bold text-slate-500 dark:text-emerald-500">${w.phase || 'Estudo Livre'}</span></div><div class="flex gap-2"><button onclick="window.toggleVacation()" class="text-xs font-bold bg-white dark:bg-cm-mid border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl shadow-sm hover:text-orange-500 hover:border-orange-300 transition text-slate-500"><i class="fas fa-umbrella-beach mr-1"></i> Férias</button><button onclick="window.openModal('replica-agenda')" class="text-xs font-bold bg-white dark:bg-cm-mid border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl shadow-sm hover:border-blue-500 transition"><i class="fas fa-copy mr-1 text-blue-600"></i> Configurar Grade</button></div></div><div class="overflow-x-auto rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-cm-dark2"><table class="agenda-table min-w-[700px]"><thead><tr><th class="p-3 w-24 bg-slate-900 text-white border-none">Horário</th>${days.map(d=>`<th class="p-3 bg-slate-900 text-white border-l border-slate-700 text-center"><div class="font-bold text-sm uppercase tracking-widest">${d.name}</div><div class="text-[10px] text-slate-400 font-mono mt-1">${d.date}</div></th>`).join('')}</tr></thead><tbody>`;
             timeSlots.forEach((slot, sIdx) => {
                 agendaHtml += `<tr><td class="p-0 w-24 align-middle time-col relative border-r border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30"><div class="w-full text-center font-mono text-[10px] font-bold outline-none p-3" contenteditable="true" onblur="window.updateTimeSlot(${window.activeWeek}, ${sIdx}, this.innerText)">${slot}</div><div class="row-controls"><button onclick="window.addAgendaRowAt(${window.activeWeek}, ${sIdx})" class="text-[10px] text-blue-600 hover:bg-blue-50 py-1"><i class="fas fa-plus"></i></button><button onclick="window.requestRemoveAgendaRow(${window.activeWeek}, ${sIdx})" class="text-[10px] text-red-600 hover:bg-red-50 py-1"><i class="fas fa-minus"></i></button></div></td>`;
                 days.forEach((d, dIdx) => { const c = agenda[`${d.key}_s${sIdx}`] || {}; const bgColor = c.color || '#ffffff'; agendaHtml += `<td class="p-0 h-16 relative"><div class="agenda-cell w-full h-full p-2 outline-none flex items-center justify-center text-xs font-medium text-slate-800 dark:text-white" style="background-color: ${bgColor}; --agenda-color: ${bgColor};" contenteditable="true" onblur="window.updateAgendaCell(${window.activeWeek}, '${d.key}', ${sIdx}, this.innerText)">${c.text||''}</div></td>`; }); agendaHtml += `</tr>`;
@@ -1034,22 +1162,15 @@
             let tasksHtml = `<div class="mb-4 flex justify-between items-center"><h3 class="text-sm font-bold uppercase tracking-widest text-slate-500"><i class="fas fa-bullseye text-blue-600 mr-1"></i> Tarefas da Semana (${tasks.length})</h3><div class="flex items-center gap-1 bg-white p-1 rounded-xl shadow-sm border border-slate-200 dark:bg-cm-dark2 dark:border-gray-800"><button onclick="window.toggleLoFi()" id="lofi-btn" class="text-slate-400 font-bold text-sm px-3 py-1.5 rounded-lg hover:text-blue-600 transition flex items-center gap-2"><i class="fas fa-headphones-alt"></i> Lo-Fi</button></div></div>${filtersHtml}<div class="grid gap-4 fade-enter">`;
             
             let tasksToRender = tasks;
-            // ✅ Usa getTaskProgress para os filtros
             if(window.weekFilter === 'pending') tasksToRender = tasksToRender.filter(t => !window.getTaskProgress(t.id).doneStatus);
             if(window.weekFilter === 'done') tasksToRender = tasksToRender.filter(t => window.getTaskProgress(t.id).doneStatus);
             
             tasksToRender.forEach((t, idx) => {
-                // ✅ PONTO CENTRAL: toda leitura de progresso passa por getTaskProgress
-                const p = window.getTaskProgress(t.id);
-                const isChecked = p.doneStatus;
-                const prioClass = window.getPrioClass(t.prioridade, t.tipo);
+                const p = window.getTaskProgress(t.id); const isChecked = p.doneStatus; const prioClass = window.getPrioClass(t.prioridade, t.tipo);
                 const labels = window.getPrioLabel(t.prioridade, t.tipo, t.customizado);
-                const doneVal = parseInt(p.done) || 0;
-                const correctVal = parseInt(p.correct) || 0;
-                const acc = doneVal > 0 ? Math.round((correctVal / doneVal) * 100) : 0;
+                const doneVal = parseInt(p.done) || 0; const correctVal = parseInt(p.correct) || 0; const acc = doneVal > 0 ? Math.round((correctVal / doneVal) * 100) : 0;
                 
                 let isPomoActiveForThis = (window.activePomoTaskId === t.id);
-                window.expandedCards = window.expandedCards || {};
                 const isExpanded = window.expandedCards[t.id] || isPomoActiveForThis;
                 const accColor = doneVal > 0 ? window.getAccuracyColorClass(acc) : 'text-slate-400';
                 
@@ -1097,8 +1218,6 @@
         window.renderDashboard = function() { 
             const content = document.getElementById('content-area'); 
             content.classList.add('fade-enter');
-            // ✅ repairState antes de qualquer acesso a dados
-            window.repairState();
             
             let totalFocoSeconds = 0; Object.values(window.state.timeTracking || {}).forEach(v => totalFocoSeconds += v);
             const hrs = Math.floor(totalFocoSeconds / 3600); const mins = Math.floor((totalFocoSeconds % 3600) / 60);
@@ -1109,10 +1228,8 @@
             window.state.weeks.forEach(w => {
                 if(w.tasks) {
                     w.tasks.forEach(t => {
-                        // ✅ Usa getTaskProgress para leitura segura
                         const p = window.getTaskProgress(t.id);
-                        totalDone += parseInt(p.done) || 0;
-                        totalCorrect += parseInt(p.correct) || 0;
+                        totalDone += parseInt(p.done) || 0; totalCorrect += parseInt(p.correct) || 0;
                     });
                 }
             });
@@ -1152,17 +1269,15 @@
             Object.entries(mapping).forEach(([area, subCats]) => {
                 let areaTasks = 0; let areaDone = 0; let areaCorrect = 0; let areaTotalQ = 0;
                 window.state.weeks.forEach(w => {
-                    if(w.tasks) {
+                    if(w.tasks && !w.isVacation) {
                         w.tasks.forEach(t => {
                             const cat = t.category; let match = subCats.includes(cat);
                             if (!match && area === "Clínica Médica" && !["Cirurgia","Pediatria","Preventiva","Ginecologia","Obstetrícia"].includes(cat)) match = true;
                             if(match) {
                                 areaTasks++;
-                                // ✅ Usa getTaskProgress para leitura segura
                                 const p = window.getTaskProgress(t.id);
                                 if(p.doneStatus) areaDone++;
-                                areaTotalQ += parseInt(p.done) || 0;
-                                areaCorrect += parseInt(p.correct) || 0;
+                                areaTotalQ += parseInt(p.done) || 0; areaCorrect += parseInt(p.correct) || 0;
                             }
                         });
                     }
@@ -1213,10 +1328,12 @@
             let weekHtml = `<div class="bg-white dark:bg-cm-dark2 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm h-[280px] flex flex-col"><div class="flex justify-between items-center mb-4"><h3 class="font-bold text-sm text-slate-800 dark:text-white uppercase tracking-wider flex items-center gap-2"><i class="fas fa-bullseye text-green-500"></i> Semana Atual (${currW ? currW.week : ''})</h3><button onclick="window.switchView('week')" class="text-[10px] font-bold bg-slate-900 text-white px-3 py-1.5 rounded-lg hover:bg-slate-700 transition shadow-sm">Estudar</button></div><div class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-2.5">`;
             
             if (currW) {
-                if(!currW.tasks || currW.tasks.length === 0) weekHtml += `<div class="text-xs text-slate-500 italic">Nenhuma tarefa.</div>`;
-                else {
+                if(currW.isVacation) {
+                     weekHtml += `<div class="text-xs text-orange-500 italic mt-4">Semana marcada como férias.</div>`;
+                } else if(!currW.tasks || currW.tasks.length === 0) {
+                    weekHtml += `<div class="text-xs text-slate-500 italic mt-4">Nenhuma tarefa para esta semana.</div>`;
+                } else {
                     currW.tasks.forEach(t => {
-                        // ✅ Usa getTaskProgress para leitura segura
                         const p = window.getTaskProgress(t.id);
                         weekHtml += `<div class="flex items-center gap-3 p-2.5 rounded-xl border ${p.doneStatus ? 'bg-slate-50 border-transparent dark:bg-slate-800/50 opacity-60' : 'bg-white border-slate-200 dark:bg-cm-mid dark:border-gray-700'}"><div class="w-5 h-5 rounded-full border-2 ${p.doneStatus ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-gray-300 dark:border-gray-600'} flex items-center justify-center text-[10px] shrink-0"><i class="fas fa-check ${p.doneStatus?'block':'hidden'}"></i></div><div class="flex-1 min-w-0"><div class="font-bold text-xs text-slate-800 dark:text-white truncate">${t.subject}</div><div class="text-[9px] uppercase tracking-widest text-slate-500 font-bold mt-0.5 truncate">${t.category}</div></div></div>`;
                     });
@@ -1240,9 +1357,7 @@
         
         window.renderSearch = function() { 
             const content = document.getElementById('content-area'); 
-            content.classList.add('fade-enter');
-            // ✅ repairState antes de qualquer acesso a dados
-            window.repairState();
+            content.classList.add('fade-enter'); 
             
             const bd = window.bancoDeMaterias || [];
             
@@ -1295,13 +1410,13 @@
                     let areaMatch = true; if (window.searchFilterArea !== 'Todas') areaMatch = (areaMapping[t.area] || "Outros") === window.searchFilterArea;
                     let subMatch = true; if (window.searchFilterSub !== 'Todas') subMatch = t.subarea === window.searchFilterSub;
                     let prioMatch = true; if (window.searchFilterPrio !== 'Todas') prioMatch = t.prioridade == window.searchFilterPrio;
+                    
                     return textMatch && areaMatch && subMatch && prioMatch;
                 });
                 window._currentFilteredBank = filtered;
                 
-                // ✅ Usa getTaskProgress ao verificar se está agendado via nome
                 const scheduledIds = new Set();
-                window.state.weeks.forEach(w => { if(w.tasks) w.tasks.forEach(t => scheduledIds.add(t.subject)); });
+                window.state.weeks.forEach(w => { if(w.tasks && !w.isVacation) w.tasks.forEach(t => scheduledIds.add(t.subject)); });
 
                 if(filtered.length === 0) { resultsContainer.innerHTML = `<div class="col-span-full text-center py-24"><i class="fas fa-search-minus text-4xl text-slate-300 dark:text-slate-700 mb-4 block"></i><p class="text-slate-500 font-medium">Nenhuma tarefa encontrada no banco para estes filtros.</p></div>`; } 
                 else { 
@@ -1334,11 +1449,11 @@
                     let targetWeek = window.activeWeek; if(targetWeek === 0) targetWeek = 1;
                     const week = window.state.weeks.find(w => w.week === targetWeek);
                     if(week) {
+                        if(week.isVacation) return window.showToast('Não é possível adicionar tarefas a uma semana de férias.', 'error');
                         window.pushState();
                         if(!week.tasks) week.tasks = [];
                         const newId = `cstm_${Date.now()}`;
                         week.tasks.push({ id: newId, category: taskToAdd.area, subject: taskToAdd.tema, prioridade: taskToAdd.prioridade || 2, customizado: true, tipo: 'materia_nova', score: taskToAdd.score || 0 });
-                        // ✅ Garante entrada no progress para a nova tarefa
                         window.ensureProgress(newId);
                         window.triggerSave(); window.showToast(`Adicionado à Semana ${targetWeek}!`); window.updateUI();
                     }
@@ -1346,15 +1461,13 @@
             }
         }
         
-        window.updateGlobalProgress = function() {
-            // ✅ repairState garante que progress existe antes de iterar
-            window.repairState();
+        window.updateGlobalProgress = function() { 
+            window.repairState(); 
             let totalTasks = 0; let completed = 0; 
             window.state.weeks.forEach(w => { 
-                if(w.tasks) {
+                if(w.tasks && !w.isVacation) {
                     totalTasks += w.tasks.length; 
                     w.tasks.forEach(t => { 
-                        // ✅ Usa getTaskProgress para leitura segura
                         if (window.getTaskProgress(t.id).doneStatus) completed++; 
                     }); 
                 }
@@ -1366,13 +1479,12 @@
         }
         
         window.updateUI = function() { 
-            // ✅ repairState é sempre o primeiro passo — blindagem absoluta
             window.repairState();
-            window.expandedCards = window.expandedCards || {};
             window.renderNav(); 
             if(window.activeView === 'homepage') window.renderHomepage(); 
             else if(window.activeView === 'dashboard') window.renderDashboard(); 
             else if (window.activeView === 'search') window.renderSearch(); 
+            else if (window.activeView === 'simulados') window.renderSimulados();
             else window.renderWeek(); 
             window.updateGlobalProgress(); 
             window.pomoUpdateUI(); 
@@ -1387,10 +1499,7 @@
                     if (window.pomoPhase !== 'descanso') {
                         window.sessionStudySeconds += delta;
                         if (window.sessionStudySeconds >= 60) {
-                            const today = window.getTodayStr();
-                            window.repairState();
-                            window.state.timeTracking[today] = (window.state.timeTracking[today] || 0) + window.sessionStudySeconds;
-                            window.sessionStudySeconds = 0;
+                            const today = window.getTodayStr(); window.repairState(); window.state.timeTracking[today] = (window.state.timeTracking[today] || 0) + window.sessionStudySeconds; window.sessionStudySeconds = 0;
                         }
                     }
                     if(window.pomoTime <= 0) window.pomoNextPhase(); else window.pomoUpdateUI();
