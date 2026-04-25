@@ -14,7 +14,7 @@
 
     <script>
         tailwind.config = {
-            darkMode: 'class', // Habilita o modo noturno seguro nativo do Tailwind
+            darkMode: 'class', 
             theme: {
                 extend: {
                     colors: {
@@ -73,7 +73,7 @@
         .draggable-item:active { cursor: grabbing; opacity: 0.6; }
         .drop-target-week { background-color: rgba(59, 130, 246, 0.1) !important; border-color: #3b82f6 !important; transform: scale(1.02); }
 
-        /* Modais Centralizados e Desfocados */
+        /* Modais Centralizados */
         .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 1rem; }
         .modal-overlay.flex { display: flex; }
         .modal-content { background: white; border-radius: 1.5rem; padding: 2rem; width: 100%; max-width: 28rem; position: relative; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); animation: scaleIn 0.2s ease; max-height: 90vh; overflow-y: auto; text-align: left; }
@@ -99,7 +99,7 @@
         .settings-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 1000; display: none; }
         .settings-overlay.open { display: block; }
 
-        /* DARK MODE CSS - LIMPO PARA NÃO CONFLITAR */
+        /* DARK MODE CSS BLINDADO */
         body.dark .agenda-table { border-color: #334155; }
         body.dark .agenda-table td { border-color: #334155; }
         body.dark .time-col { background-color: #0f172a !important; color: #94a3b8 !important; border-right-color: #334155 !important;}
@@ -165,7 +165,7 @@
                     </div>
                 </div>
                 <div class="text-xl font-bold text-white w-12 text-right hidden sm:block" id="global-percent-text">0%</div>
-                <!-- Avatar -->
+                <!-- Avatar para não quebrar o JS -->
                 <div id="user-avatar" class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center uppercase cursor-pointer" onclick="window.openSettingsSidebar()">U</div>
             </div>
         </header>
@@ -501,7 +501,7 @@
             else if (window.pomoPhase === 'questoes') { window.isPomoRunning = false; window.playBeep('conquista'); confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 }, colors: ['#10b981', '#3b82f6', '#f59e0b'] }); window.showToast("Ciclo Completo! Excelente trabalho.", "success"); window.activePomoTaskId = null; window.updateUI(); return; }
             window.pomoUpdateUI();
         }
-        window.pomoToggle = function() { if(window.isPomoRunning) window.isPomoRunning = false; else { window.isPomoRunning = true; window.pomoLastTick = Date.now(); } window.pomoUpdateUI(); }
+        window.pomoToggle = function(taskId) { if(window.isPomoRunning) window.isPomoRunning = false; else { window.isPomoRunning = true; window.pomoLastTick = Date.now(); } window.pomoUpdateUI(); }
         window.pomoSkip = function() { window.pomoNextPhase(); }
         window.pomoStop = function() { window.isPomoRunning = false; window.activePomoTaskId = null; window.updateUI(); }
         
@@ -529,16 +529,28 @@
         window.getPrioClass = function(prio, tipo) { if(tipo === 'revisao') return 'prio-rev'; if(prio === 1) return 'prio-1'; if(prio === 2) return 'prio-2'; if(prio === 3) return 'prio-3'; return 'prio-4'; }
         window.getPrioLabel = function(prio, tipo, custom) { if(tipo === 'revisao') return 'REVISÃO'; if(custom) return 'CUSTOMIZADO'; if(prio===1) return 'ALTA'; if(prio===2) return 'MÉDIA'; if(prio===3) return 'BAIXA'; return 'OPCIONAL'; }
 
-        window.updateStreak = function() {
-            let streak = 0; let d = new Date();
-            while(true) {
-                let s = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-                if (window.state.dailyStats[s] && window.state.dailyStats[s] > 0) { streak++; d.setDate(d.getDate() - 1); } 
-                else if (s === window.getTodayStr()) d.setDate(d.getDate() - 1); 
-                else break;
-            }
-            return streak;
-        }
+        // A ALFÂNDEGA DE DADOS (Sanitização) - O Escudo do Sistema
+        window.sanitizeState = function(st) {
+            if (!st) st = {};
+            if (!st.weeks) st.weeks = [];
+            if (!st.progress) st.progress = {};
+            if (!st.dailyStats) st.dailyStats = {};
+            if (!st.timeTracking) st.timeTracking = {};
+            if (!st.simulados) st.simulados = [];
+
+            st.weeks.forEach(w => {
+                if (!w.timeSlots || !Array.isArray(w.timeSlots) || w.timeSlots.length === 0) {
+                    w.timeSlots = ["08:00 - 12:00", "14:00 - 18:00", "18:00 - 22:00"];
+                }
+                if (!w.agenda) w.agenda = {};
+                if (!w.tasks) w.tasks = [];
+                w.tasks.forEach(t => {
+                    if (!t.id) t.id = 'gen_' + Math.random().toString(36).substr(2, 9);
+                    if (!st.progress[t.id]) st.progress[t.id] = {};
+                });
+            });
+            return st;
+        };
 
         // ----------------------------------------------------------------------
         // INICIALIZAÇÃO E FIREBASE
@@ -564,12 +576,8 @@
                         if (!data.has_onboarded) { window.location.href = "onboarding.html"; return; }
                         
                         if (data.app_state && data.app_state.weeks && data.app_state.weeks.length > 0) {
-                            window.state = data.app_state;
-                            // REDE DE SEGURANÇA CONTRA O BUG DE OBJETOS VAZIOS:
-                            if(!window.state.progress) window.state.progress = {};
-                            if(!window.state.dailyStats) window.state.dailyStats = {};
-                            if(!window.state.timeTracking) window.state.timeTracking = {};
-                            if(!window.state.simulados) window.state.simulados = [];
+                            // PASSA PELA ALFÂNDEGA ANTES DE RENDERIZAR
+                            window.state = window.sanitizeState(data.app_state);
                             finishLoading();
                         } else {
                             generateSchedule(data.onboarding_data);
@@ -644,8 +652,11 @@
 
             newWeeks.forEach(w => { delete w._start; delete w._end; w.tasks.sort((a,b) => b.score - a.score); });
 
-            window.state.weeks = newWeeks; window.state.progress = {}; window.state.dailyStats = {}; window.state.timeTracking = {};
+            window.state.weeks = newWeeks; window.state.progress = {}; window.state.dailyStats = {};
             window.state.startDate = start.toISOString();
+
+            // ALFÂNDEGA PÓS GERAÇÃO
+            window.state = window.sanitizeState(window.state);
 
             await window.saveToCloud();
             finishLoading();
@@ -654,9 +665,7 @@
         function finishLoading() {
             document.getElementById('loader-overlay').style.display = 'none';
             window.toggleDarkMode(localStorage.getItem('darkMode') === '1');
-            
-            // Força a página inicial na inicialização
-            window.switchView('homepage');
+            window.updateUI();
         }
 
         window.saveToCloud = async function() { try { if(currentUser) await updateDoc(doc(db, "profiles", currentUser.uid), { app_state: window.state }); } catch(e) {} }
@@ -698,9 +707,11 @@
         // AÇÕES NAS TAREFAS
         // ----------------------------------------------------------------------
         window.ensureProgress = function(id) { 
+            // A alfândega já protegeu, mas dupla camada nunca é demais.
             if (!window.state.progress) window.state.progress = {};
             if (!window.state.progress[id]) window.state.progress[id] = {}; 
         }
+        
         window.toggleTask = function(id) { 
             window.pushState(); window.ensureProgress(id); const p = window.state.progress[id]; p.doneStatus = !p.doneStatus; 
             if(p.doneStatus) { p.completedDate = window.getTodayStr(); confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 }, colors: ['#10b981', '#3b82f6'] }); window.openReviewModal(id); } 
@@ -708,7 +719,6 @@
         }
         window.toggleCrucial = function(taskId) { window.pushState(); window.ensureProgress(taskId); window.state.progress[taskId].crucial = !window.state.progress[taskId].crucial; window.triggerSave(); window.updateUI(); if(window.state.progress[taskId].crucial) window.showToast('Marcado como Crucial 🔥');}
         
-        // Atualiza a % enquanto digita sem fechar o teclado
         window.calcTempAcc = function(taskId) {
             const doneInp = document.getElementById(`done_inp_${taskId}`);
             const corrInp = document.getElementById(`corr_inp_${taskId}`);
@@ -722,7 +732,6 @@
             }
         }
         
-        // Salva na nuvem ao perder o foco (blur)
         window.saveTaskQuestions = function(taskId, type, newVal) { 
             window.pushState(); 
             window.ensureProgress(taskId); 
@@ -850,68 +859,82 @@
         // ----------------------------------------------------------------------
         window.switchView = function(viewName) {
             window.activeView = viewName;
-            ['nav-dashboard', 'nav-search', 'nav-homepage'].forEach(id => { const el = document.getElementById(id); if (el) { el.classList.remove('bg-black', 'text-white', 'border-transparent', 'shadow-md'); el.classList.add('bg-white', 'text-slate-600', 'border-slate-200'); } });
-            const activeEl = document.getElementById(`nav-${viewName}`); if (activeEl) { activeEl.classList.remove('bg-white', 'text-slate-600', 'border-slate-200'); activeEl.classList.add('bg-black', 'text-white', 'border-transparent', 'shadow-md'); }
+            ['nav-dashboard', 'nav-search', 'nav-homepage'].forEach(id => { const el = document.getElementById(id); if (el) { el.classList.remove('bg-black', 'text-white', 'border-transparent', 'shadow-md'); el.classList.add('bg-white', 'text-slate-700', 'border-slate-200'); } });
+            const activeEl = document.getElementById(`nav-${viewName}`); if (activeEl) { activeEl.classList.remove('bg-white', 'text-slate-700', 'border-slate-200'); activeEl.classList.add('bg-black', 'text-white', 'border-transparent', 'shadow-md'); }
             if(viewName !== 'week') window.activeWeek = 0; 
             window.updateUI();
         }
 
         window.renderNav = function() {
             const nav = document.getElementById('week-nav'); if(!nav) return; nav.innerHTML = '';
+            
+            // Garantir que as semanas existem (Alfândega extra)
+            if(!window.state.weeks) return;
+
             window.state.weeks.forEach(w => {
-                let done = 0; w.tasks.forEach(t => { if(window.state.progress[t.id]?.doneStatus) done++; });
-                const pct = w.tasks.length ? Math.round((done/w.tasks.length)*100) : 0;
+                let done = 0; 
+                if(w.tasks) {
+                    w.tasks.forEach(t => { 
+                        if(window.state.progress && window.state.progress[t.id] && window.state.progress[t.id].doneStatus) done++; 
+                    });
+                }
+                const total = w.tasks ? w.tasks.length : 0;
+                const pct = total > 0 ? Math.round((done/total)*100) : 0;
+                
                 const active = (window.activeView === 'week' && window.activeWeek === w.week) ? 'ring-2 ring-slate-900 shadow-md font-bold z-10' : '';
-                let statusClass = done === w.tasks.length && w.tasks.length > 0 ? "bg-emerald-50 text-emerald-900 border-l-4 border-emerald-500" : done > 0 ? "bg-amber-50 text-amber-900 border-l-4 border-amber-400" : "bg-white text-slate-600 border-l-4 border-transparent hover:bg-slate-50";
+                let statusClass = done === total && total > 0 ? "bg-emerald-50 text-emerald-900 border-l-4 border-emerald-500" : done > 0 ? "bg-amber-50 text-amber-900 border-l-4 border-amber-400" : "bg-white text-slate-700 border-l-4 border-transparent hover:bg-slate-50 dark:bg-cm-dark2 dark:text-slate-200";
                 const dateRange = window.getWeekDateRange(w.week);
                 
-                nav.innerHTML += `<div onclick="window.activeWeek=${w.week}; window.switchView('week');" class="px-4 py-3.5 rounded-xl mb-2 cursor-pointer transition-all border border-slate-200 ${statusClass} ${active} flex justify-between items-center" ondragover="window.handleDragOverWeek(event)" ondragleave="window.handleDragLeaveWeek(event)" ondrop="window.handleDropWeek(event, ${w.week})"><div><span class="block text-[11px] font-bold uppercase tracking-wide opacity-80 pointer-events-none">Semana ${w.week}</span><span class="text-[9px] text-slate-500 font-mono mt-0.5 block font-medium pointer-events-none">${dateRange}</span></div><span class="text-xs font-bold bg-white/60 px-2 py-1 rounded shadow-sm pointer-events-none">${pct}%</span></div>`;
+                nav.innerHTML += `<div onclick="window.activeWeek=${w.week}; window.switchView('week');" class="px-4 py-3.5 rounded-xl mb-2 cursor-pointer transition-all border border-slate-200 dark:border-slate-700 ${statusClass} ${active} flex justify-between items-center" ondragover="window.handleDragOverWeek(event)" ondragleave="window.handleDragLeaveWeek(event)" ondrop="window.handleDropWeek(event, ${w.week})"><div><span class="block text-[11px] font-bold uppercase tracking-wide opacity-80 pointer-events-none">Semana ${w.week}</span><span class="text-[9px] text-slate-500 font-mono mt-0.5 block font-medium pointer-events-none">${dateRange}</span></div><span class="text-xs font-bold bg-white/60 dark:bg-slate-800 px-2 py-1 rounded shadow-sm pointer-events-none">${pct}%</span></div>`;
             });
         }
 
         window.renderHomepage = function() {
             const content = document.getElementById('content-area'); const nome = document.getElementById('user-name').innerText.split(' ')[0] || 'Doutor(a)';
             const currW = window.state.weeks.find(w => w.week === window.activeWeek) || window.state.weeks[0]; 
-            const todayTasks = currW ? currW.tasks.filter(t => !(window.state.progress[t.id] || {}).doneStatus) : [];
+            const todayTasks = currW ? (currW.tasks || []).filter(t => !(window.state.progress[t.id] || {}).doneStatus) : [];
             const dayIdx = new Date().getDay();
             let agendaHtml = '';
+            
             if(currW && currW.timeSlots) {
                 currW.timeSlots.forEach((slot, sIdx) => {
                     const cell = currW.agenda ? currW.agenda[`d${dayIdx}_s${sIdx}`] : null; const txt = cell ? cell.text : '- Estudo/Livre -';
                     agendaHtml += `<div class="flex items-start gap-4 timeline-item"><div class="text-[10px] font-bold font-mono text-slate-500 mt-1 w-20 shrink-0">${slot}</div><div class="font-bold text-sm text-slate-900 dark:text-white bg-white dark:bg-cm-mid px-4 py-2 border border-slate-200 dark:border-transparent rounded-xl flex-1 shadow-sm break-words" style="${cell && cell.color ? `--agenda-color: ${cell.color};` : ''}">${txt}</div></div>`;
                 });
+            } else {
+                agendaHtml = `<div class="text-sm text-slate-500 italic">Horários não encontrados.</div>`;
             }
 
-            let html = `<div class="max-w-4xl mx-auto fade-enter"><div class="mb-10"><h1 class="text-4xl font-serif text-slate-900 dark:text-white tracking-tight">Bom dia, ${nome}!</h1><p class="text-slate-500 dark:text-cm-muted mt-2 text-lg">Aqui está o seu painel de comando de hoje.</p></div><div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10"><div class="card-shadow bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-center items-center text-center"><div class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Semana Atual</div><div class="text-xl font-bold text-blue-600 flex items-center gap-2"><i class="fas fa-calendar-week"></i> Semana ${currW?currW.week:''}</div></div><div class="card-shadow bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-center items-center text-center"><div class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Questões Hoje</div><div class="text-3xl font-bold text-green-500 flex items-center gap-2">${window.state.dailyStats[window.getTodayStr()]||0}</div></div><div class="card-shadow p-6 rounded-2xl flex flex-col justify-center items-center text-center bg-black text-white dark:bg-cm-green dark:text-cm-dark border-transparent cursor-pointer hover:scale-105 transition" onclick="window.startPomoTask('avulso', 'Foco Livre')"><i class="fas fa-play text-2xl mb-2 text-blue-400 dark:text-cm-dark"></i><div class="font-bold text-sm">Foco Livre</div></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><div><h3 class="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2"><i class="far fa-clock"></i> A Linha do Tempo (Hoje)</h3><div class="card-shadow bg-white rounded-2xl border border-slate-200 p-8 pt-10">${agendaHtml}<button onclick="window.switchView('week')" class="w-full text-xs font-bold text-blue-600 hover:underline mt-4 text-center">Editar grade (Aba Semanas)</button></div></div><div><h3 class="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2"><i class="fas fa-tasks"></i> Foco Principal (Sem. ${currW?currW.week:''})</h3><div class="space-y-3">`;
-            todayTasks.slice(0, 6).forEach(t => { html += `<div class="card-shadow bg-white border border-slate-200 rounded-xl p-4 flex items-center gap-3 ${window.getPrioClass(t.prioridade, t.tipo)} cursor-pointer" onclick="window.activeWeek=${currW?currW.week:1}; window.switchView('week');"><div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-cm-dark2 flex items-center justify-center text-slate-400 shrink-0"><i class="fas fa-arrow-right"></i></div><div class="min-w-0"><div class="font-bold text-sm text-slate-900 dark:text-white leading-tight truncate">${t.subject}</div><span class="${window.getCategoryColor(t.category)} text-[8px] uppercase font-bold px-1.5 rounded border">${t.category}</span></div></div>`; });
+            let html = `<div class="max-w-4xl mx-auto fade-enter"><div class="mb-10"><h1 class="text-4xl font-serif text-slate-900 dark:text-white tracking-tight">Bom dia, ${nome}!</h1><p class="text-slate-500 dark:text-cm-muted mt-2 text-lg">Aqui está o seu painel de comando de hoje.</p></div><div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10"><div class="card-shadow bg-white dark:bg-cm-dark2 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-center items-center text-center"><div class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Semana Atual</div><div class="text-xl font-bold text-blue-600 flex items-center gap-2"><i class="fas fa-calendar-week"></i> Semana ${currW?currW.week:''}</div></div><div class="card-shadow bg-white dark:bg-cm-dark2 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-center items-center text-center"><div class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Questões Hoje</div><div class="text-3xl font-bold text-green-500 flex items-center gap-2">${window.state.dailyStats[window.getTodayStr()]||0}</div></div><div class="card-shadow p-6 rounded-2xl flex flex-col justify-center items-center text-center bg-black text-white dark:bg-cm-green dark:text-cm-dark border-transparent cursor-pointer hover:scale-105 transition" onclick="window.startPomoTask('avulso', 'Foco Livre')"><i class="fas fa-play text-2xl mb-2 text-blue-400 dark:text-cm-dark"></i><div class="font-bold text-sm">Foco Livre</div></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><div><h3 class="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2"><i class="far fa-clock"></i> A Linha do Tempo (Hoje)</h3><div class="card-shadow bg-white dark:bg-cm-dark2 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 pt-10">${agendaHtml}<button onclick="window.switchView('week')" class="w-full text-xs font-bold text-blue-600 hover:underline mt-4 text-center">Editar grade (Aba Semanas)</button></div></div><div><h3 class="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2"><i class="fas fa-tasks"></i> Foco Principal (Sem. ${currW?currW.week:''})</h3><div class="space-y-3">`;
+            todayTasks.slice(0, 6).forEach(t => { html += `<div class="card-shadow bg-white dark:bg-cm-dark2 border border-slate-200 dark:border-slate-800 rounded-xl p-4 flex items-center gap-3 ${window.getPrioClass(t.prioridade, t.tipo)} cursor-pointer" onclick="window.activeWeek=${currW?currW.week:1}; window.switchView('week');"><div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 shrink-0"><i class="fas fa-arrow-right"></i></div><div class="min-w-0"><div class="font-bold text-sm text-slate-900 dark:text-white leading-tight truncate">${t.subject}</div><span class="${window.getCategoryColor(t.category)} text-[8px] uppercase font-bold px-1.5 rounded border">${t.category}</span></div></div>`; });
             if(todayTasks.length===0) html+=`<div class="text-slate-400 text-sm text-center py-10 italic">Tudo concluído para esta semana! Descanse.</div>`;
             html += `</div></div></div></div>`; content.innerHTML = html;
         }
 
         window.renderWeek = function() {
-            if (!window.state.progress) window.state.progress = {};
             const w = window.state.weeks.find(d => d.week === window.activeWeek); 
             const content = document.getElementById('content-area'); 
             if(!w) {
-                content.innerHTML = `<div class="text-center py-20 text-slate-500">Semana não encontrada.</div>`;
+                content.innerHTML = `<div class="text-center py-20 text-slate-500">Semana não encontrada. Recalcule a Rota.</div>`;
                 return;
             }
             const days = window.getWeekDates(window.activeWeek);
             const timeSlots = w.timeSlots || ["08:00 - 12:00", "14:00 - 18:00", "18:00 - 22:00"];
             const agenda = w.agenda || {};
+            const tasks = w.tasks || [];
             
-            let agendaHtml = `<div class="mb-12 fade-enter"><div class="flex justify-between items-center mb-6"><div><h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Semana ${w.week}</h2><span class="text-sm font-bold text-slate-500 dark:text-emerald-500">${w.phase}</span></div><button onclick="window.openModal('replica-agenda')" class="text-xs font-bold bg-white dark:bg-cm-mid border border-slate-200 dark:border-gray-700 px-4 py-2 rounded-xl shadow-sm hover:border-blue-500 transition"><i class="fas fa-copy mr-1 text-blue-600"></i> Configurar Grade</button></div><div class="overflow-x-auto rounded-xl shadow-sm border border-slate-200 dark:border-gray-800 bg-white dark:bg-cm-dark2"><table class="agenda-table min-w-[700px]"><thead><tr><th class="p-3 w-24 bg-slate-900 text-white border-none">Horário</th>${days.map(d=>`<th class="p-3 bg-slate-900 text-white border-l border-slate-700 text-center"><div class="font-bold text-sm uppercase tracking-widest">${d.name}</div><div class="text-[10px] text-slate-400 font-mono mt-1">${d.date}</div></th>`).join('')}</tr></thead><tbody>`;
+            let agendaHtml = `<div class="mb-12 fade-enter"><div class="flex justify-between items-center mb-6"><div><h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Semana ${w.week}</h2><span class="text-sm font-bold text-slate-500 dark:text-emerald-500">${w.phase || 'Estudo Livre'}</span></div><button onclick="window.openModal('replica-agenda')" class="text-xs font-bold bg-white dark:bg-cm-mid border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl shadow-sm hover:border-blue-500 transition"><i class="fas fa-copy mr-1 text-blue-600"></i> Configurar Grade</button></div><div class="overflow-x-auto rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-cm-dark2"><table class="agenda-table min-w-[700px]"><thead><tr><th class="p-3 w-24 bg-slate-900 text-white border-none">Horário</th>${days.map(d=>`<th class="p-3 bg-slate-900 text-white border-l border-slate-700 text-center"><div class="font-bold text-sm uppercase tracking-widest">${d.name}</div><div class="text-[10px] text-slate-400 font-mono mt-1">${d.date}</div></th>`).join('')}</tr></thead><tbody>`;
             timeSlots.forEach((slot, sIdx) => {
-                agendaHtml += `<tr><td class="p-0 w-24 align-middle time-col relative border-r border-slate-200 dark:border-gray-800 bg-slate-50/50 dark:bg-cm-mid/30"><div class="w-full text-center font-mono text-[10px] font-bold outline-none p-3" contenteditable="true" onblur="window.updateTimeSlot(${window.activeWeek}, ${sIdx}, this.innerText)">${slot}</div><div class="row-controls"><button onclick="window.addAgendaRowAt(${window.activeWeek}, ${sIdx})" class="text-[10px] text-blue-600 hover:bg-blue-50 py-1"><i class="fas fa-plus"></i></button><button onclick="window.requestRemoveAgendaRow(${window.activeWeek}, ${sIdx})" class="text-[10px] text-red-600 hover:bg-red-50 py-1"><i class="fas fa-minus"></i></button></div></td>`;
+                agendaHtml += `<tr><td class="p-0 w-24 align-middle time-col relative border-r border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30"><div class="w-full text-center font-mono text-[10px] font-bold outline-none p-3" contenteditable="true" onblur="window.updateTimeSlot(${window.activeWeek}, ${sIdx}, this.innerText)">${slot}</div><div class="row-controls"><button onclick="window.addAgendaRowAt(${window.activeWeek}, ${sIdx})" class="text-[10px] text-blue-600 hover:bg-blue-50 py-1"><i class="fas fa-plus"></i></button><button onclick="window.requestRemoveAgendaRow(${window.activeWeek}, ${sIdx})" class="text-[10px] text-red-600 hover:bg-red-50 py-1"><i class="fas fa-minus"></i></button></div></td>`;
                 days.forEach((d, dIdx) => { const c = agenda[`${d.key}_s${sIdx}`] || {}; const bgColor = c.color || '#ffffff'; agendaHtml += `<td class="p-0 h-16 relative"><div class="agenda-cell w-full h-full p-2 outline-none flex items-center justify-center text-xs font-medium text-slate-800 dark:text-white" style="background-color: ${bgColor}; --agenda-color: ${bgColor};" contenteditable="true" onblur="window.updateAgendaCell(${window.activeWeek}, '${d.key}', ${sIdx}, this.innerText)">${c.text||''}</div></td>`; }); agendaHtml += `</tr>`;
             });
             agendaHtml += `</tbody></table></div><p class="text-[10px] text-slate-500 mt-2"><i class="fas fa-info-circle text-blue-500"></i> Edite a tabela acima para configurar as suas aulas. As alterações são guardadas na nuvem.</p></div>`;
 
             let filtersHtml = `<div class="flex flex-wrap gap-2 mb-4"><button onclick="window.setWeekFilter('all')" class="filter-chip shadow-sm ${window.weekFilter==='all'?'active':''}">Todas</button><button onclick="window.setWeekFilter('pending')" class="filter-chip shadow-sm ${window.weekFilter==='pending'?'active':''}">Pendentes</button><button onclick="window.setWeekFilter('done')" class="filter-chip shadow-sm ${window.weekFilter==='done'?'active':''}">Concluídas</button></div>`;
 
-            let tasksHtml = `<div class="mb-4 flex justify-between items-center"><h3 class="text-sm font-bold uppercase tracking-widest text-slate-500"><i class="fas fa-bullseye text-blue-600 mr-1"></i> Tarefas da Semana (${w.tasks.length})</h3><div class="flex items-center gap-1 bg-white p-1 rounded-xl shadow-sm border border-slate-200 dark:bg-cm-dark2 dark:border-gray-800"><button onclick="window.toggleLoFi()" id="lofi-btn" class="text-slate-400 font-bold text-sm px-3 py-1.5 rounded-lg hover:text-blue-600 transition flex items-center gap-2"><i class="fas fa-headphones-alt"></i> Lo-Fi</button></div></div>${filtersHtml}<div class="grid gap-4 fade-enter">`;
+            let tasksHtml = `<div class="mb-4 flex justify-between items-center"><h3 class="text-sm font-bold uppercase tracking-widest text-slate-500"><i class="fas fa-bullseye text-blue-600 mr-1"></i> Tarefas da Semana (${tasks.length})</h3><div class="flex items-center gap-1 bg-white p-1 rounded-xl shadow-sm border border-slate-200 dark:bg-slate-800 dark:border-slate-700"><button onclick="window.toggleLoFi()" id="lofi-btn" class="text-slate-400 font-bold text-sm px-3 py-1.5 rounded-lg hover:text-blue-600 transition flex items-center gap-2"><i class="fas fa-headphones-alt"></i> Lo-Fi</button></div></div>${filtersHtml}<div class="grid gap-4 fade-enter">`;
             
-            let tasksToRender = w.tasks;
+            let tasksToRender = tasks;
             if(window.weekFilter === 'pending') tasksToRender = tasksToRender.filter(t => !window.state.progress[t.id]?.doneStatus);
             if(window.weekFilter === 'done') tasksToRender = tasksToRender.filter(t => window.state.progress[t.id]?.doneStatus);
             
@@ -931,7 +954,7 @@
                     pomoUI = `<div class="mt-4 bg-slate-50 dark:bg-cm-mid border border-slate-200 dark:border-gray-800 p-5 rounded-2xl w-full shadow-inner"><div class="flex justify-between text-[9px] font-bold uppercase tracking-widest mb-3"><span id="pomo-lbl-1-${t.id}" class="${window.pomoPhase === 'aula' ? 'text-blue-600' : 'text-slate-500'}"><i class="fas fa-book-open"></i> Aula</span><span id="pomo-lbl-2-${t.id}" class="${window.pomoPhase === 'descanso' ? 'text-amber-500' : 'text-slate-500'}"><i class="fas fa-coffee"></i> Pausa</span><span id="pomo-lbl-3-${t.id}" class="${window.pomoPhase === 'questoes' ? 'text-emerald-600' : 'text-slate-500'}"><i class="fas fa-pen"></i> Questões</span></div><div class="flex gap-2 h-2 mb-5"><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="pomo-bar-1-${t.id}" class="h-full bg-blue-500 transition-all duration-1000" style="width: ${pct1}%"></div></div><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="pomo-bar-2-${t.id}" class="h-full bg-amber-400 transition-all duration-1000" style="width: ${pct2}%"></div></div><div class="flex-1 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden"><div id="pomo-bar-3-${t.id}" class="h-full bg-emerald-500 transition-all duration-1000" style="width: ${pct3}%"></div></div></div><div class="flex justify-between items-center"><div id="pomo-display-${t.id}" class="font-mono font-bold text-4xl text-slate-900 dark:text-white tracking-tight">${displayTime}</div><div class="flex gap-2 items-center"><button id="pomo-btn-play-${t.id}" onclick="window.pomoToggle('${t.id}')" class="w-10 h-10 flex items-center justify-center text-white rounded-xl shadow-md ${window.isPomoRunning ? 'bg-red-500' : 'bg-slate-900 dark:bg-cm-green'}">${window.isPomoRunning ? '<i class="fas fa-pause text-xs"></i>' : '<i class="fas fa-play text-xs ml-0.5"></i>'}</button><button onclick="window.pomoSkip()" class="px-4 py-2.5 bg-white dark:bg-cm-dark2 border border-slate-200 text-slate-700 dark:text-gray-300 rounded-xl text-[10px] font-bold uppercase tracking-wider hover:bg-slate-50 transition shadow-sm">Pular <i class="fas fa-forward"></i></button><button onclick="window.pomoStop()" class="px-4 py-2.5 bg-red-50 border border-red-200 text-red-600 rounded-xl text-[10px] font-bold uppercase tracking-wider hover:bg-red-100 transition shadow-sm"><i class="fas fa-times"></i> Fechar</button></div></div></div>`;
                 }
 
-                tasksHtml += `<div class="card-shadow p-5 flex flex-col lg:flex-row gap-5 bg-white dark:bg-cm-dark2 border border-slate-200 dark:border-gray-800 rounded-2xl relative group draggable-item ${prioClass} ${isChecked?'opacity-60 bg-slate-50 dark:bg-slate-800':''}" draggable="true" ondragstart="window.handleDragStart(event, ${window.activeWeek}, ${idx})" ondragover="window.handleDragOverTask(event)" ondragleave="window.handleDragLeaveTask(event)" ondrop="window.handleDropTask(event, ${idx})">
+                tasksHtml += `<div class="card-shadow p-5 flex flex-col lg:flex-row gap-5 bg-white dark:bg-cm-dark2 border border-slate-200 dark:border-slate-800 rounded-2xl relative group draggable-item ${prioClass} ${isChecked?'opacity-60 bg-slate-50 dark:bg-slate-800':''}" draggable="true" ondragstart="window.handleDragStart(event, ${window.activeWeek}, ${idx})" ondragover="window.handleDragOverTask(event)" ondragleave="window.handleDragLeaveTask(event)" ondrop="window.handleDropTask(event, ${idx})">
                     <div class="flex items-center gap-4 flex-1 min-w-0">
                         <div class="cursor-move text-slate-300 hover:text-blue-500 drag-handle transition shrink-0"><i class="fas fa-grip-vertical text-lg"></i></div>
                         <div class="relative shrink-0"><input type="checkbox" class="peer appearance-none w-6 h-6 border-2 border-slate-300 rounded-lg checked:bg-slate-900 checked:border-slate-900 transition cursor-pointer" ${isChecked?'checked':''} onchange="window.toggleTask('${t.id}')"><i class="fas fa-check text-white absolute top-1 left-1 pointer-events-none opacity-0 peer-checked:opacity-100 text-xs transition"></i></div>
@@ -946,22 +969,22 @@
                     </div>
                     
                     <div class="flex items-center gap-4 shrink-0 flex-wrap lg:flex-nowrap">
-                        <div class="flex items-center gap-3 bg-slate-50 dark:bg-slate-800 p-2.5 rounded-xl border border-slate-200 dark:border-gray-700 shadow-inner">
+                        <div class="flex items-center gap-3 bg-slate-50 dark:bg-slate-800 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-inner">
                             <div class="text-center"><span class="text-[9px] font-bold text-slate-500 uppercase block tracking-wider mb-1">Feitas</span><input type="number" id="done_inp_${t.id}" value="${doneVal || ''}" onblur="window.saveTaskQuestions('${t.id}', 'done', this.value)" oninput="window.calcTempAcc('${t.id}')" class="w-10 bg-transparent text-center font-bold text-slate-900 dark:text-white outline-none border-b-2 border-slate-300 focus:border-blue-500 py-0.5 transition" placeholder="-"></div>
                             <div class="text-center"><span class="text-[9px] font-bold text-slate-500 uppercase block tracking-wider mb-1">Acertos</span><input type="number" id="corr_inp_${t.id}" value="${correctVal || ''}" onblur="window.saveTaskQuestions('${t.id}', 'correct', this.value)" oninput="window.calcTempAcc('${t.id}')" class="w-10 bg-transparent text-center font-bold text-slate-900 dark:text-white outline-none border-b-2 border-slate-300 focus:border-blue-500 py-0.5 transition" placeholder="-"></div>
-                            <div class="pl-3 border-l border-slate-200 dark:border-gray-700 text-center min-w-[3.5rem]"><span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">%</span><span id="pct_span_${t.id}" class="text-lg font-bold ${accColor}">${acc}%</span></div>
+                            <div class="pl-3 border-l border-slate-200 dark:border-slate-700 text-center min-w-[3.5rem]"><span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">%</span><span id="pct_span_${t.id}" class="text-lg font-bold ${accColor}">${acc}%</span></div>
                         </div>
                         
-                        <div class="flex items-center gap-2 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-gray-800 pt-3 lg:pt-0 lg:pl-4 w-full lg:w-auto">
-                            <button onclick="window.openNotesModal('${t.id}')" class="w-9 h-9 rounded-full bg-white border border-slate-200 dark:border-gray-700 dark:bg-cm-mid text-slate-500 hover:bg-blue-100 hover:text-blue-600 transition flex items-center justify-center shadow-sm" title="Anotações e Links"><i class="fas fa-book-open"></i></button>
-                            <button onclick="window.requestDeleteTask(${window.activeWeek}, ${idx})" class="w-9 h-9 rounded-full bg-white border border-slate-200 dark:border-gray-700 dark:bg-cm-mid text-slate-500 hover:bg-red-100 hover:text-red-600 transition flex items-center justify-center shadow-sm" title="Excluir"><i class="fas fa-trash-alt"></i></button>
+                        <div class="flex items-center gap-2 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-700 pt-3 lg:pt-0 lg:pl-4 w-full lg:w-auto">
+                            <button onclick="window.openNotesModal('${t.id}')" class="w-9 h-9 rounded-full bg-white border border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-slate-500 hover:bg-blue-100 hover:text-blue-600 transition flex items-center justify-center shadow-sm" title="Anotações e Links"><i class="fas fa-book-open"></i></button>
+                            <button onclick="window.requestDeleteTask(${window.activeWeek}, ${idx})" class="w-9 h-9 rounded-full bg-white border border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-slate-500 hover:bg-red-100 hover:text-red-600 transition flex items-center justify-center shadow-sm" title="Excluir"><i class="fas fa-trash-alt"></i></button>
                             <button onclick="window.startPomoForTask('${t.id}')" class="px-4 py-2 rounded-full bg-slate-900 dark:bg-cm-mid text-white text-[10px] font-bold uppercase tracking-wider hover:bg-slate-700 transition shadow-sm flex items-center gap-2 ml-auto ${isPomoActiveForThis ? 'hidden' : ''}"><i class="fas fa-stopwatch text-blue-400"></i> Sessão</button>
                         </div>
                     </div>
                     ${pomoUI}
                 </div>`;
             });
-            tasksHtml += `<button onclick="window.openAddTaskModal(${window.activeWeek})" class="w-full py-8 border-2 border-dashed border-slate-300 dark:border-gray-700 rounded-3xl text-slate-400 hover:text-blue-600 hover:border-blue-400 hover:bg-blue-50 transition font-bold text-sm mt-2 flex items-center justify-center gap-3 group"><span class="w-10 h-10 rounded-full bg-white dark:bg-cm-mid border border-slate-200 flex items-center justify-center group-hover:bg-blue-100 transition shadow-sm text-lg"><i class="fas fa-plus"></i></span> Inserir Tema Avulso</button></div>`;
+            tasksHtml += `<button onclick="window.openAddTaskModal(${window.activeWeek})" class="w-full py-8 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-3xl text-slate-500 hover:text-blue-600 hover:border-blue-400 hover:bg-blue-50 transition font-bold text-sm mt-2 flex items-center justify-center gap-3 group"><span class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center group-hover:bg-blue-100 transition shadow-sm text-lg"><i class="fas fa-plus"></i></span> Inserir Tema Avulso</button></div>`;
             content.innerHTML = agendaHtml + tasksHtml;
         }
 
@@ -975,37 +998,34 @@
             let totalQuestões = 0; Object.values(window.state.dailyStats || {}).forEach(v => totalQuestões += v);
             
             let totalDone = 0; let totalCorrect = 0;
-            window.state.weeks.forEach(w => w.tasks.forEach(t => {
-                const p = window.state.progress[t.id] || {};
-                totalDone += parseInt(p.done) || 0; totalCorrect += parseInt(p.correct) || 0;
-            }));
+            window.state.weeks.forEach(w => {
+                if(w.tasks) {
+                    w.tasks.forEach(t => {
+                        const p = window.state.progress[t.id] || {};
+                        totalDone += parseInt(p.done) || 0; totalCorrect += parseInt(p.correct) || 0;
+                    });
+                }
+            });
             const precisao = window.calculateAccuracy(totalDone, totalCorrect);
-            
-            let streak = 0; let d = new Date();
-            while(true) {
-                let s = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-                if (window.state.dailyStats[s] && window.state.dailyStats[s] > 0) { streak++; d.setDate(d.getDate() - 1); } 
-                else if (s === window.getTodayStr()) { d.setDate(d.getDate() - 1); } 
-                else break;
-            }
+            const streak = window.updateStreak();
 
-            let html = `<h2 class="text-3xl font-black text-slate-800 dark:text-white mb-6 tracking-tight flex items-center gap-3"><i class="fas fa-chart-pie text-blue-600"></i> Dashboard & Metas</h2>`;
+            let html = `<h2 class="text-3xl font-black text-slate-900 dark:text-white mb-6 tracking-tight flex items-center gap-3"><i class="fas fa-chart-pie text-blue-600"></i> Dashboard & Metas</h2>`;
             
             // BLOCO 1: KPIs
             html += `<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div class="bg-white dark:bg-cm-dark2 p-5 rounded-2xl border border-slate-200 dark:border-gray-800 shadow-sm">
+                <div class="bg-white dark:bg-cm-dark2 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
                     <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1 flex justify-between"><span>Tempo de Foco</span> <i class="fas fa-stopwatch text-blue-500"></i></div>
                     <div class="text-2xl font-bold text-slate-900 dark:text-white">${hrs}<span class="text-sm text-slate-500 font-medium">h</span> ${mins}<span class="text-sm text-slate-500 font-medium">m</span></div>
                 </div>
-                <div class="bg-white dark:bg-cm-dark2 p-5 rounded-2xl border border-slate-200 dark:border-gray-800 shadow-sm">
+                <div class="bg-white dark:bg-cm-dark2 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
                     <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1 flex justify-between"><span>Questões Feitas</span> <i class="fas fa-pen-alt text-emerald-500"></i></div>
                     <div class="text-2xl font-bold text-slate-900 dark:text-white">${totalQuestões}</div>
                 </div>
-                <div class="bg-white dark:bg-cm-dark2 p-5 rounded-2xl border border-slate-200 dark:border-gray-800 shadow-sm">
+                <div class="bg-white dark:bg-cm-dark2 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
                     <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1 flex justify-between"><span>Precisão Média</span> <i class="fas fa-bullseye text-purple-500"></i></div>
                     <div class="text-2xl font-bold text-slate-900 dark:text-white">${precisao}%</div>
                 </div>
-                <div class="bg-white dark:bg-cm-dark2 p-5 rounded-2xl border border-slate-200 dark:border-gray-800 shadow-sm">
+                <div class="bg-white dark:bg-cm-dark2 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
                     <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1 flex justify-between"><span>Ofensiva</span> <i class="fas fa-fire text-orange-500"></i></div>
                     <div class="text-2xl font-bold text-slate-900 dark:text-white">${streak} <span class="text-sm text-slate-500 font-medium">dias</span></div>
                 </div>
@@ -1013,7 +1033,7 @@
             
             // BLOCO 2 & 3: Especialidades e Heatmap
             html += `<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-                <div class="lg:col-span-2 bg-white dark:bg-cm-dark2 p-6 rounded-3xl border border-slate-200 dark:border-gray-800 shadow-sm flex flex-col">
+                <div class="lg:col-span-2 bg-white dark:bg-cm-dark2 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col">
                     <h3 class="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider mb-6 flex items-center gap-2"><i class="fas fa-layer-group text-blue-500"></i> Domínio por Especialidade</h3>
                     <div class="space-y-5 flex-1">`;
                     
@@ -1021,16 +1041,20 @@
             
             Object.entries(mapping).forEach(([area, subCats]) => {
                 let areaTasks = 0; let areaDone = 0; let areaCorrect = 0; let areaTotalQ = 0;
-                window.state.weeks.forEach(w => w.tasks.forEach(t => {
-                    const cat = t.category; let match = subCats.includes(cat);
-                    if (!match && area === "Clínica Médica" && !["Cirurgia","Pediatria","Preventiva","Ginecologia","Obstetrícia"].includes(cat)) match = true;
-                    if(match) {
-                        areaTasks++;
-                        const p = window.state.progress[t.id] || {};
-                        if(p.doneStatus) areaDone++;
-                        areaTotalQ += parseInt(p.done) || 0; areaCorrect += parseInt(p.correct) || 0;
+                window.state.weeks.forEach(w => {
+                    if(w.tasks) {
+                        w.tasks.forEach(t => {
+                            const cat = t.category; let match = subCats.includes(cat);
+                            if (!match && area === "Clínica Médica" && !["Cirurgia","Pediatria","Preventiva","Ginecologia","Obstetrícia"].includes(cat)) match = true;
+                            if(match) {
+                                areaTasks++;
+                                const p = window.state.progress[t.id] || {};
+                                if(p.doneStatus) areaDone++;
+                                areaTotalQ += parseInt(p.done) || 0; areaCorrect += parseInt(p.correct) || 0;
+                            }
+                        });
                     }
-                }));
+                });
                 const pbar = areaTasks > 0 ? Math.round((areaDone / areaTasks) * 100) : 0;
                 const aAcc = window.calculateAccuracy(areaTotalQ, areaCorrect);
                 let color = "bg-blue-500"; if(area === "Cirurgia") color = "bg-red-500"; if(area === "Ginecologia e Obstetrícia") color = "bg-pink-500"; if(area === "Pediatria") color = "bg-yellow-500"; if(area === "Preventiva") color = "bg-emerald-500";
@@ -1061,7 +1085,7 @@
                 heatmapHtml += `<div class="w-4 h-4 rounded-sm ${colorClass} transition hover:scale-125 cursor-pointer" title="${d.toLocaleDateString('pt-BR')}: ${count} questões"></div>`;
             }
 
-            html += `<div class="lg:col-span-1 bg-white dark:bg-cm-dark2 p-6 rounded-3xl border border-slate-200 dark:border-gray-800 shadow-sm flex flex-col justify-between">
+            html += `<div class="lg:col-span-1 bg-white dark:bg-cm-dark2 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
                 <div>
                     <h3 class="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider mb-1 flex items-center gap-2"><i class="fas fa-fire text-orange-500"></i> Mapa de Constância</h3>
                     <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-6">Últimos 30 dias</p>
@@ -1071,17 +1095,19 @@
             </div></div>`;
 
             // BLOCO 4 & 5: Gráfico e Resumo da Semana
-            const qCanvas = `<div class="bg-white dark:bg-cm-dark2 p-6 rounded-3xl border border-slate-200 dark:border-gray-800 shadow-sm relative h-[280px] w-full flex flex-col"><h3 class="font-bold text-sm text-slate-800 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2"><i class="fas fa-chart-line text-blue-500"></i> Evolução de Questões (14 dias)</h3><div class="relative flex-1 w-full"><canvas id="chart-questions"></canvas></div></div>`;
+            const qCanvas = `<div class="bg-white dark:bg-cm-dark2 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm relative h-[280px] w-full flex flex-col"><h3 class="font-bold text-sm text-slate-800 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2"><i class="fas fa-chart-line text-blue-500"></i> Evolução de Questões (14 dias)</h3><div class="relative flex-1 w-full"><canvas id="chart-questions"></canvas></div></div>`;
             
             const currW = window.state.weeks.find(w => w.week === window.activeWeek) || window.state.weeks[0];
-            let weekHtml = `<div class="bg-white dark:bg-cm-dark2 p-6 rounded-3xl border border-slate-200 dark:border-gray-800 shadow-sm h-[280px] flex flex-col"><div class="flex justify-between items-center mb-4"><h3 class="font-bold text-sm text-slate-800 dark:text-white uppercase tracking-wider flex items-center gap-2"><i class="fas fa-bullseye text-green-500"></i> Semana Atual (${currW ? currW.week : ''})</h3><button onclick="window.switchView('week')" class="text-[10px] font-bold bg-slate-900 text-white px-3 py-1.5 rounded-lg hover:bg-slate-700 transition shadow-sm">Estudar</button></div><div class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-2.5">`;
+            let weekHtml = `<div class="bg-white dark:bg-cm-dark2 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm h-[280px] flex flex-col"><div class="flex justify-between items-center mb-4"><h3 class="font-bold text-sm text-slate-800 dark:text-white uppercase tracking-wider flex items-center gap-2"><i class="fas fa-bullseye text-green-500"></i> Semana Atual (${currW ? currW.week : ''})</h3><button onclick="window.switchView('week')" class="text-[10px] font-bold bg-slate-900 text-white px-3 py-1.5 rounded-lg hover:bg-slate-700 transition shadow-sm">Estudar</button></div><div class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-2.5">`;
             
             if (currW) {
-                if(currW.tasks.length === 0) weekHtml += `<div class="text-xs text-slate-500 italic">Nenhuma tarefa.</div>`;
-                currW.tasks.forEach(t => {
-                    const p = window.state.progress[t.id] || {};
-                    weekHtml += `<div class="flex items-center gap-3 p-2.5 rounded-xl border ${p.doneStatus ? 'bg-slate-50 border-transparent dark:bg-slate-800/50 opacity-60' : 'bg-white border-slate-200 dark:bg-cm-mid dark:border-gray-700'}"><div class="w-5 h-5 rounded-full border-2 ${p.doneStatus ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-gray-300 dark:border-gray-600'} flex items-center justify-center text-[10px] shrink-0"><i class="fas fa-check ${p.doneStatus?'block':'hidden'}"></i></div><div class="flex-1 min-w-0"><div class="font-bold text-xs text-slate-800 dark:text-white truncate">${t.subject}</div><div class="text-[9px] uppercase tracking-widest text-slate-500 font-bold mt-0.5 truncate">${t.category}</div></div></div>`;
-                });
+                if(!currW.tasks || currW.tasks.length === 0) weekHtml += `<div class="text-xs text-slate-500 italic">Nenhuma tarefa.</div>`;
+                else {
+                    currW.tasks.forEach(t => {
+                        const p = window.state.progress[t.id] || {};
+                        weekHtml += `<div class="flex items-center gap-3 p-2.5 rounded-xl border ${p.doneStatus ? 'bg-slate-50 border-transparent dark:bg-slate-800/50 opacity-60' : 'bg-white border-slate-200 dark:bg-cm-mid dark:border-gray-700'}"><div class="w-5 h-5 rounded-full border-2 ${p.doneStatus ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-gray-300 dark:border-gray-600'} flex items-center justify-center text-[10px] shrink-0"><i class="fas fa-check ${p.doneStatus?'block':'hidden'}"></i></div><div class="flex-1 min-w-0"><div class="font-bold text-xs text-slate-800 dark:text-white truncate">${t.subject}</div><div class="text-[9px] uppercase tracking-widest text-slate-500 font-bold mt-0.5 truncate">${t.category}</div></div></div>`;
+                    });
+                }
             }
             weekHtml += `</div></div>`;
 
@@ -1103,9 +1129,11 @@
             const content = document.getElementById('content-area'); 
             content.classList.add('fade-enter'); 
             
+            const bd = window.bancoDeMaterias || [];
+            
             // Calculo Dinâmico para os Filtros
-            const counts = { 'Todas': window.bancoDeMaterias.length };
-            mainCategories.forEach(cat => { counts[cat] = window.bancoDeMaterias.filter(t => (areaMapping[t.area] || 'Outros') === cat).length; });
+            const counts = { 'Todas': bd.length };
+            mainCategories.forEach(cat => { counts[cat] = bd.filter(t => (areaMapping[t.area] || 'Outros') === cat).length; });
 
             const filterButtonsArea = ['Todas', ...mainCategories].map(area => {
                 const label = area === 'Clínica' ? 'Clínica Médica' : area; const count = counts[area] || 0;
@@ -1117,24 +1145,24 @@
             // Sub-áreas (Filtro Cascata)
             let subAreaHtml = '';
             if (window.searchFilterArea !== 'Todas') {
-                const subAreas = [...new Set(window.bancoDeMaterias.filter(t => (areaMapping[t.area] || 'Outros') === window.searchFilterArea).map(t => t.subarea))].sort();
+                const subAreas = [...new Set(bd.filter(t => (areaMapping[t.area] || 'Outros') === window.searchFilterArea).map(t => t.subarea))].sort();
                 if(subAreas.length > 0) {
                     const subButtons = ['Todas', ...subAreas].map(sub => {
                         const activeClass = window.searchFilterSub === sub ? 'bg-slate-700 text-white border-slate-700' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50';
                         return `<button onclick="window.toggleSearchSub('${sub}')" class="filter-chip shadow-sm ${activeClass}">${sub}</button>`;
                     }).join('');
-                    subAreaHtml = `<div class="flex flex-wrap gap-2 mt-4 pl-4 border-l-2 border-slate-200 dark:border-gray-700">${subButtons}</div>`;
+                    subAreaHtml = `<div class="flex flex-wrap gap-2 mt-4 pl-4 border-l-2 border-slate-200 dark:border-slate-700">${subButtons}</div>`;
                 }
             }
 
             // Prioridades
             const prios = [{l:'Todas', v:'Todas'}, {l:'Alta (1)', v:1}, {l:'Média (2)', v:2}, {l:'Baixa (3)', v:3}, {l:'Opcional (4)', v:4}];
             const prioHtml = `<div class="flex flex-wrap items-center gap-2 mt-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest"><i class="fas fa-filter mr-1"></i> Prioridade: ` + prios.map(p => {
-                const activeClass = window.searchFilterPrio === p.v ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50';
+                const activeClass = window.searchFilterPrio == p.v ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50';
                 return `<button onclick="window.toggleSearchPrio('${p.v}')" class="filter-chip shadow-sm ${activeClass}">${p.l}</button>`;
             }).join('') + `</div>`;
 
-            const html = `<div class="bg-white dark:bg-cm-dark2 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-gray-800 min-h-[600px]"><div class="mb-10"><h2 class="text-3xl font-black text-slate-800 dark:text-white mb-6 tracking-tight">Buscar Tarefas</h2><input type="text" id="global-search-input" placeholder="Digite o tema, categoria ou palavra-chave..." class="w-full text-lg p-5 border border-slate-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none bg-slate-50 dark:bg-cm-mid transition shadow-sm mb-6 font-medium dark:text-white"><div class="flex flex-col"><div class="flex flex-wrap gap-2">${filterButtonsArea}</div>${subAreaHtml}${prioHtml}</div></div><div id="search-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div></div>`;
+            const html = `<div class="bg-white dark:bg-cm-dark2 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 min-h-[600px]"><div class="mb-10"><h2 class="text-3xl font-black text-slate-900 dark:text-white mb-6 tracking-tight">Buscar Tarefas</h2><input type="text" id="global-search-input" placeholder="Digite o tema, categoria ou palavra-chave..." class="w-full text-lg p-5 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none bg-slate-50 dark:bg-cm-mid transition shadow-sm mb-6 font-medium dark:text-white"><div class="flex flex-col"><div class="flex flex-wrap gap-2">${filterButtonsArea}</div>${subAreaHtml}${prioHtml}</div></div><div id="search-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div></div>`;
             content.innerHTML = html; 
             setTimeout(() => content.classList.remove('fade-enter'), 500); 
             
@@ -1147,8 +1175,8 @@
             
             function filterAndRender(query) {
                 const lowerQ = query.toLowerCase(); 
-                const filtered = window.bancoDeMaterias.filter(t => {
-                    const textMatch = t.tema.toLowerCase().includes(lowerQ) || t.area.toLowerCase().includes(lowerQ) || t.subarea.toLowerCase().includes(lowerQ);
+                const filtered = bd.filter(t => {
+                    const textMatch = t.tema.toLowerCase().includes(lowerQ) || t.area.toLowerCase().includes(lowerQ) || (t.subarea||'').toLowerCase().includes(lowerQ);
                     let areaMatch = true; if (window.searchFilterArea !== 'Todas') areaMatch = (areaMapping[t.area] || "Outros") === window.searchFilterArea;
                     let subMatch = true; if (window.searchFilterSub !== 'Todas') subMatch = t.subarea === window.searchFilterSub;
                     let prioMatch = true; if (window.searchFilterPrio !== 'Todas') prioMatch = t.prioridade == window.searchFilterPrio;
@@ -1157,14 +1185,14 @@
                 window._currentFilteredBank = filtered;
                 
                 const scheduledIds = new Set();
-                window.state.weeks.forEach(w => w.tasks.forEach(t => scheduledIds.add(t.subject)));
+                window.state.weeks.forEach(w => { if(w.tasks) w.tasks.forEach(t => scheduledIds.add(t.subject)); });
 
-                if(filtered.length === 0) { resultsContainer.innerHTML = `<div class="col-span-full text-center py-24"><i class="fas fa-search-minus text-4xl text-slate-300 dark:text-gray-700 mb-4 block"></i><p class="text-slate-500 font-medium">Nenhuma tarefa encontrada no banco para estes filtros.</p></div>`; } 
+                if(filtered.length === 0) { resultsContainer.innerHTML = `<div class="col-span-full text-center py-24"><i class="fas fa-search-minus text-4xl text-slate-300 dark:text-slate-700 mb-4 block"></i><p class="text-slate-500 font-medium">Nenhuma tarefa encontrada no banco para estes filtros.</p></div>`; } 
                 else { 
                     resultsContainer.innerHTML = filtered.map((item, index) => { 
                         const isUsed = scheduledIds.has(item.tema);
                         const statusBadge = isUsed ? `<span class="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded text-[9px] font-bold border border-emerald-200"><i class="fas fa-check"></i> Na Agenda</span>` : `<span class="bg-slate-100 text-slate-500 px-2 py-0.5 rounded text-[9px] font-bold border border-slate-200">Não agendado</span>`;
-                        return `<div class="p-5 border border-slate-200 dark:border-gray-800 rounded-2xl bg-white dark:bg-cm-mid hover:shadow-md transition-all hover:border-blue-300 card-shadow flex flex-col justify-between items-start draggable-item" draggable="true" ondragstart="window.handleDragStartSearch(event, ${index})"><div class="flex-1 w-full"><div class="font-bold text-sm text-slate-900 dark:text-white leading-tight mb-2">${item.tema}</div><div class="flex flex-wrap items-center gap-2 mb-4"><div class="text-[9px] font-black uppercase text-slate-500 tracking-wide">${item.area}</div>${statusBadge}</div></div><div class="flex justify-between w-full items-center"><div class="text-[10px] text-slate-500 font-medium flex items-center gap-1 bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded"><i class="fas fa-arrows-alt text-slate-400"></i> Arraste p/ semana</div><button onclick="window.addFromBank(${index})" class="bg-slate-900 dark:bg-gray-700 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-blue-600 transition shadow-sm flex-shrink-0" title="Adicionar à Semana Atual"><i class="fas fa-plus"></i> Add</button></div></div>`; 
+                        return `<div class="p-5 border border-slate-200 dark:border-slate-800 rounded-2xl bg-white dark:bg-cm-mid hover:shadow-md transition-all hover:border-blue-300 card-shadow flex flex-col justify-between items-start draggable-item" draggable="true" ondragstart="window.handleDragStartSearch(event, ${index})"><div class="flex-1 w-full"><div class="font-bold text-sm text-slate-900 dark:text-white leading-tight mb-2">${item.tema}</div><div class="flex flex-wrap items-center gap-2 mb-4"><div class="text-[9px] font-black uppercase text-slate-500 tracking-wide">${item.area}</div>${statusBadge}</div></div><div class="flex justify-between w-full items-center"><div class="text-[10px] text-slate-500 font-medium flex items-center gap-1 bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded"><i class="fas fa-arrows-alt text-slate-400"></i> Arraste p/ semana</div><button onclick="window.addFromBank(${index})" class="bg-slate-900 dark:bg-slate-700 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-blue-600 transition shadow-sm flex-shrink-0" title="Adicionar à Semana Atual"><i class="fas fa-plus"></i> Add</button></div></div>`; 
                     }).join(''); 
                 }
                 
@@ -1188,6 +1216,7 @@
                     const week = window.state.weeks.find(w => w.week === targetWeek);
                     if(week) {
                         window.pushState();
+                        if(!week.tasks) week.tasks = [];
                         week.tasks.push({ id: `cstm_${Date.now()}`, category: taskToAdd.area, subject: taskToAdd.tema, prioridade: taskToAdd.prioridade || 2, customizado: true, tipo: 'materia_nova', score: taskToAdd.score || 0 });
                         window.triggerSave(); window.showToast(`Adicionado à Semana ${targetWeek}!`); window.updateUI();
                     }
@@ -1197,7 +1226,14 @@
         
         window.updateGlobalProgress = function() { 
             let totalTasks = 0; let completed = 0; 
-            window.state.weeks.forEach(w => { totalTasks += w.tasks.length; w.tasks.forEach(t => { if (window.state.progress && window.state.progress[t.id] && window.state.progress[t.id].doneStatus) completed++; }); }); 
+            window.state.weeks.forEach(w => { 
+                if(w.tasks) {
+                    totalTasks += w.tasks.length; 
+                    w.tasks.forEach(t => { 
+                        if (window.state.progress && window.state.progress[t.id] && window.state.progress[t.id].doneStatus) completed++; 
+                    }); 
+                }
+            }); 
             const percent = totalTasks > 0 ? (completed / totalTasks) * 100 : 0; 
             const bar = document.getElementById('global-progress'); const text = document.getElementById('global-percent-text'); 
             if(bar) bar.style.width = `${percent}%`; if(text) text.innerText = `${Math.round(percent)}%`; 
