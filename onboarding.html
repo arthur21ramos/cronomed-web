@@ -380,20 +380,33 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
 
           <!-- Fase 1: Estudo Base -->
-          <div class="phase-card phase-card-base">
-            <div class="flex items-center gap-2 mb-3">
-              <div class="w-7 h-7 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center text-sm"><i class="fas fa-book-open"></i></div>
-              <div>
-                <div class="text-white font-bold text-sm">Estudo Base</div>
-                <div class="text-[10px] text-gray-500 uppercase tracking-widest">Fase 1</div>
-              </div>
-            </div>
-            <p class="text-xs text-gray-400 mb-4">Cobrir todo o conteúdo novo do banco de matérias. Cada tema aparece uma única vez.</p>
-            <div class="flex items-center gap-3">
-              <input type="number" id="inp-base-weeks" class="weeks-input" min="1" value="0" oninput="syncPhaseInputs('base')">
-              <span class="text-gray-400 text-sm font-bold">semanas</span>
-            </div>
-          </div>
+<div class="phase-card phase-card-base" id="card-base">
+  <div class="flex items-center gap-2 mb-3">
+    <div class="w-7 h-7 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center text-sm"><i class="fas fa-book-open"></i></div>
+    <div>
+      <div class="text-white font-bold text-sm">Estudo Base</div>
+      <div class="text-[10px] text-gray-500 uppercase tracking-widest">Fase 1</div>
+    </div>
+  </div>
+  <p class="text-xs text-gray-400 mb-4">Cobrir todo o conteúdo novo do banco de matérias. Cada tema aparece uma única vez.</p>
+
+  <!-- Modo LIVRE: input editável -->
+  <div id="base-input-free" class="flex items-center gap-3">
+    <input type="number" id="inp-base-weeks" class="weeks-input" min="1" value="0" oninput="syncPhaseInputs('base')">
+    <span class="text-gray-400 text-sm font-bold">semanas</span>
+  </div>
+
+  <!-- Modo INTERNATO: bloqueado, calculado automaticamente -->
+  <div id="base-input-locked" class="hidden">
+    <div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-4 py-3">
+      <i class="fas fa-lock text-blue-400 text-sm"></i>
+      <div>
+        <div class="text-white font-bold text-lg" id="base-locked-value">—</div>
+        <div class="text-[10px] text-gray-500 uppercase tracking-widest">semanas · calculado pelo internato</div>
+      </div>
+    </div>
+  </div>
+</div>
 
           <!-- Fase 2: Revisão Cíclica -->
           <div class="phase-card phase-card-rev">
@@ -636,23 +649,79 @@
     let _totalWeeks = 4; // será sobrescrito
 
     function _calcSuggestion(totalWeeks) {
-        // Tabela de proporções por intervalo de tempo
-        let basePct, revPct, intPct;
-        if (totalWeeks <= 26)       { basePct = 0.60; revPct = 0.30; intPct = 0.10; }
-        else if (totalWeeks <= 52)  { basePct = 0.55; revPct = 0.30; intPct = 0.15; }
-        else if (totalWeeks <= 78)  { basePct = 0.50; revPct = 0.35; intPct = 0.15; }
-        else if (totalWeeks <= 104) { basePct = 0.45; revPct = 0.40; intPct = 0.15; }
-        else                        { basePct = 0.40; revPct = 0.45; intPct = 0.15; }
+     // ─────────────────────────────────────────────────────────
+// Calcula semanas de internato pendentes a partir das datas
+// ─────────────────────────────────────────────────────────
+function _calcInternatoBaseWeeks() {
+    if (answers.internato !== 'sim' || !answers.datasRodizios) return null;
 
-        let baseW = Math.round(totalWeeks * basePct);
-        let intW  = Math.round(totalWeeks * intPct);
-        intW = Math.max(intW, 2); // mínimo 2 semanas de intensivão
-        let revW = totalWeeks - baseW - intW;
-        revW = Math.max(revW, 1);
-        // Garante que a soma bate exatamente
-        baseW = totalWeeks - revW - intW;
-        return { baseW, revW, intW };
+    const rodList = ['cirurgia', 'clinica', 'go', 'ped'];
+    let totalBaseWeeks = 0;
+    let hasAnyPending = false;
+
+    rodList.forEach(rod => {
+        const r = answers.datasRodizios[rod];
+        if (!r || r.concluido) return; // pula os já concluídos
+        if (!r.in || !r.fim) return;
+
+        const start = new Date(r.in  + 'T12:00:00');
+        const end   = new Date(r.fim + 'T12:00:00');
+        const weeks = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24 * 7)));
+        totalBaseWeeks += weeks;
+        hasAnyPending = true;
+    });
+
+    return hasAnyPending ? totalBaseWeeks : null;
+}
+
+function _calcSuggestion(totalWeeks) {
+    // Intensivão: sempre 4 semanas sugeridas (editável pelo aluno)
+    const INT_DEFAULT = 4;
+
+    // Verifica se internato define a base
+    const internatoBase = _calcInternatoBaseWeeks();
+
+    let baseW, revW, intW;
+
+    if (internatoBase !== null) {
+        // ── MODO INTERNATO ──
+        // Base = soma dos rodízios pendentes (âncora fixa)
+        // Intensivão = 4 semanas (sugestão, editável)
+        // Revisão = resto
+        baseW = internatoBase;
+        intW  = Math.min(INT_DEFAULT, totalWeeks - baseW - 1); // pelo menos 1 semana de revisão
+        intW  = Math.max(intW, 1);
+        revW  = totalWeeks - baseW - intW;
+        revW  = Math.max(revW, 1);
+
+        // Edge case: se internato já ocupa quase tudo
+        if (baseW + intW >= totalWeeks) {
+            intW = Math.max(1, totalWeeks - baseW - 1);
+            revW = 1;
+            // Se ainda não cabe, reduz base (não deveria acontecer mas é segurança)
+            if (baseW >= totalWeeks) baseW = totalWeeks - 2;
+        }
+    } else {
+        // ── MODO LIVRE ──
+        // Proporções por faixa de tempo, intensivão fixo em 4 semanas
+        intW = Math.min(INT_DEFAULT, Math.round(totalWeeks * 0.15));
+        intW = Math.max(intW, 1);
+
+        let basePct;
+        if      (totalWeeks <= 26)  basePct = 0.62;
+        else if (totalWeeks <= 52)  basePct = 0.57;
+        else if (totalWeeks <= 78)  basePct = 0.52;
+        else if (totalWeeks <= 104) basePct = 0.47;
+        else                        basePct = 0.42;
+
+        baseW = Math.round((totalWeeks - intW) * basePct);
+        revW  = totalWeeks - baseW - intW;
+        revW  = Math.max(revW, 1);
+        baseW = totalWeeks - revW - intW; // garante soma exacta
     }
+
+    return { baseW, revW, intW, isInternatoLocked: internatoBase !== null };
+}
 
     function _applyAutoSuggestion(totalWeeks) {
         _totalWeeks = totalWeeks;
@@ -666,80 +735,155 @@
     }
 
     function _initStep5() {
-        const d1 = new Date(answers.dataInicio + 'T12:00:00');
-        const d2 = new Date(answers.dataProva  + 'T12:00:00');
-        _totalWeeks = Math.max(4, Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24 * 7)));
+        function _initStep5() {
+    const d1 = new Date(answers.dataInicio + 'T12:00:00');
+    const d2 = new Date(answers.dataProva  + 'T12:00:00');
+    _totalWeeks = Math.max(4, Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24 * 7)));
 
-        const { baseW, revW, intW } = _calcSuggestion(_totalWeeks);
-
-        // Textos informativos
-        const meses = (_totalWeeks / 4.33).toFixed(1);
-        const months = Math.round(_totalWeeks / 4.33);
-
-        let suggText = '';
-        if (_totalWeeks <= 26) {
-            suggText = `Você tem <strong>${_totalWeeks} semanas (~${meses} meses)</strong>. Com pouco tempo, concentre a maior parte no estudo de matéria nova e reserve apenas o mínimo para revisão.`;
-        } else if (_totalWeeks <= 52) {
-            suggText = `Você tem <strong>${_totalWeeks} semanas (~${months} meses)</strong>. Um ano é ideal para cobrir tudo e ainda ter um bom ciclo de revisões antes do intensivão.`;
-        } else {
-            suggText = `Você tem <strong>${_totalWeeks} semanas (~${months} meses)</strong>. Com mais de um ano, é possível cobrir todo o conteúdo com calma no primeiro ano e dedicar o segundo às revisões e simulados.`;
-        }
-        document.getElementById('suggestion-text').innerHTML = suggText;
-
-        const start = new Date(answers.dataInicio + 'T12:00:00');
-        const end   = new Date(answers.dataProva  + 'T12:00:00');
-        document.getElementById('total-weeks-label').innerText = _totalWeeks;
-        document.getElementById('total-period-label').innerText =
-            `${start.toLocaleDateString('pt-BR', {month:'short', year:'numeric'})} → ${end.toLocaleDateString('pt-BR', {month:'short', year:'numeric'})}`;
-
-        document.getElementById('inp-base-weeks').value = baseW;
-        document.getElementById('inp-rev-weeks').value  = revW;
-        document.getElementById('inp-int-weeks').value  = intW;
-
-        _updatePhaseUI(baseW, revW, intW, _totalWeeks);
+    // Coleta os dados dos rodízios ANTES de calcular
+    // (handleStep4To5 já validou, mas precisamos ter os dados em answers.datasRodizios)
+    if (answers.internato === 'sim') {
+        const rodList = ['cirurgia', 'clinica', 'go', 'ped'];
+        answers.datasRodizios = answers.datasRodizios || {};
+        rodList.forEach(rod => {
+            const isConcluido = document.getElementById(`check-${rod}`).checked;
+            if (isConcluido) {
+                answers.datasRodizios[rod] = { concluido: true };
+            } else {
+                answers.datasRodizios[rod] = {
+                    concluido: false,
+                    in:  document.getElementById(`rod-${rod}-inicio`).value,
+                    fim: document.getElementById(`rod-${rod}-fim`).value
+                };
+            }
+        });
     }
 
-    function _updatePhaseUI(baseW, revW, intW, total) {
-        const sum = baseW + revW + intW;
-        const badge    = document.getElementById('sum-badge');
-        const badgeIcon= document.getElementById('sum-icon');
-        const badgeTxt = document.getElementById('sum-text');
-        const btnFinish= document.getElementById('btn-finish');
+    const { baseW, revW, intW, isInternatoLocked } = _calcSuggestion(_totalWeeks);
 
-        // Barra de preview
-        const bPct = total > 0 ? (baseW / total * 100).toFixed(1) : 0;
-        const rPct = total > 0 ? (revW  / total * 100).toFixed(1) : 0;
-        const iPct = total > 0 ? (intW  / total * 100).toFixed(1) : 0;
+    // ── Configura o card de Estudo Base ──
+    const freeEl   = document.getElementById('base-input-free');
+    const lockedEl = document.getElementById('base-input-locked');
+    const baseInp  = document.getElementById('inp-base-weeks');
 
-        document.getElementById('pbar-base').style.width = `${bPct}%`;
-        document.getElementById('pbar-rev').style.width  = `${rPct}%`;
-        document.getElementById('pbar-int').style.width  = `${iPct}%`;
-
-        document.getElementById('pbar-base-label').innerText = `${baseW} sem`;
-        document.getElementById('pbar-rev-label').innerText  = `${revW} sem`;
-        document.getElementById('pbar-int-label').innerText  = `${intW} sem`;
-
-        // Badge de soma
-        if (sum === total && baseW >= 1 && revW >= 1 && intW >= 1) {
-            badge.className     = 'sum-badge sum-ok';
-            badgeIcon.className = 'fas fa-check-circle';
-            badgeTxt.innerText  = `Perfeito! ${baseW} + ${revW} + ${intW} = ${total} semanas`;
-            btnFinish.disabled  = false;
-        } else {
-            badge.className     = 'sum-badge sum-err';
-            badgeIcon.className = 'fas fa-exclamation-circle';
-            badgeTxt.innerText  = `A soma (${sum}) deve ser igual ao total (${total} semanas)`;
-            btnFinish.disabled  = true;
-        }
+    if (isInternatoLocked) {
+        // Bloqueia o input e mostra o valor calculado
+        freeEl.classList.add('hidden');
+        lockedEl.classList.remove('hidden');
+        document.getElementById('base-locked-value').innerText = baseW;
+        // Mantém o valor num data attribute para leitura posterior
+        baseInp.dataset.lockedValue = baseW;
+        baseInp.value = baseW; // mantém sincronizado mesmo oculto
+    } else {
+        freeEl.classList.remove('hidden');
+        lockedEl.classList.add('hidden');
+        baseInp.value = baseW;
+        delete baseInp.dataset.lockedValue;
     }
+
+    document.getElementById('inp-rev-weeks').value  = revW;
+    document.getElementById('inp-int-weeks').value  = intW;
+
+    // ── Texto de sugestão ──
+    const months = Math.round(_totalWeeks / 4.33);
+    let suggText = '';
+
+    if (isInternatoLocked) {
+        const rodList = ['cirurgia', 'clinica', 'go', 'ped'];
+        const rodNames = { cirurgia: 'Cirurgia', clinica: 'Clínica', go: 'GO', ped: 'Pediatria' };
+        const pendentes = rodList
+            .filter(r => answers.datasRodizios[r] && !answers.datasRodizios[r].concluido)
+            .map(r => rodNames[r])
+            .join(', ');
+        suggText = `O seu internato tem <strong>${baseW} semanas</strong> de rodízios pendentes (${pendentes}), que formam a <strong>Fase Base automaticamente</strong>. Pode ajustar o Intensivão — a Revisão completa o restante.`;
+    } else if (_totalWeeks <= 26) {
+        suggText = `Você tem <strong>${_totalWeeks} semanas (~${(_totalWeeks/4.33).toFixed(1)} meses)</strong>. Com pouco tempo, concentre a maior parte no estudo de matéria nova e reserve o mínimo para revisão.`;
+    } else if (_totalWeeks <= 52) {
+        suggText = `Você tem <strong>${_totalWeeks} semanas (~${months} meses)</strong>. Um ano é ideal para cobrir tudo e ter um bom ciclo de revisões antes do intensivão.`;
+    } else {
+        suggText = `Você tem <strong>${_totalWeeks} semanas (~${months} meses)</strong>. Com mais de um ano, estude o conteúdo com calma e dedique o segundo ano às revisões e simulados.`;
+    }
+    document.getElementById('suggestion-text').innerHTML = suggText;
+
+    // ── Labels de período ──
+    document.getElementById('total-weeks-label').innerText = _totalWeeks;
+    document.getElementById('total-period-label').innerText =
+        `${d1.toLocaleDateString('pt-BR', {month:'short', year:'numeric'})} → ${d2.toLocaleDateString('pt-BR', {month:'short', year:'numeric'})}`;
+
+    _updatePhaseUI(baseW, revW, intW, _totalWeeks, isInternatoLocked);
+}
+
+   function _updatePhaseUI(baseW, revW, intW, total, isInternatoLocked) {
+    const sum = baseW + revW + intW;
+    const badge     = document.getElementById('sum-badge');
+    const badgeIcon = document.getElementById('sum-icon');
+    const badgeTxt  = document.getElementById('sum-text');
+    const btnFinish = document.getElementById('btn-finish');
+
+    // Barra de preview
+    const bPct = total > 0 ? (baseW / total * 100).toFixed(1) : 0;
+    const rPct = total > 0 ? (revW  / total * 100).toFixed(1) : 0;
+    const iPct = total > 0 ? (intW  / total * 100).toFixed(1) : 0;
+
+    document.getElementById('pbar-base').style.width = `${bPct}%`;
+    document.getElementById('pbar-rev').style.width  = `${rPct}%`;
+    document.getElementById('pbar-int').style.width  = `${iPct}%`;
+
+    document.getElementById('pbar-base-label').innerText = `${baseW} sem${isInternatoLocked ? ' 🔒' : ''}`;
+    document.getElementById('pbar-rev-label').innerText  = `${revW} sem`;
+    document.getElementById('pbar-int-label').innerText  = `${intW} sem`;
+
+    // Badge de validação
+    const isValid = sum === total && baseW >= 1 && revW >= 1 && intW >= 1;
+    if (isValid) {
+        badge.className     = 'sum-badge sum-ok';
+        badgeIcon.className = 'fas fa-check-circle';
+        badgeTxt.innerText  = `Perfeito! ${baseW} + ${revW} + ${intW} = ${total} semanas`;
+        btnFinish.disabled  = false;
+    } else {
+        badge.className     = 'sum-badge sum-err';
+        badgeIcon.className = 'fas fa-exclamation-circle';
+        badgeTxt.innerText  = `A soma (${sum}) deve ser igual ao total (${total} semanas)`;
+        btnFinish.disabled  = true;
+    }
+}
 
     // Chamada pelos inputs do passo 5
     window.syncPhaseInputs = function(changed) {
-        const baseW = parseInt(document.getElementById('inp-base-weeks').value) || 0;
-        const revW  = parseInt(document.getElementById('inp-rev-weeks').value)  || 0;
-        const intW  = parseInt(document.getElementById('inp-int-weeks').value)  || 0;
-        _updatePhaseUI(baseW, revW, intW, _totalWeeks);
+    const baseInp = document.getElementById('inp-base-weeks');
+    const isLocked = !!baseInp.dataset.lockedValue;
+
+    let baseW = isLocked
+        ? parseInt(baseInp.dataset.lockedValue) || 0
+        : parseInt(baseInp.value) || 0;
+
+    let revW  = parseInt(document.getElementById('inp-rev-weeks').value)  || 0;
+    let intW  = parseInt(document.getElementById('inp-int-weeks').value)  || 0;
+
+    if (isLocked) {
+        // Base está travada → ao mudar intensivão, revisão se auto-ajusta
+        if (changed === 'int') {
+            revW = _totalWeeks - baseW - intW;
+            revW = Math.max(revW, 1);
+            // Se revisão ficou negativa, limita o intensivão
+            if (revW < 1) {
+                intW = _totalWeeks - baseW - 1;
+                intW = Math.max(intW, 1);
+                revW = 1;
+            }
+            document.getElementById('inp-rev-weeks').value = revW;
+            document.getElementById('inp-int-weeks').value = intW;
+        }
+        // Se o aluno tentar mudar 'rev' com base travada, ajusta 'int'
+        if (changed === 'rev') {
+            intW = _totalWeeks - baseW - revW;
+            intW = Math.max(intW, 1);
+            document.getElementById('inp-int-weeks').value = intW;
+        }
     }
+
+    _updatePhaseUI(baseW, revW, intW, _totalWeeks, isLocked);
+}
 
     // ─────────────────────────────────────────────────────────
     // SUBMISSÃO FINAL
@@ -764,8 +908,12 @@
         }
 
         // Coleta configuração de fases
-        const baseW = parseInt(document.getElementById('inp-base-weeks').value) || 0;
-        const revW  = parseInt(document.getElementById('inp-rev-weeks').value)  || 0;
+// Coleta configuração de fases
+// Se base está bloqueada pelo internato, lê do data attribute
+const baseInp = document.getElementById('inp-base-weeks');
+const baseW = baseInp.dataset.lockedValue
+    ? parseInt(baseInp.dataset.lockedValue) || 0
+    : parseInt(baseInp.value) || 0;        const revW  = parseInt(document.getElementById('inp-rev-weeks').value)  || 0;
         const intW  = parseInt(document.getElementById('inp-int-weeks').value)  || 0;
 
         if (baseW < 1 || revW < 1 || intW < 1) {
