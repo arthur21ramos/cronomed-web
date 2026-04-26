@@ -45,16 +45,16 @@
     }
     .option-card:hover { border-color: rgba(0,194,122,0.4); background: var(--mid); }
     .option-card.selected { border-color: var(--green); background: rgba(0,194,122,0.1); box-shadow: 0 0 20px rgba(0,194,122,0.15); }
-    
+
     .input-field {
       width: 100%; background: var(--dark2); border: 1px solid rgba(255,255,255,0.1);
       border-radius: 12px; padding: 1rem 1.2rem; color: white; font-family: 'DM Sans', sans-serif;
       font-size: 1rem; outline: none; transition: border-color 0.2s;
     }
     .input-field:focus { border-color: var(--green); }
-    
+
     input[type="date"]::-webkit-calendar-picker-indicator {
-        filter: invert(1); cursor: pointer; opacity: 0.6; transition: 0.2s;
+      filter: invert(1); cursor: pointer; opacity: 0.6; transition: 0.2s;
     }
     input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 
@@ -85,57 +85,52 @@
 
     .internato-block { background: var(--dark2); border: 1px solid rgba(255,255,255,0.08); padding: 1.5rem; border-radius: 16px; margin-bottom: 1rem; transition: opacity 0.3s; }
     .internato-block.disabled { opacity: 0.5; border-color: rgba(255,255,255,0.02); }
-    
+
     .custom-checkbox { width: 1.2rem; height: 1.2rem; border-radius: 4px; border: 2px solid var(--muted); appearance: none; background-color: transparent; cursor: pointer; position: relative; transition: all 0.2s; }
     .custom-checkbox:checked { background-color: var(--green); border-color: var(--green); }
     .custom-checkbox:checked::after { content: '✓'; position: absolute; color: var(--dark); font-size: 0.8rem; font-weight: 900; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-    
+
     .warning-msg { animation: slideUp 0.3s ease; }
 
-    /* =====================================================
-       PASSO 5 — CONFIGURADOR DE FASES (NOVO)
-       ===================================================== */
-
-    /* Barra tricolor de fases */
+    /* ── PASSO 5: Configurador de Fases ── */
     .phase-bar-wrapper { border-radius: 12px; overflow: hidden; height: 18px; display: flex; box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
     .phase-bar-segment { transition: width 0.4s cubic-bezier(0.4,0,0.2,1); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; overflow: hidden; white-space: nowrap; }
-    .phase-bar-base    { background: #3b82f6; color: white; }
-    .phase-bar-rev     { background: #10b981; color: white; }
-    .phase-bar-int     { background: #8b5cf6; color: white; }
+    .phase-bar-base { background: #3b82f6; color: white; }
+    .phase-bar-rev  { background: #10b981; color: white; }
+    .phase-bar-int  { background: #8b5cf6; color: white; }
 
-    /* Cartões de fase */
-    .phase-card {
-      background: var(--dark2); border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 16px; padding: 1.25rem 1.5rem;
-    }
+    .phase-card { background: var(--dark2); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1.25rem 1.5rem; }
     .phase-card-base { border-left: 4px solid #3b82f6; }
     .phase-card-rev  { border-left: 4px solid #10b981; }
     .phase-card-int  { border-left: 4px solid #8b5cf6; }
 
-    /* Input numérico de semanas estilizado */
     .weeks-input {
       background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15);
       border-radius: 10px; color: white; font-weight: 700; font-size: 1.1rem;
-      text-align: center; width: 72px; padding: 0.5rem; outline: none;
-      transition: border-color 0.2s;
+      text-align: center; width: 72px; padding: 0.5rem; outline: none; transition: border-color 0.2s;
     }
     .weeks-input:focus { border-color: var(--green); }
     input[type=number]::-webkit-inner-spin-button,
     input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
-    /* Badge de aviso de soma */
     .sum-badge { padding: 6px 14px; border-radius: 100px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; transition: all 0.3s; }
     .sum-ok  { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
-    .sum-err { background: rgba(239,68,68,0.15);  color: #ef4444;  border: 1px solid rgba(239,68,68,0.3);  }
+    .sum-err { background: rgba(239,68,68,0.15);  color: #ef4444;  border: 1px solid rgba(239,68,68,0.3); }
 
-    /* Sugestão automática */
     .suggestion-box { background: rgba(0,194,122,0.08); border: 1px solid rgba(0,194,122,0.2); border-radius: 12px; padding: 1rem 1.25rem; }
+
+    /* Card de base bloqueado pelo internato */
+    .base-locked-box {
+      display: flex; align-items: center; gap: 0.75rem;
+      background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.25);
+      border-radius: 12px; padding: 0.875rem 1rem;
+    }
   </style>
 </head>
 <body class="relative">
 
   <nav class="p-6 relative z-10 flex justify-between items-center">
-    <div class="logo font-black text-2xl text-white" style="font-family: 'Fraunces', serif;">Crono<span style="color: var(--green);">Med</span></div>
+    <div class="logo font-black text-2xl text-white" style="font-family:'Fraunces',serif;">Crono<span style="color:var(--green)">Med</span></div>
     <button onclick="window.handleLogout()" class="text-sm font-bold text-gray-500 hover:text-red-500 transition">Sair</button>
   </nav>
 
@@ -145,42 +140,42 @@
         <div class="progress-bar" id="progress-bar"></div>
       </div>
 
-      <!-- ═══════════════════════════════════════════════════
+      <!-- ═══════════════════════════════════════════════
            PASSO 1: O Alvo
-           ═══════════════════════════════════════════════════ -->
+           ═══════════════════════════════════════════════ -->
       <div id="step-1" class="step-container active">
-        <div class="text-sm font-bold tracking-widest uppercase mb-2" style="color: var(--green);">Passo 1 de 5</div>
+        <div class="text-sm font-bold tracking-widest uppercase mb-2" style="color:var(--green)">Passo 1 de 5</div>
         <h2 class="text-3xl md:text-4xl font-black text-white mb-3">Qual é o seu alvo?</h2>
         <p class="text-gray-400 mb-8 text-lg">Selecione as provas que vai prestar. O sistema irá priorizar os temas mais prevalentes baseados na sua escolha.</p>
-        
+
         <div class="flex flex-wrap gap-3 mb-4" id="provas-container">
-            <div class="chip" onclick="toggleChip(this, 'ENARE')">ENARE</div>
-            <div class="chip" onclick="toggleChip(this, 'SUS-SP')">SUS-SP</div>
-            <div class="chip" onclick="toggleChip(this, 'USP-SP')">USP-SP</div>
-            <div class="chip" onclick="toggleChip(this, 'UNICAMP')">UNICAMP</div>
-            <div class="chip" onclick="toggleChip(this, 'PSU-MG')">PSU-MG</div>
-            <div class="chip" onclick="toggleChip(this, 'SCMMG')">SCMMG</div>
-            <div class="chip" onclick="toggleChip(this, 'SURCE')">SURCE</div>
-            <div class="chip" onclick="toggleChip(this, 'AMRIGS')">AMRIGS</div>
-            <div class="chip" onclick="toggleChip(this, 'SES-RJ')">SES-RJ</div>
-            <div class="chip" onclick="toggleOutraProva(this)" id="chip-outras"><i class="fas fa-pen"></i> Outra prova</div>
+          <div class="chip" onclick="toggleChip(this,'ENARE')">ENARE</div>
+          <div class="chip" onclick="toggleChip(this,'SUS-SP')">SUS-SP</div>
+          <div class="chip" onclick="toggleChip(this,'USP-SP')">USP-SP</div>
+          <div class="chip" onclick="toggleChip(this,'UNICAMP')">UNICAMP</div>
+          <div class="chip" onclick="toggleChip(this,'PSU-MG')">PSU-MG</div>
+          <div class="chip" onclick="toggleChip(this,'SCMMG')">SCMMG</div>
+          <div class="chip" onclick="toggleChip(this,'SURCE')">SURCE</div>
+          <div class="chip" onclick="toggleChip(this,'AMRIGS')">AMRIGS</div>
+          <div class="chip" onclick="toggleChip(this,'SES-RJ')">SES-RJ</div>
+          <div class="chip" onclick="toggleOutraProva(this)" id="chip-outras"><i class="fas fa-pen"></i> Outra prova</div>
         </div>
 
         <div id="outras-provas-container" class="hidden mb-10">
-            <input type="text" id="outras-provas-input" class="input-field" placeholder="Ex: UERJ, AMRIGS, HIAE...">
+          <input type="text" id="outras-provas-input" class="input-field" placeholder="Ex: UERJ, AMRIGS, HIAE...">
         </div>
 
         <div class="h-px w-full bg-white/10 my-8"></div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-            <div>
-                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-3"><i class="far fa-calendar-alt text-green-500 mr-2"></i> Início dos estudos</h3>
-                <input type="date" id="ans-data-inicio" class="input-field cursor-pointer" onchange="recalcSuggestion()">
-            </div>
-            <div>
-                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-3"><i class="fas fa-flag-checkered text-green-500 mr-2"></i> Data da Prova (Foco)</h3>
-                <input type="date" id="ans-data-prova" class="input-field cursor-pointer" onchange="recalcSuggestion()">
-            </div>
+          <div>
+            <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-3"><i class="far fa-calendar-alt text-green-500 mr-2"></i> Início dos estudos</h3>
+            <input type="date" id="ans-data-inicio" class="input-field cursor-pointer">
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-3"><i class="fas fa-flag-checkered text-green-500 mr-2"></i> Data da Prova (Foco)</h3>
+            <input type="date" id="ans-data-prova" class="input-field cursor-pointer">
+          </div>
         </div>
 
         <div class="flex justify-end">
@@ -188,26 +183,26 @@
         </div>
       </div>
 
-      <!-- ═══════════════════════════════════════════════════
+      <!-- ═══════════════════════════════════════════════
            PASSO 2: O Tempo
-           ═══════════════════════════════════════════════════ -->
+           ═══════════════════════════════════════════════ -->
       <div id="step-2" class="step-container">
-        <div class="text-sm font-bold tracking-widest uppercase mb-2" style="color: var(--green);">Passo 2 de 5</div>
+        <div class="text-sm font-bold tracking-widest uppercase mb-2" style="color:var(--green)">Passo 2 de 5</div>
         <h2 class="text-3xl md:text-4xl font-black text-white mb-3">Como é a sua rotina?</h2>
         <p class="text-gray-400 mb-8 text-lg">Quantas horas reais de estudo consegue garantir por dia?</p>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-          <div class="option-card" onclick="selectOption('horas', '2h', this)">
+          <div class="option-card" onclick="selectOption('horas','2h',this)">
             <div class="text-2xl mb-2">🏃‍♂️</div>
             <h3 class="text-white font-bold text-lg mb-1">Até 2 horas</h3>
             <p class="text-xs text-gray-400">Foco total em tarefas novas para cobrir o edital. Sem agendamento de revisões automáticas.</p>
           </div>
-          <div class="option-card" onclick="selectOption('horas', '4h', this)">
+          <div class="option-card" onclick="selectOption('horas','4h',this)">
             <div class="text-2xl mb-2">🚶‍♂️</div>
             <h3 class="text-white font-bold text-lg mb-1">3 a 4 horas</h3>
             <p class="text-xs text-gray-400">Tarefas do dia + blocos de revisões programadas estrategicamente.</p>
           </div>
-          <div class="option-card" onclick="selectOption('horas', '6h', this)">
+          <div class="option-card" onclick="selectOption('horas','6h',this)">
             <div class="text-2xl mb-2">🧘‍♂️</div>
             <h3 class="text-white font-bold text-lg mb-1">5+ horas</h3>
             <p class="text-xs text-gray-400">Carga máxima: Tarefas, muitas revisões espaçadas e blocos para simulados na íntegra.</p>
@@ -220,21 +215,21 @@
         </div>
       </div>
 
-      <!-- ═══════════════════════════════════════════════════
+      <!-- ═══════════════════════════════════════════════
            PASSO 3: Internato
-           ═══════════════════════════════════════════════════ -->
+           ═══════════════════════════════════════════════ -->
       <div id="step-3" class="step-container">
-        <div class="text-sm font-bold tracking-widest uppercase mb-2" style="color: var(--green);">Passo 3 de 5</div>
+        <div class="text-sm font-bold tracking-widest uppercase mb-2" style="color:var(--green)">Passo 3 de 5</div>
         <h2 class="text-3xl md:text-4xl font-black text-white mb-3">Vai estar no Internato?</h2>
         <p class="text-gray-400 mb-8 text-lg">Podemos sincronizar as tarefas de estudo exatamente com as datas dos seus rodízios práticos.</p>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-          <div class="option-card" onclick="selectOption('internato', 'sim', this)">
+          <div class="option-card" onclick="selectOption('internato','sim',this)">
             <div class="text-3xl mb-3 text-green-400"><i class="fas fa-hospital"></i></div>
             <h3 class="text-white font-bold text-xl mb-2">Sim, terei rodízios</h3>
             <p class="text-sm text-gray-400">Quero estudar Clínica Médica enquanto estiver a rodar na Clínica, etc.</p>
           </div>
-          <div class="option-card" onclick="selectOption('internato', 'nao', this)">
+          <div class="option-card" onclick="selectOption('internato','nao',this)">
             <div class="text-3xl mb-3 text-blue-400"><i class="fas fa-home"></i></div>
             <h3 class="text-white font-bold text-xl mb-2">Não / Estudo Livre</h3>
             <p class="text-sm text-gray-400">Estudo misto e dinâmico, mesclando diferentes matérias na mesma semana.</p>
@@ -247,88 +242,102 @@
         </div>
       </div>
 
-      <!-- ═══════════════════════════════════════════════════
+      <!-- ═══════════════════════════════════════════════
            PASSO 4: Datas dos Rodízios
-           ═══════════════════════════════════════════════════ -->
+           ═══════════════════════════════════════════════ -->
       <div id="step-4" class="step-container">
-        <div class="text-sm font-bold tracking-widest uppercase mb-2" style="color: var(--green);">Passo 4 de 5</div>
+        <div class="text-sm font-bold tracking-widest uppercase mb-2" style="color:var(--green)">Passo 4 de 5</div>
         <h2 class="text-3xl md:text-4xl font-black text-white mb-3">Defina as Datas</h2>
-        
+
         <div id="internato-config" class="mb-10">
           <p class="text-gray-400 mb-6 text-lg">Selecione o início e o fim de cada grande bloco. Se já passou por algum, marque como concluído.</p>
-          
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
             <!-- Cirurgia -->
             <div class="internato-block" id="block-cirurgia">
-                <div class="flex justify-between items-center mb-4">
-                    <h4 class="text-white font-bold text-lg flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-red-500/20 text-red-400 flex items-center justify-center"><i class="fas fa-scalpel"></i></div> Cirurgia</h4>
-                    <label class="flex items-center gap-2 text-xs text-gray-400 cursor-pointer hover:text-white transition">
-                        <input type="checkbox" class="custom-checkbox" id="check-cirurgia" onchange="toggleRodizioAtivo('cirurgia', this.checked)"> Já concluí
-                    </label>
-                </div>
-                <div id="dates-cirurgia" class="flex flex-col sm:flex-row gap-3">
-                    <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Início</label><input type="date" id="rod-cirurgia-inicio" class="input-field px-3 py-2 text-sm"></div>
-                    <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Fim</label><input type="date" id="rod-cirurgia-fim" class="input-field px-3 py-2 text-sm"></div>
-                </div>
-                <div id="msg-cirurgia" class="hidden warning-msg text-xs text-yellow-500 mt-4 bg-yellow-500/10 p-2.5 rounded-lg border border-yellow-500/20">
-                    <i class="fas fa-info-circle mr-1"></i> As tarefas cruciais de Cirurgia serão distribuídas como revisões ao longo do ano.
-                </div>
+              <div class="flex justify-between items-center mb-4">
+                <h4 class="text-white font-bold text-lg flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-lg bg-red-500/20 text-red-400 flex items-center justify-center"><i class="fas fa-scalpel"></i></div> Cirurgia
+                </h4>
+                <label class="flex items-center gap-2 text-xs text-gray-400 cursor-pointer hover:text-white transition">
+                  <input type="checkbox" class="custom-checkbox" id="check-cirurgia" onchange="toggleRodizioAtivo('cirurgia',this.checked)"> Já concluí
+                </label>
+              </div>
+              <div id="dates-cirurgia" class="flex flex-col sm:flex-row gap-3">
+                <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Início</label><input type="date" id="rod-cirurgia-inicio" class="input-field px-3 py-2 text-sm"></div>
+                <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Fim</label><input type="date" id="rod-cirurgia-fim" class="input-field px-3 py-2 text-sm"></div>
+              </div>
+              <div id="msg-cirurgia" class="hidden warning-msg text-xs text-yellow-500 mt-4 bg-yellow-500/10 p-2.5 rounded-lg border border-yellow-500/20">
+                <i class="fas fa-info-circle mr-1"></i> As tarefas cruciais de Cirurgia serão distribuídas como revisões ao longo do ano.
+              </div>
             </div>
+
             <!-- Clínica -->
             <div class="internato-block" id="block-clinica">
-                <div class="flex justify-between items-center mb-4">
-                    <h4 class="text-white font-bold text-lg flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center"><i class="fas fa-stethoscope"></i></div> Clínica Médica</h4>
-                    <label class="flex items-center gap-2 text-xs text-gray-400 cursor-pointer hover:text-white transition">
-                        <input type="checkbox" class="custom-checkbox" id="check-clinica" onchange="toggleRodizioAtivo('clinica', this.checked)"> Já concluí
-                    </label>
-                </div>
-                <div id="dates-clinica" class="flex flex-col sm:flex-row gap-3">
-                    <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Início</label><input type="date" id="rod-clinica-inicio" class="input-field px-3 py-2 text-sm"></div>
-                    <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Fim</label><input type="date" id="rod-clinica-fim" class="input-field px-3 py-2 text-sm"></div>
-                </div>
-                <div id="msg-clinica" class="hidden warning-msg text-xs text-yellow-500 mt-4 bg-yellow-500/10 p-2.5 rounded-lg border border-yellow-500/20">
-                    <i class="fas fa-info-circle mr-1"></i> As tarefas cruciais de Clínica serão distribuídas como revisões ao longo do ano.
-                </div>
+              <div class="flex justify-between items-center mb-4">
+                <h4 class="text-white font-bold text-lg flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center"><i class="fas fa-stethoscope"></i></div> Clínica Médica
+                </h4>
+                <label class="flex items-center gap-2 text-xs text-gray-400 cursor-pointer hover:text-white transition">
+                  <input type="checkbox" class="custom-checkbox" id="check-clinica" onchange="toggleRodizioAtivo('clinica',this.checked)"> Já concluí
+                </label>
+              </div>
+              <div id="dates-clinica" class="flex flex-col sm:flex-row gap-3">
+                <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Início</label><input type="date" id="rod-clinica-inicio" class="input-field px-3 py-2 text-sm"></div>
+                <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Fim</label><input type="date" id="rod-clinica-fim" class="input-field px-3 py-2 text-sm"></div>
+              </div>
+              <div id="msg-clinica" class="hidden warning-msg text-xs text-yellow-500 mt-4 bg-yellow-500/10 p-2.5 rounded-lg border border-yellow-500/20">
+                <i class="fas fa-info-circle mr-1"></i> As tarefas cruciais de Clínica serão distribuídas como revisões ao longo do ano.
+              </div>
             </div>
+
             <!-- GO -->
             <div class="internato-block" id="block-go">
-                <div class="flex justify-between items-center mb-4">
-                    <h4 class="text-white font-bold text-lg flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-pink-500/20 text-pink-400 flex items-center justify-center"><i class="fas fa-baby"></i></div> Gineco/Obstetrícia</h4>
-                    <label class="flex items-center gap-2 text-xs text-gray-400 cursor-pointer hover:text-white transition">
-                        <input type="checkbox" class="custom-checkbox" id="check-go" onchange="toggleRodizioAtivo('go', this.checked)"> Já concluí
-                    </label>
-                </div>
-                <div id="dates-go" class="flex flex-col sm:flex-row gap-3">
-                    <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Início</label><input type="date" id="rod-go-inicio" class="input-field px-3 py-2 text-sm"></div>
-                    <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Fim</label><input type="date" id="rod-go-fim" class="input-field px-3 py-2 text-sm"></div>
-                </div>
-                <div id="msg-go" class="hidden warning-msg text-xs text-yellow-500 mt-4 bg-yellow-500/10 p-2.5 rounded-lg border border-yellow-500/20">
-                    <i class="fas fa-info-circle mr-1"></i> As tarefas cruciais de GO serão distribuídas como revisões ao longo do ano.
-                </div>
+              <div class="flex justify-between items-center mb-4">
+                <h4 class="text-white font-bold text-lg flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-lg bg-pink-500/20 text-pink-400 flex items-center justify-center"><i class="fas fa-baby"></i></div> Gineco/Obstetrícia
+                </h4>
+                <label class="flex items-center gap-2 text-xs text-gray-400 cursor-pointer hover:text-white transition">
+                  <input type="checkbox" class="custom-checkbox" id="check-go" onchange="toggleRodizioAtivo('go',this.checked)"> Já concluí
+                </label>
+              </div>
+              <div id="dates-go" class="flex flex-col sm:flex-row gap-3">
+                <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Início</label><input type="date" id="rod-go-inicio" class="input-field px-3 py-2 text-sm"></div>
+                <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Fim</label><input type="date" id="rod-go-fim" class="input-field px-3 py-2 text-sm"></div>
+              </div>
+              <div id="msg-go" class="hidden warning-msg text-xs text-yellow-500 mt-4 bg-yellow-500/10 p-2.5 rounded-lg border border-yellow-500/20">
+                <i class="fas fa-info-circle mr-1"></i> As tarefas cruciais de GO serão distribuídas como revisões ao longo do ano.
+              </div>
             </div>
+
             <!-- Pediatria -->
             <div class="internato-block" id="block-ped">
-                <div class="flex justify-between items-center mb-4">
-                    <h4 class="text-white font-bold text-lg flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-yellow-500/20 text-yellow-400 flex items-center justify-center"><i class="fas fa-child"></i></div> Pediatria</h4>
-                    <label class="flex items-center gap-2 text-xs text-gray-400 cursor-pointer hover:text-white transition">
-                        <input type="checkbox" class="custom-checkbox" id="check-ped" onchange="toggleRodizioAtivo('ped', this.checked)"> Já concluí
-                    </label>
-                </div>
-                <div id="dates-ped" class="flex flex-col sm:flex-row gap-3">
-                    <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Início</label><input type="date" id="rod-ped-inicio" class="input-field px-3 py-2 text-sm"></div>
-                    <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Fim</label><input type="date" id="rod-ped-fim" class="input-field px-3 py-2 text-sm"></div>
-                </div>
-                <div id="msg-ped" class="hidden warning-msg text-xs text-yellow-500 mt-4 bg-yellow-500/10 p-2.5 rounded-lg border border-yellow-500/20">
-                    <i class="fas fa-info-circle mr-1"></i> As tarefas cruciais de Pediatria serão distribuídas como revisões ao longo do ano.
-                </div>
+              <div class="flex justify-between items-center mb-4">
+                <h4 class="text-white font-bold text-lg flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-lg bg-yellow-500/20 text-yellow-400 flex items-center justify-center"><i class="fas fa-child"></i></div> Pediatria
+                </h4>
+                <label class="flex items-center gap-2 text-xs text-gray-400 cursor-pointer hover:text-white transition">
+                  <input type="checkbox" class="custom-checkbox" id="check-ped" onchange="toggleRodizioAtivo('ped',this.checked)"> Já concluí
+                </label>
+              </div>
+              <div id="dates-ped" class="flex flex-col sm:flex-row gap-3">
+                <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Início</label><input type="date" id="rod-ped-inicio" class="input-field px-3 py-2 text-sm"></div>
+                <div class="flex-1"><label class="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 block">Fim</label><input type="date" id="rod-ped-fim" class="input-field px-3 py-2 text-sm"></div>
+              </div>
+              <div id="msg-ped" class="hidden warning-msg text-xs text-yellow-500 mt-4 bg-yellow-500/10 p-2.5 rounded-lg border border-yellow-500/20">
+                <i class="fas fa-info-circle mr-1"></i> As tarefas cruciais de Pediatria serão distribuídas como revisões ao longo do ano.
+              </div>
             </div>
+
           </div>
-          <div class="text-xs text-gray-500 italic mt-4"><i class="fas fa-info-circle text-green-500"></i> O conteúdo de Medicina Preventiva será distribuído estrategicamente de forma contínua.</div>
+          <div class="text-xs text-gray-500 italic mt-4">
+            <i class="fas fa-info-circle text-green-500"></i> O conteúdo de Medicina Preventiva será distribuído estrategicamente de forma contínua.
+          </div>
         </div>
 
         <div id="livre-config" class="mb-10 hidden text-center py-12">
           <div class="text-5xl text-green-500 mb-6"><i class="fas fa-check-circle"></i></div>
-          <h3 class="text-3xl font-black text-white mb-3" style="font-family: 'Fraunces', serif;">Quase lá!</h3>
+          <h3 class="text-3xl font-black text-white mb-3" style="font-family:'Fraunces',serif;">Quase lá!</h3>
           <p class="text-gray-400 text-lg max-w-md mx-auto">Vamos agora configurar as fases do seu cronograma para garantir uma distribuição inteligente das semanas.</p>
         </div>
 
@@ -338,16 +347,16 @@
         </div>
       </div>
 
-      <!-- ═══════════════════════════════════════════════════
-           PASSO 5 (NOVO): Configurador de Fases do Cronograma
-           ═══════════════════════════════════════════════════ -->
+      <!-- ═══════════════════════════════════════════════
+           PASSO 5: Configurador de Fases
+           ═══════════════════════════════════════════════ -->
       <div id="step-5" class="step-container">
-        <div class="text-sm font-bold tracking-widest uppercase mb-2" style="color: var(--green);">Passo 5 de 5</div>
+        <div class="text-sm font-bold tracking-widest uppercase mb-2" style="color:var(--green)">Passo 5 de 5</div>
         <h2 class="text-3xl md:text-4xl font-black text-white mb-3">Como dividir o seu tempo?</h2>
         <p class="text-gray-400 mb-6 text-lg">Baseado nas suas datas, calculámos a sugestão ideal. Ajuste se quiser.</p>
 
         <!-- Sugestão automática -->
-        <div class="suggestion-box mb-8" id="suggestion-box">
+        <div class="suggestion-box mb-8">
           <div class="flex items-center gap-3 mb-2">
             <i class="fas fa-lightbulb text-green-400 text-lg"></i>
             <span class="text-sm font-bold text-green-400 uppercase tracking-widest">Sugestão do Sistema</span>
@@ -362,7 +371,7 @@
             <span class="text-emerald-400"><i class="fas fa-sync-alt mr-1"></i> Revisão</span>
             <span class="text-purple-400"><i class="fas fa-fire mr-1"></i> Intensivão</span>
           </div>
-          <div class="phase-bar-wrapper mb-1" id="phase-bar-preview">
+          <div class="phase-bar-wrapper mb-1">
             <div class="phase-bar-segment phase-bar-base" id="pbar-base" style="width:50%">Base</div>
             <div class="phase-bar-segment phase-bar-rev"  id="pbar-rev"  style="width:35%">Revisão</div>
             <div class="phase-bar-segment phase-bar-int"  id="pbar-int"  style="width:15%">Intensivão</div>
@@ -376,39 +385,39 @@
 
         <div class="h-px w-full bg-white/10 my-6"></div>
 
-        <!-- Cards de ajuste por fase -->
+        <!-- Cards de fase -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
 
-          <!-- Fase 1: Estudo Base -->
-<div class="phase-card phase-card-base" id="card-base">
-  <div class="flex items-center gap-2 mb-3">
-    <div class="w-7 h-7 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center text-sm"><i class="fas fa-book-open"></i></div>
-    <div>
-      <div class="text-white font-bold text-sm">Estudo Base</div>
-      <div class="text-[10px] text-gray-500 uppercase tracking-widest">Fase 1</div>
-    </div>
-  </div>
-  <p class="text-xs text-gray-400 mb-4">Cobrir todo o conteúdo novo do banco de matérias. Cada tema aparece uma única vez.</p>
+          <!-- FASE 1: Estudo Base -->
+          <div class="phase-card phase-card-base" id="card-base">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-7 h-7 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center text-sm"><i class="fas fa-book-open"></i></div>
+              <div>
+                <div class="text-white font-bold text-sm">Estudo Base</div>
+                <div class="text-[10px] text-gray-500 uppercase tracking-widest">Fase 1</div>
+              </div>
+            </div>
+            <p class="text-xs text-gray-400 mb-4">Cobrir todo o conteúdo novo do banco de matérias. Cada tema aparece uma única vez.</p>
 
-  <!-- Modo LIVRE: input editável -->
-  <div id="base-input-free" class="flex items-center gap-3">
-    <input type="number" id="inp-base-weeks" class="weeks-input" min="1" value="0" oninput="syncPhaseInputs('base')">
-    <span class="text-gray-400 text-sm font-bold">semanas</span>
-  </div>
+            <!-- Modo livre: input editável -->
+            <div id="base-input-free" class="flex items-center gap-3">
+              <input type="number" id="inp-base-weeks" class="weeks-input" min="1" value="0" oninput="syncPhaseInputs('base')">
+              <span class="text-gray-400 text-sm font-bold">semanas</span>
+            </div>
 
-  <!-- Modo INTERNATO: bloqueado, calculado automaticamente -->
-  <div id="base-input-locked" class="hidden">
-    <div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-4 py-3">
-      <i class="fas fa-lock text-blue-400 text-sm"></i>
-      <div>
-        <div class="text-white font-bold text-lg" id="base-locked-value">—</div>
-        <div class="text-[10px] text-gray-500 uppercase tracking-widest">semanas · calculado pelo internato</div>
-      </div>
-    </div>
-  </div>
-</div>
+            <!-- Modo internato: bloqueado, valor calculado automaticamente -->
+            <div id="base-input-locked" class="hidden">
+              <div class="base-locked-box">
+                <i class="fas fa-lock text-blue-400 text-base shrink-0"></i>
+                <div>
+                  <div class="text-white font-bold text-xl leading-none" id="base-locked-value">—</div>
+                  <div class="text-[10px] text-blue-300/70 uppercase tracking-widest mt-0.5">semanas · definido pelo internato</div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-          <!-- Fase 2: Revisão Cíclica -->
+          <!-- FASE 2: Revisão Cíclica -->
           <div class="phase-card phase-card-rev">
             <div class="flex items-center gap-2 mb-3">
               <div class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm"><i class="fas fa-sync-alt"></i></div>
@@ -424,7 +433,7 @@
             </div>
           </div>
 
-          <!-- Fase 3: Intensivão Final -->
+          <!-- FASE 3: Intensivão Final -->
           <div class="phase-card phase-card-int">
             <div class="flex items-center gap-2 mb-3">
               <div class="w-7 h-7 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm"><i class="fas fa-fire"></i></div>
@@ -449,7 +458,7 @@
           </div>
         </div>
 
-        <!-- Total de semanas (ref) -->
+        <!-- Total de referência -->
         <div class="text-center text-xs text-gray-500 mb-8">
           Total disponível: <span id="total-weeks-label" class="font-bold text-white">—</span> semanas
           &nbsp;·&nbsp; Período: <span id="total-period-label" class="font-bold text-white">—</span>
@@ -467,11 +476,10 @@
   <!-- Loading Overlay -->
   <div id="loading-overlay" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[2000] hidden flex-col items-center justify-center text-center px-4">
     <div class="w-20 h-20 border-4 border-green-500 border-t-transparent rounded-full animate-spin mb-8"></div>
-    <h2 class="text-3xl md:text-4xl font-black text-white font-serif mb-3" style="font-family: 'Fraunces', serif;">A calcular rotas...</h2>
+    <h2 class="text-3xl md:text-4xl font-black text-white font-serif mb-3" style="font-family:'Fraunces',serif;">A calcular rotas...</h2>
     <p class="text-gray-400 text-lg max-w-md">O nosso algoritmo está a analisar as prevalências, alocar tarefas e a construir a sua jornada rumo à aprovação.</p>
   </div>
 
-  <!-- FIREBASE INTEGRATION -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -488,224 +496,196 @@
 
     let app, auth, db, currentUser;
     try {
-        app = initializeApp(firebaseConfig);
-        auth = getAuth(app);
-        db = getFirestore(app);
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                const docSnap = await getDoc(doc(db, "profiles", user.uid));
-                if(docSnap.exists() && !docSnap.data().acesso_liberado) {
-                    window.location.href = "index.html";
-                }
-            } else {
-                window.location.href = "index.html";
-            }
-        });
+      app  = initializeApp(firebaseConfig);
+      auth = getAuth(app);
+      db   = getFirestore(app);
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          currentUser = user;
+          const snap = await getDoc(doc(db, "profiles", user.uid));
+          if (snap.exists() && !snap.data().acesso_liberado) window.location.href = "index.html";
+        } else {
+          window.location.href = "index.html";
+        }
+      });
     } catch(e) { console.warn("Firebase não configurado."); }
 
-    window.handleLogout = async function() { 
-        if(auth) await signOut(auth); 
-        window.location.href = "index.html";
-    }
+    window.handleLogout = async () => { if(auth) await signOut(auth); window.location.href = "index.html"; };
 
-    // ─────────────────────────────────────────────────────────
-    // ESTADO DO FORMULÁRIO
-    // ─────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────
+    // ESTADO GLOBAL DO FORMULÁRIO
+    // ─────────────────────────────────────────────
     let currentStep = 1;
     const TOTAL_STEPS = 5;
 
-    const answers = { 
-        provasTarget: [], 
-        outraProva: "", 
-        dataInicio: "", 
-        dataProva: "", 
-        horas: "", 
-        internato: "", 
-        datasRodizios: {},
-        fasesConfig: { baseWeeks: 0, revisaoWeeks: 0, intensivaoWeeks: 0 }
+    // _baseIsLocked: true quando o internato define a base automaticamente
+    let _totalWeeks = 4;
+    let _baseIsLocked = false;
+    let _lockedBaseValue = 0;
+
+    const answers = {
+      provasTarget: [],
+      outraProva: "",
+      dataInicio: "",
+      dataProva: "",
+      horas: "",
+      internato: "",
+      datasRodizios: {},
+      fasesConfig: { baseWeeks: 0, revisaoWeeks: 0, intensivaoWeeks: 0 }
     };
 
-    // ─────────────────────────────────────────────────────────
-    // PASSO 1 — CHIPS E DATAS
-    // ─────────────────────────────────────────────────────────
-    window.toggleChip = function(element, provaName) {
-        element.classList.toggle('active');
-        if (element.classList.contains('active')) answers.provasTarget.push(provaName);
-        else answers.provasTarget = answers.provasTarget.filter(p => p !== provaName);
-    }
+    // ─────────────────────────────────────────────
+    // PASSO 1
+    // ─────────────────────────────────────────────
+    window.toggleChip = (el, name) => {
+      el.classList.toggle('active');
+      if (el.classList.contains('active')) answers.provasTarget.push(name);
+      else answers.provasTarget = answers.provasTarget.filter(p => p !== name);
+    };
 
-    window.toggleOutraProva = function(element) {
-        element.classList.toggle('active');
-        const container = document.getElementById('outras-provas-container');
-        if (element.classList.contains('active')) container.classList.remove('hidden');
-        else { container.classList.add('hidden'); document.getElementById('outras-provas-input').value = ""; answers.outraProva = ""; }
-    }
+    window.toggleOutraProva = (el) => {
+      el.classList.toggle('active');
+      const c = document.getElementById('outras-provas-container');
+      if (el.classList.contains('active')) c.classList.remove('hidden');
+      else { c.classList.add('hidden'); document.getElementById('outras-provas-input').value = ""; }
+    };
 
-    // Recalcula a sugestão sempre que as datas mudarem (usado no passo 5)
-    window.recalcSuggestion = function() {
-        const d1 = document.getElementById('ans-data-inicio').value;
-        const d2 = document.getElementById('ans-data-prova').value;
-        if (!d1 || !d2) return;
-        const start = new Date(d1 + 'T12:00:00');
-        const end   = new Date(d2 + 'T12:00:00');
-        const totalWeeks = Math.max(4, Math.ceil((end - start) / (1000 * 60 * 60 * 24 * 7)));
-        _applyAutoSuggestion(totalWeeks);
-    }
+    // ─────────────────────────────────────────────
+    // NAVEGAÇÃO
+    // ─────────────────────────────────────────────
+    window.nextStep = (step) => {
+      if (currentStep === 1) {
+        answers.dataInicio = document.getElementById('ans-data-inicio').value;
+        answers.dataProva  = document.getElementById('ans-data-prova').value;
+        answers.outraProva = document.getElementById('outras-provas-input').value.trim();
+        if (!answers.provasTarget.length && !answers.outraProva) { alert("Selecione pelo menos uma prova."); return; }
+        if (!answers.dataInicio || !answers.dataProva) { alert("Preencha a Data de Início e a Data da Prova."); return; }
+        if (new Date(answers.dataInicio) >= new Date(answers.dataProva)) { alert("A Data da Prova deve ser posterior ao Início."); return; }
+      }
+      document.getElementById(`step-${currentStep}`).classList.remove('active');
+      currentStep = step;
+      document.getElementById(`step-${currentStep}`).classList.add('active');
+      document.getElementById('progress-bar').style.width = `${(currentStep / TOTAL_STEPS) * 100}%`;
+    };
 
-    // ─────────────────────────────────────────────────────────
-    // NAVEGAÇÃO ENTRE PASSOS
-    // ─────────────────────────────────────────────────────────
-    window.nextStep = function(step) {
-        if (currentStep === 1) {
-            answers.dataInicio = document.getElementById('ans-data-inicio').value;
-            answers.dataProva  = document.getElementById('ans-data-prova').value;
-            answers.outraProva = document.getElementById('outras-provas-input').value.trim();
+    window.prevStep = (step) => {
+      document.getElementById(`step-${currentStep}`).classList.remove('active');
+      currentStep = step;
+      document.getElementById(`step-${currentStep}`).classList.add('active');
+      document.getElementById('progress-bar').style.width = `${(currentStep / TOTAL_STEPS) * 100}%`;
+    };
 
-            if (answers.provasTarget.length === 0 && !answers.outraProva) {
-                alert("Por favor, selecione pelo menos uma prova."); return;
-            }
-            if (!answers.dataInicio || !answers.dataProva) {
-                alert("Por favor, preencha a Data de Início e a Data da Prova."); return;
-            }
-            if (new Date(answers.dataInicio) >= new Date(answers.dataProva)) {
-                alert("A Data da Prova deve ser posterior à Data de Início."); return;
-            }
-        }
+    window.selectOption = (cat, val, el) => {
+      answers[cat] = val;
+      for (const s of el.parentElement.children) s.classList.remove('selected');
+      el.classList.add('selected');
+      if (cat === 'horas')     document.getElementById('btn-next-2').disabled = false;
+      if (cat === 'internato') document.getElementById('btn-next-3').disabled = false;
+    };
 
-        document.getElementById(`step-${currentStep}`).classList.remove('active');
-        currentStep = step;
-        document.getElementById(`step-${currentStep}`).classList.add('active');
-        document.getElementById('progress-bar').style.width = `${(currentStep / TOTAL_STEPS) * 100}%`;
-    }
+    window.handleStep3To4 = () => {
+      if (answers.internato === 'sim') {
+        document.getElementById('internato-config').classList.remove('hidden');
+        document.getElementById('livre-config').classList.add('hidden');
+      } else {
+        document.getElementById('internato-config').classList.add('hidden');
+        document.getElementById('livre-config').classList.remove('hidden');
+      }
+      window.nextStep(4);
+    };
 
-    window.prevStep = function(step) {
-        document.getElementById(`step-${currentStep}`).classList.remove('active');
-        currentStep = step;
-        document.getElementById(`step-${currentStep}`).classList.add('active');
-        document.getElementById('progress-bar').style.width = `${(currentStep / TOTAL_STEPS) * 100}%`;
-    }
+    window.handleStep4To5 = () => {
+      // Valida datas dos rodízios pendentes
+      if (answers.internato === 'sim') {
+        const rods = ['cirurgia','clinica','go','ped'];
+        let ok = true;
+        rods.forEach(r => {
+          if (!document.getElementById(`check-${r}`).checked) {
+            if (!document.getElementById(`rod-${r}-inicio`).value || !document.getElementById(`rod-${r}-fim`).value) ok = false;
+          }
+        });
+        if (!ok) { alert("Preencha as Datas para os rodízios que ainda vai cursar."); return; }
+      }
+      _initStep5();
+      window.nextStep(5);
+    };
 
-    window.selectOption = function(category, value, element) {
-        answers[category] = value;
-        const siblings = element.parentElement.children;
-        for(let el of siblings) el.classList.remove('selected');
-        element.classList.add('selected');
-        if (category === 'horas')    document.getElementById('btn-next-2').disabled = false;
-        if (category === 'internato') document.getElementById('btn-next-3').disabled = false;
-    }
+    window.toggleRodizioAtivo = (rod, done) => {
+      const c = document.getElementById(`dates-${rod}`);
+      const b = document.getElementById(`block-${rod}`);
+      const m = document.getElementById(`msg-${rod}`);
+      if (done) {
+        c.style.display = 'none'; b.classList.add('disabled'); m.classList.remove('hidden');
+        document.getElementById(`rod-${rod}-inicio`).value = '';
+        document.getElementById(`rod-${rod}-fim`).value = '';
+      } else {
+        c.style.display = 'flex'; b.classList.remove('disabled'); m.classList.add('hidden');
+      }
+    };
 
-    window.handleStep3To4 = function() {
-        if (answers.internato === 'sim') {
-            document.getElementById('internato-config').classList.remove('hidden');
-            document.getElementById('livre-config').classList.add('hidden');
-        } else {
-            document.getElementById('internato-config').classList.add('hidden');
-            document.getElementById('livre-config').classList.remove('hidden');
-        }
-        window.nextStep(4);
-    }
+    // ─────────────────────────────────────────────
+    // CÁLCULO DAS SEMANAS DE INTERNATO PENDENTES
+    // Soma as semanas reais de cada rodízio não-concluído.
+    // Retorna null se internato não estiver activo.
+    // ─────────────────────────────────────────────
+    function _calcInternatoBaseWeeks() {
+      if (answers.internato !== 'sim') return null;
 
-    window.handleStep4To5 = function() {
-        // Valida rodízios se aplicável
-        if (answers.internato === 'sim') {
-            const rodiziosList = ['cirurgia', 'clinica', 'go', 'ped'];
-            let tudoPreenchido = true;
-            rodiziosList.forEach(rod => {
-                const isConcluido = document.getElementById(`check-${rod}`).checked;
-                if (!isConcluido) {
-                    const dtIn  = document.getElementById(`rod-${rod}-inicio`).value;
-                    const dtFim = document.getElementById(`rod-${rod}-fim`).value;
-                    if (!dtIn || !dtFim) tudoPreenchido = false;
-                }
-            });
-            if (!tudoPreenchido) {
-                alert("Por favor, preencha as Datas para os rodízios que ainda vai cursar."); return;
-            }
-        }
+      const rods = ['cirurgia','clinica','go','ped'];
+      let total = 0;
+      let anyPending = false;
 
-        // Inicializa o passo 5 com a sugestão automática
-        _initStep5();
-        window.nextStep(5);
-    }
+      rods.forEach(r => {
+        const isConcluido = document.getElementById(`check-${r}`).checked;
+        if (isConcluido) return; // já foi feito, não conta para a base futura
 
-    window.toggleRodizioAtivo = function(rodizio, isConcluido) {
-        const container = document.getElementById(`dates-${rodizio}`);
-        const block     = document.getElementById(`block-${rodizio}`);
-        const msg       = document.getElementById(`msg-${rodizio}`);
-        if (isConcluido) {
-            container.style.display = 'none'; block.classList.add('disabled'); msg.classList.remove('hidden');
-            document.getElementById(`rod-${rodizio}-inicio`).value = '';
-            document.getElementById(`rod-${rodizio}-fim`).value = '';
-        } else {
-            container.style.display = 'flex'; block.classList.remove('disabled'); msg.classList.add('hidden');
-        }
-    }
+        const dtIn  = document.getElementById(`rod-${r}-inicio`).value;
+        const dtFim = document.getElementById(`rod-${r}-fim`).value;
+        if (!dtIn || !dtFim) return;
 
-    // ─────────────────────────────────────────────────────────
-    // PASSO 5 — LÓGICA DE FASES
-    // ─────────────────────────────────────────────────────────
-
-    let _totalWeeks = 4; // será sobrescrito
-
-    function _calcSuggestion(totalWeeks) {
-     // ─────────────────────────────────────────────────────────
-// Calcula semanas de internato pendentes a partir das datas
-// ─────────────────────────────────────────────────────────
-function _calcInternatoBaseWeeks() {
-    if (answers.internato !== 'sim' || !answers.datasRodizios) return null;
-
-    const rodList = ['cirurgia', 'clinica', 'go', 'ped'];
-    let totalBaseWeeks = 0;
-    let hasAnyPending = false;
-
-    rodList.forEach(rod => {
-        const r = answers.datasRodizios[rod];
-        if (!r || r.concluido) return; // pula os já concluídos
-        if (!r.in || !r.fim) return;
-
-        const start = new Date(r.in  + 'T12:00:00');
-        const end   = new Date(r.fim + 'T12:00:00');
+        const start = new Date(dtIn  + 'T12:00:00');
+        const end   = new Date(dtFim + 'T12:00:00');
         const weeks = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24 * 7)));
-        totalBaseWeeks += weeks;
-        hasAnyPending = true;
-    });
+        total += weeks;
+        anyPending = true;
+      });
 
-    return hasAnyPending ? totalBaseWeeks : null;
-}
+      return anyPending ? total : null;
+    }
 
-function _calcSuggestion(totalWeeks) {
-    // Intensivão: sempre 4 semanas sugeridas (editável pelo aluno)
-    const INT_DEFAULT = 4;
+    // ─────────────────────────────────────────────
+    // CÁLCULO DA SUGESTÃO DE FASES
+    // Regra de prioridade:
+    //   1. Se internato presente → baseWeeks = semanas dos rodízios pendentes (âncora)
+    //   2. Intensivão sempre sugerido como 4 semanas (editável)
+    //   3. Revisão = restante
+    // ─────────────────────────────────────────────
+    function _calcSuggestion(totalWeeks) {
+      const INT_DEFAULT = 4; // intensivão padrão: 4 semanas (último mês)
 
-    // Verifica se internato define a base
-    const internatoBase = _calcInternatoBaseWeeks();
+      const internatoBase = _calcInternatoBaseWeeks();
 
-    let baseW, revW, intW;
+      let baseW, revW, intW;
+      let locked = false;
 
-    if (internatoBase !== null) {
-        // ── MODO INTERNATO ──
-        // Base = soma dos rodízios pendentes (âncora fixa)
-        // Intensivão = 4 semanas (sugestão, editável)
-        // Revisão = resto
-        baseW = internatoBase;
-        intW  = Math.min(INT_DEFAULT, totalWeeks - baseW - 1); // pelo menos 1 semana de revisão
-        intW  = Math.max(intW, 1);
-        revW  = totalWeeks - baseW - intW;
-        revW  = Math.max(revW, 1);
+      if (internatoBase !== null) {
+        // ── MODO INTERNATO: base é âncora ──
+        locked = true;
+        baseW  = internatoBase;
+        // Intensivão default 4 semanas, mas não pode ultrapassar o espaço disponível
+        intW   = Math.min(INT_DEFAULT, Math.max(1, totalWeeks - baseW - 1));
+        revW   = totalWeeks - baseW - intW;
 
-        // Edge case: se internato já ocupa quase tudo
-        if (baseW + intW >= totalWeeks) {
-            intW = Math.max(1, totalWeeks - baseW - 1);
-            revW = 1;
-            // Se ainda não cabe, reduz base (não deveria acontecer mas é segurança)
-            if (baseW >= totalWeeks) baseW = totalWeeks - 2;
+        // Segurança: se o internato já ocupa quase tudo
+        if (revW < 1) {
+          revW = 1;
+          intW = totalWeeks - baseW - 1;
+          if (intW < 1) { intW = 1; baseW = totalWeeks - 2; }
         }
-    } else {
-        // ── MODO LIVRE ──
-        // Proporções por faixa de tempo, intensivão fixo em 4 semanas
-        intW = Math.min(INT_DEFAULT, Math.round(totalWeeks * 0.15));
-        intW = Math.max(intW, 1);
+      } else {
+        // ── MODO LIVRE: proporções por faixa de tempo ──
+        // Intensivão fixo em 4 semanas (ou menos se tempo for muito curto)
+        intW = Math.min(INT_DEFAULT, Math.max(1, Math.round(totalWeeks * 0.12)));
 
         let basePct;
         if      (totalWeeks <= 26)  basePct = 0.62;
@@ -716,239 +696,220 @@ function _calcSuggestion(totalWeeks) {
 
         baseW = Math.round((totalWeeks - intW) * basePct);
         revW  = totalWeeks - baseW - intW;
-        revW  = Math.max(revW, 1);
-        baseW = totalWeeks - revW - intW; // garante soma exacta
+        if (revW < 1) { revW = 1; baseW = totalWeeks - intW - 1; }
+        // Garante soma exacta
+        baseW = totalWeeks - revW - intW;
+      }
+
+      return { baseW, revW, intW, locked };
     }
 
-    return { baseW, revW, intW, isInternatoLocked: internatoBase !== null };
-}
-
-    function _applyAutoSuggestion(totalWeeks) {
-        _totalWeeks = totalWeeks;
-        const { baseW, revW, intW } = _calcSuggestion(totalWeeks);
-
-        document.getElementById('inp-base-weeks').value = baseW;
-        document.getElementById('inp-rev-weeks').value  = revW;
-        document.getElementById('inp-int-weeks').value  = intW;
-
-        _updatePhaseUI(baseW, revW, intW, totalWeeks);
-    }
-
+    // ─────────────────────────────────────────────
+    // INICIALIZA PASSO 5
+    // ─────────────────────────────────────────────
     function _initStep5() {
-        function _initStep5() {
-    const d1 = new Date(answers.dataInicio + 'T12:00:00');
-    const d2 = new Date(answers.dataProva  + 'T12:00:00');
-    _totalWeeks = Math.max(4, Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24 * 7)));
+      const d1 = new Date(answers.dataInicio + 'T12:00:00');
+      const d2 = new Date(answers.dataProva  + 'T12:00:00');
+      _totalWeeks = Math.max(4, Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24 * 7)));
 
-    // Coleta os dados dos rodízios ANTES de calcular
-    // (handleStep4To5 já validou, mas precisamos ter os dados em answers.datasRodizios)
-    if (answers.internato === 'sim') {
-        const rodList = ['cirurgia', 'clinica', 'go', 'ped'];
-        answers.datasRodizios = answers.datasRodizios || {};
-        rodList.forEach(rod => {
-            const isConcluido = document.getElementById(`check-${rod}`).checked;
-            if (isConcluido) {
-                answers.datasRodizios[rod] = { concluido: true };
-            } else {
-                answers.datasRodizios[rod] = {
-                    concluido: false,
-                    in:  document.getElementById(`rod-${rod}-inicio`).value,
-                    fim: document.getElementById(`rod-${rod}-fim`).value
-                };
-            }
-        });
-    }
+      const { baseW, revW, intW, locked } = _calcSuggestion(_totalWeeks);
 
-    const { baseW, revW, intW, isInternatoLocked } = _calcSuggestion(_totalWeeks);
+      _baseIsLocked   = locked;
+      _lockedBaseValue = locked ? baseW : 0;
 
-    // ── Configura o card de Estudo Base ──
-    const freeEl   = document.getElementById('base-input-free');
-    const lockedEl = document.getElementById('base-input-locked');
-    const baseInp  = document.getElementById('inp-base-weeks');
+      // ── Configura o card de Estudo Base ──
+      const freeEl   = document.getElementById('base-input-free');
+      const lockedEl = document.getElementById('base-input-locked');
+      const baseInp  = document.getElementById('inp-base-weeks');
 
-    if (isInternatoLocked) {
-        // Bloqueia o input e mostra o valor calculado
+      if (locked) {
         freeEl.classList.add('hidden');
         lockedEl.classList.remove('hidden');
         document.getElementById('base-locked-value').innerText = baseW;
-        // Mantém o valor num data attribute para leitura posterior
-        baseInp.dataset.lockedValue = baseW;
-        baseInp.value = baseW; // mantém sincronizado mesmo oculto
-    } else {
+        baseInp.value = baseW; // mantém sincronizado para leitura em finishOnboarding
+      } else {
         freeEl.classList.remove('hidden');
         lockedEl.classList.add('hidden');
         baseInp.value = baseW;
-        delete baseInp.dataset.lockedValue;
-    }
+      }
 
-    document.getElementById('inp-rev-weeks').value  = revW;
-    document.getElementById('inp-int-weeks').value  = intW;
+      document.getElementById('inp-rev-weeks').value = revW;
+      document.getElementById('inp-int-weeks').value = intW;
 
-    // ── Texto de sugestão ──
-    const months = Math.round(_totalWeeks / 4.33);
-    let suggText = '';
+      // ── Texto de sugestão contextualizado ──
+      const months = Math.round(_totalWeeks / 4.33);
+      let suggText = '';
 
-    if (isInternatoLocked) {
-        const rodList = ['cirurgia', 'clinica', 'go', 'ped'];
-        const rodNames = { cirurgia: 'Cirurgia', clinica: 'Clínica', go: 'GO', ped: 'Pediatria' };
-        const pendentes = rodList
-            .filter(r => answers.datasRodizios[r] && !answers.datasRodizios[r].concluido)
-            .map(r => rodNames[r])
-            .join(', ');
-        suggText = `O seu internato tem <strong>${baseW} semanas</strong> de rodízios pendentes (${pendentes}), que formam a <strong>Fase Base automaticamente</strong>. Pode ajustar o Intensivão — a Revisão completa o restante.`;
-    } else if (_totalWeeks <= 26) {
+      if (locked) {
+        const rods = ['cirurgia','clinica','go','ped'];
+        const names = { cirurgia:'Cirurgia', clinica:'Clínica', go:'GO', ped:'Pediatria' };
+        const pendentes = rods
+          .filter(r => !document.getElementById(`check-${r}`).checked
+                    && document.getElementById(`rod-${r}-inicio`).value)
+          .map(r => names[r])
+          .join(', ');
+        suggText = `O seu internato tem <strong>${baseW} semanas</strong> de rodízios pendentes (${pendentes || 'a calcular'}). Essa duração define automaticamente a <strong>Fase Base 🔒</strong>. Você pode ajustar o Intensivão — a Revisão completa o restante.`;
+      } else if (_totalWeeks <= 26) {
         suggText = `Você tem <strong>${_totalWeeks} semanas (~${(_totalWeeks/4.33).toFixed(1)} meses)</strong>. Com pouco tempo, concentre a maior parte no estudo de matéria nova e reserve o mínimo para revisão.`;
-    } else if (_totalWeeks <= 52) {
+      } else if (_totalWeeks <= 52) {
         suggText = `Você tem <strong>${_totalWeeks} semanas (~${months} meses)</strong>. Um ano é ideal para cobrir tudo e ter um bom ciclo de revisões antes do intensivão.`;
-    } else {
-        suggText = `Você tem <strong>${_totalWeeks} semanas (~${months} meses)</strong>. Com mais de um ano, estude o conteúdo com calma e dedique o segundo ano às revisões e simulados.`;
+      } else {
+        suggText = `Você tem <strong>${_totalWeeks} semanas (~${months} meses)</strong>. Com mais de um ano, estude com calma na fase base e dedique o tempo restante às revisões e simulados intensivos.`;
+      }
+
+      document.getElementById('suggestion-text').innerHTML = suggText;
+      document.getElementById('total-weeks-label').innerText = _totalWeeks;
+      document.getElementById('total-period-label').innerText =
+        `${d1.toLocaleDateString('pt-BR',{month:'short',year:'numeric'})} → ${d2.toLocaleDateString('pt-BR',{month:'short',year:'numeric'})}`;
+
+      _updatePhaseUI(baseW, revW, intW);
     }
-    document.getElementById('suggestion-text').innerHTML = suggText;
 
-    // ── Labels de período ──
-    document.getElementById('total-weeks-label').innerText = _totalWeeks;
-    document.getElementById('total-period-label').innerText =
-        `${d1.toLocaleDateString('pt-BR', {month:'short', year:'numeric'})} → ${d2.toLocaleDateString('pt-BR', {month:'short', year:'numeric'})}`;
+    // ─────────────────────────────────────────────
+    // SINCRONIZAÇÃO DOS INPUTS DO PASSO 5
+    // Quando base está bloqueada:
+    //   - alterar 'int' → revisão se auto-ajusta
+    //   - alterar 'rev' → intensivão se auto-ajusta
+    // Quando livre: qualquer campo pode mudar.
+    // ─────────────────────────────────────────────
+    window.syncPhaseInputs = (changed) => {
+      let baseW = _baseIsLocked
+        ? _lockedBaseValue
+        : (parseInt(document.getElementById('inp-base-weeks').value) || 0);
 
-    _updatePhaseUI(baseW, revW, intW, _totalWeeks, isInternatoLocked);
-}
+      let revW = parseInt(document.getElementById('inp-rev-weeks').value) || 0;
+      let intW = parseInt(document.getElementById('inp-int-weeks').value) || 0;
 
-   function _updatePhaseUI(baseW, revW, intW, total, isInternatoLocked) {
-    const sum = baseW + revW + intW;
-    const badge     = document.getElementById('sum-badge');
-    const badgeIcon = document.getElementById('sum-icon');
-    const badgeTxt  = document.getElementById('sum-text');
-    const btnFinish = document.getElementById('btn-finish');
+      if (_baseIsLocked) {
+        const remaining = _totalWeeks - baseW;
 
-    // Barra de preview
-    const bPct = total > 0 ? (baseW / total * 100).toFixed(1) : 0;
-    const rPct = total > 0 ? (revW  / total * 100).toFixed(1) : 0;
-    const iPct = total > 0 ? (intW  / total * 100).toFixed(1) : 0;
-
-    document.getElementById('pbar-base').style.width = `${bPct}%`;
-    document.getElementById('pbar-rev').style.width  = `${rPct}%`;
-    document.getElementById('pbar-int').style.width  = `${iPct}%`;
-
-    document.getElementById('pbar-base-label').innerText = `${baseW} sem${isInternatoLocked ? ' 🔒' : ''}`;
-    document.getElementById('pbar-rev-label').innerText  = `${revW} sem`;
-    document.getElementById('pbar-int-label').innerText  = `${intW} sem`;
-
-    // Badge de validação
-    const isValid = sum === total && baseW >= 1 && revW >= 1 && intW >= 1;
-    if (isValid) {
-        badge.className     = 'sum-badge sum-ok';
-        badgeIcon.className = 'fas fa-check-circle';
-        badgeTxt.innerText  = `Perfeito! ${baseW} + ${revW} + ${intW} = ${total} semanas`;
-        btnFinish.disabled  = false;
-    } else {
-        badge.className     = 'sum-badge sum-err';
-        badgeIcon.className = 'fas fa-exclamation-circle';
-        badgeTxt.innerText  = `A soma (${sum}) deve ser igual ao total (${total} semanas)`;
-        btnFinish.disabled  = true;
-    }
-}
-
-    // Chamada pelos inputs do passo 5
-    window.syncPhaseInputs = function(changed) {
-    const baseInp = document.getElementById('inp-base-weeks');
-    const isLocked = !!baseInp.dataset.lockedValue;
-
-    let baseW = isLocked
-        ? parseInt(baseInp.dataset.lockedValue) || 0
-        : parseInt(baseInp.value) || 0;
-
-    let revW  = parseInt(document.getElementById('inp-rev-weeks').value)  || 0;
-    let intW  = parseInt(document.getElementById('inp-int-weeks').value)  || 0;
-
-    if (isLocked) {
-        // Base está travada → ao mudar intensivão, revisão se auto-ajusta
         if (changed === 'int') {
-            revW = _totalWeeks - baseW - intW;
-            revW = Math.max(revW, 1);
-            // Se revisão ficou negativa, limita o intensivão
-            if (revW < 1) {
-                intW = _totalWeeks - baseW - 1;
-                intW = Math.max(intW, 1);
-                revW = 1;
-            }
-            document.getElementById('inp-rev-weeks').value = revW;
-            document.getElementById('inp-int-weeks').value = intW;
+          // Clamp intensivão para não comer toda a revisão
+          intW = Math.max(1, Math.min(intW, remaining - 1));
+          revW = remaining - intW;
+          document.getElementById('inp-int-weeks').value = intW;
+          document.getElementById('inp-rev-weeks').value = revW;
         }
-        // Se o aluno tentar mudar 'rev' com base travada, ajusta 'int'
+
         if (changed === 'rev') {
-            intW = _totalWeeks - baseW - revW;
-            intW = Math.max(intW, 1);
-            document.getElementById('inp-int-weeks').value = intW;
+          revW = Math.max(1, Math.min(revW, remaining - 1));
+          intW = remaining - revW;
+          document.getElementById('inp-rev-weeks').value = revW;
+          document.getElementById('inp-int-weeks').value = intW;
         }
+      }
+
+      _updatePhaseUI(baseW, revW, intW);
+    };
+
+    // ─────────────────────────────────────────────
+    // ATUALIZA UI DO PASSO 5 (barra + badge)
+    // ─────────────────────────────────────────────
+    function _updatePhaseUI(baseW, revW, intW) {
+      const total  = _totalWeeks;
+      const sum    = baseW + revW + intW;
+      const isOk   = sum === total && baseW >= 1 && revW >= 1 && intW >= 1;
+
+      // Barra tricolor
+      const bPct = total > 0 ? (baseW / total * 100).toFixed(1) : 0;
+      const rPct = total > 0 ? (revW  / total * 100).toFixed(1) : 0;
+      const iPct = total > 0 ? (intW  / total * 100).toFixed(1) : 0;
+
+      document.getElementById('pbar-base').style.width = `${bPct}%`;
+      document.getElementById('pbar-rev').style.width  = `${rPct}%`;
+      document.getElementById('pbar-int').style.width  = `${iPct}%`;
+
+      document.getElementById('pbar-base-label').innerText = `${baseW} sem${_baseIsLocked ? ' 🔒' : ''}`;
+      document.getElementById('pbar-rev-label').innerText  = `${revW} sem`;
+      document.getElementById('pbar-int-label').innerText  = `${intW} sem`;
+
+      // Badge de validação
+      const badge = document.getElementById('sum-badge');
+      const icon  = document.getElementById('sum-icon');
+      const txt   = document.getElementById('sum-text');
+      const btn   = document.getElementById('btn-finish');
+
+      if (isOk) {
+        badge.className = 'sum-badge sum-ok';
+        icon.className  = 'fas fa-check-circle';
+        txt.innerText   = `Perfeito! ${baseW} + ${revW} + ${intW} = ${total} semanas`;
+        btn.disabled    = false;
+      } else {
+        badge.className = 'sum-badge sum-err';
+        icon.className  = 'fas fa-exclamation-circle';
+        txt.innerText   = `A soma (${sum}) deve ser igual ao total (${total} semanas)`;
+        btn.disabled    = true;
+      }
     }
 
-    _updatePhaseUI(baseW, revW, intW, _totalWeeks, isLocked);
-}
-
-    // ─────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────
     // SUBMISSÃO FINAL
-    // ─────────────────────────────────────────────────────────
-    window.finishOnboarding = async function() {
-        // Coleta rodízios (se internato)
-        if (answers.internato === 'sim') {
-            const rodiziosList = ['cirurgia', 'clinica', 'go', 'ped'];
-            answers.datasRodizios = {};
-            rodiziosList.forEach(rod => {
-                const isConcluido = document.getElementById(`check-${rod}`).checked;
-                if (isConcluido) {
-                    answers.datasRodizios[rod] = { concluido: true };
-                } else {
-                    answers.datasRodizios[rod] = {
-                        concluido: false,
-                        in:  document.getElementById(`rod-${rod}-inicio`).value,
-                        fim: document.getElementById(`rod-${rod}-fim`).value
-                    };
-                }
-            });
+    // ─────────────────────────────────────────────
+    window.finishOnboarding = async () => {
+      // Coleta rodízios
+      if (answers.internato === 'sim') {
+        const rods = ['cirurgia','clinica','go','ped'];
+        answers.datasRodizios = {};
+        rods.forEach(r => {
+          const done = document.getElementById(`check-${r}`).checked;
+          if (done) {
+            answers.datasRodizios[r] = { concluido: true };
+          } else {
+            answers.datasRodizios[r] = {
+              concluido: false,
+              in:  document.getElementById(`rod-${r}-inicio`).value,
+              fim: document.getElementById(`rod-${r}-fim`).value
+            };
+          }
+        });
+      }
+
+      // Lê valores das fases
+      // — se base está bloqueada, usa o valor calculado pelo internato
+      const baseW = _baseIsLocked
+        ? _lockedBaseValue
+        : (parseInt(document.getElementById('inp-base-weeks').value) || 0);
+      const revW = parseInt(document.getElementById('inp-rev-weeks').value) || 0;
+      const intW = parseInt(document.getElementById('inp-int-weeks').value) || 0;
+
+      if (baseW < 1 || revW < 1 || intW < 1) {
+        alert("Cada fase deve ter pelo menos 1 semana."); return;
+      }
+      if (baseW + revW + intW !== _totalWeeks) {
+        alert(`A soma (${baseW + revW + intW}) não bate com o total disponível (${_totalWeeks}).`); return;
+      }
+
+      answers.fasesConfig = {
+        baseWeeks:       baseW,
+        revisaoWeeks:    revW,
+        intensivaoWeeks: intW,
+        baseLockedByInternato: _baseIsLocked // flag útil para o cronograma.html
+      };
+
+      const btn = document.getElementById('btn-finish');
+      btn.disabled = true;
+      document.getElementById('loading-overlay').classList.remove('hidden');
+      document.getElementById('loading-overlay').classList.add('flex');
+
+      if (currentUser) {
+        try {
+          await updateDoc(doc(db, "profiles", currentUser.uid), {
+            has_onboarded: true,
+            onboarding_data: answers
+          });
+          setTimeout(() => { window.location.href = "cronograma.html"; }, 2500);
+        } catch(e) {
+          console.error("Erro ao salvar:", e);
+          alert("Erro ao guardar. Tente novamente.");
+          document.getElementById('loading-overlay').classList.add('hidden');
+          document.getElementById('loading-overlay').classList.remove('flex');
+          btn.disabled = false;
         }
-
-        // Coleta configuração de fases
-// Coleta configuração de fases
-// Se base está bloqueada pelo internato, lê do data attribute
-const baseInp = document.getElementById('inp-base-weeks');
-const baseW = baseInp.dataset.lockedValue
-    ? parseInt(baseInp.dataset.lockedValue) || 0
-    : parseInt(baseInp.value) || 0;        const revW  = parseInt(document.getElementById('inp-rev-weeks').value)  || 0;
-        const intW  = parseInt(document.getElementById('inp-int-weeks').value)  || 0;
-
-        if (baseW < 1 || revW < 1 || intW < 1) {
-            alert("Cada fase deve ter pelo menos 1 semana."); return;
-        }
-        if (baseW + revW + intW !== _totalWeeks) {
-            alert(`A soma das semanas (${baseW + revW + intW}) não bate com o total disponível (${_totalWeeks}).`); return;
-        }
-
-        answers.fasesConfig = { baseWeeks: baseW, revisaoWeeks: revW, intensivaoWeeks: intW };
-
-        const btn = document.getElementById('btn-finish');
-        btn.disabled = true;
-        document.getElementById('loading-overlay').classList.remove('hidden');
-        document.getElementById('loading-overlay').classList.add('flex');
-
-        if (currentUser) {
-            try {
-                await updateDoc(doc(db, "profiles", currentUser.uid), {
-                    has_onboarded: true,
-                    onboarding_data: answers
-                });
-                setTimeout(() => { window.location.href = "cronograma.html"; }, 2500);
-            } catch (error) {
-                console.error("Erro ao salvar:", error);
-                alert("Ocorreu um erro a guardar os seus dados. Tente novamente.");
-                document.getElementById('loading-overlay').classList.add('hidden');
-                document.getElementById('loading-overlay').classList.remove('flex');
-                btn.disabled = false;
-            }
-        } else {
-            console.log("Respostas prontas:", answers);
-            setTimeout(() => { window.location.href = "cronograma.html"; }, 2500);
-        }
-    }
+      } else {
+        console.log("Dados prontos (sem Firebase):", answers);
+        setTimeout(() => { window.location.href = "cronograma.html"; }, 2500);
+      }
+    };
   </script>
 </body>
 </html>
