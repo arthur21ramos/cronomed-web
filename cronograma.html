@@ -720,13 +720,35 @@
         }
 
         // Aplica labels de internato nas semanas da fase base
+        // ─────────────────────────────────────────────────────────────────
+        // Mapeamento rodízio → grande área do banco
+        // ─────────────────────────────────────────────────────────────────
+        const rodAreaMap = {
+            cirurgia: 'Cirurgia',
+            clinica:  'Clínica Médica',
+            go:       'Ginecologia e Obstetrícia',
+            ped:      'Pediatria'
+        };
+        const rodLabelMap = {
+            cirurgia: 'Cirurgia',
+            clinica:  'Clínica',
+            go:       'GO',
+            ped:      'Pediatria'
+        };
+
+        // Dado um índice de semana (0-based) e datasRodizios, retorna
+        // a grande área do rodízio activo nessa semana, ou null.
+        function _getAreaForWeek(weekStartDate, datasRodizios) {
+            for (const [key, rd] of Object.entries(datasRodizios)) {
+                if (!rd || rd.concluido || !rd.in || !rd.fim) continue;
+                const s = new Date(rd.in  + 'T12:00:00');
+                const e = new Date(rd.fim + 'T12:00:00');
+                if (weekStartDate >= s && weekStartDate <= e) return rodAreaMap[key] || null;
+            }
+            return null;
+        }
+
         function _applyInternatoPhases(weeks, datasRodizios, startDate) {
-            const rodMap = {
-                cirurgia: { label:'Cirurgia', area:'Cirurgia' },
-                clinica:  { label:'Clínica',  area:'Clínica Médica' },
-                go:       { label:'GO',        area:'Ginecologia e Obstetrícia' },
-                ped:      { label:'Pediatria', area:'Pediatria' }
-            };
             weeks.forEach(w => {
                 if (w.fase !== 'base') return;
                 const wDate = new Date(startDate); wDate.setDate(startDate.getDate()+(w.week-1)*7);
@@ -735,15 +757,38 @@
                     if (!rd || rd.concluido || !rd.in || !rd.fim) return;
                     const s = new Date(rd.in  + 'T12:00:00');
                     const e = new Date(rd.fim + 'T12:00:00');
-                    if (wDate >= s && wDate <= e && rodMap[key]) phaseLabels.push(rodMap[key].label);
+                    if (wDate >= s && wDate <= e && rodLabelMap[key]) phaseLabels.push(rodLabelMap[key]);
                 });
                 if (phaseLabels.length) w.phase = 'Internato — ' + phaseLabels.join('/');
             });
         }
 
-        // FASE 1: round-robin por área para diversidade temática
+        // ─────────────────────────────────────────────────────────────────
+        // FASE 1 — Distribuição da Fase Base
+        //
+        // MODO INTERNATO:
+        //   Cada semana recebe matérias da área do rodízio activo naquela semana.
+        //   Preventiva é distribuída uniformemente por todas as semanas base.
+        //   Matérias de áreas cujo rodízio já foi concluído são tratadas como
+        //   Estudo Livre e distribuídas uniformemente nas semanas restantes.
+        //
+        // MODO LIVRE (sem internato):
+        //   Round-robin por área para garantir diversidade em cada semana.
+        // ─────────────────────────────────────────────────────────────────
         function _distributeBase(tasks, weeksBase, obData) {
             if (!weeksBase.length) return;
+
+            const hasInternato = obData.internato === 'sim' && obData.datasRodizios;
+
+            if (hasInternato) {
+                _distributeBaseComInternato(tasks, weeksBase, obData.datasRodizios, obData);
+            } else {
+                _distributeBaseLivre(tasks, weeksBase);
+            }
+        }
+
+        function _distributeBaseLivre(tasks, weeksBase) {
+            // Round-robin por grande área para diversidade temática
             const byArea = {};
             tasks.forEach(t => {
                 const area = areaMapping[t.area] || t.area;
@@ -766,6 +811,92 @@
                     tipo: 'materia_nova', score: t.score || 0
                 });
             });
+        }
+
+        function _distributeBaseComInternato(tasks, weeksBase, datasRodizios, obData) {
+            const startDate = new Date(obData.dataInicio.split('T')[0] + 'T12:00:00');
+
+            // Separa Preventiva das demais (Preventiva vai distribuída por todo o cronograma)
+            const preventiva = tasks.filter(t => (areaMapping[t.area]||t.area) === 'Preventiva');
+            const resto      = tasks.filter(t => (areaMapping[t.area]||t.area) !== 'Preventiva');
+
+            // Agrupa matérias por grande área
+            const byGrandeArea = {};
+            resto.forEach(t => {
+                const ga = areaMapping[t.area] || t.area;
+                if (!byGrandeArea[ga]) byGrandeArea[ga] = [];
+                byGrandeArea[ga].push(t);
+            });
+
+            // Para cada semana base, descobre qual área de rodízio está activa
+            // e constrói filas de tarefas por área
+            const areaQueues = {};
+            Object.keys(byGrandeArea).forEach(ga => {
+                areaQueues[ga] = [...byGrandeArea[ga]];
+            });
+
+            // Semanas agrupadas por área activa
+            const weeksByArea = {}; // ga → [weeks]
+            const weeksNoRodizio = []; // semanas sem rodízio activo
+
+            weeksBase.forEach(w => {
+                const wDate = new Date(startDate); wDate.setDate(startDate.getDate()+(w.week-1)*7);
+                const activeArea = _getAreaForWeek(wDate, datasRodizios);
+                if (activeArea) {
+                    if (!weeksByArea[activeArea]) weeksByArea[activeArea] = [];
+                    weeksByArea[activeArea].push(w);
+                } else {
+                    weeksNoRodizio.push(w);
+                }
+            });
+
+            // Distribui cada área nas semanas do seu rodízio
+            Object.entries(weeksByArea).forEach(([ga, wks]) => {
+                const queue = areaQueues[ga] || [];
+                if (!queue.length || !wks.length) return;
+                const perWeek = Math.ceil(queue.length / wks.length);
+                queue.forEach((t, i) => {
+                    const wIdx = Math.floor(i / perWeek) % wks.length;
+                    wks[wIdx].tasks.push({
+                        id: `base_${Date.now()}_${Math.random().toString(36).substr(2,6)}`,
+                        category: t.area, subject: t.tema, prioridade: t.prioridade,
+                        tipo: 'materia_nova', score: t.score || 0
+                    });
+                    delete areaQueues[ga][i]; // marca como distribuída
+                });
+                areaQueues[ga] = []; // limpa fila usada
+            });
+
+            // Matérias de áreas cujo rodízio já foi concluído ou não tem semana
+            // → distribuídas nas semanas sem rodízio activo (ou em toda a base se não houver)
+            const sobras = [];
+            Object.values(areaQueues).forEach(q => sobras.push(...q.filter(Boolean)));
+
+            const targetFree = weeksNoRodizio.length ? weeksNoRodizio : weeksBase;
+            if (sobras.length && targetFree.length) {
+                const perWeek = Math.ceil(sobras.length / targetFree.length);
+                sobras.forEach((t, i) => {
+                    const wIdx = Math.floor(i / perWeek) % targetFree.length;
+                    targetFree[wIdx].tasks.push({
+                        id: `base_${Date.now()}_${Math.random().toString(36).substr(2,6)}`,
+                        category: t.area, subject: t.tema, prioridade: t.prioridade,
+                        tipo: 'materia_nova', score: t.score || 0
+                    });
+                });
+            }
+
+            // Preventiva: distribuída uniformemente por TODAS as semanas base
+            if (preventiva.length && weeksBase.length) {
+                const prevPerWeek = Math.ceil(preventiva.length / weeksBase.length);
+                preventiva.forEach((t, i) => {
+                    const wIdx = Math.floor(i / prevPerWeek) % weeksBase.length;
+                    weeksBase[wIdx].tasks.push({
+                        id: `base_${Date.now()}_${Math.random().toString(36).substr(2,6)}`,
+                        category: t.area, subject: t.tema, prioridade: t.prioridade,
+                        tipo: 'materia_nova', score: t.score || 0
+                    });
+                });
+            }
         }
 
         // FASE 2: prio 1 → 3x, prio 2 → 2x, prio 3 → 1x
