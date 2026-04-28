@@ -392,6 +392,7 @@
         <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 animate-pulse"><i class="fas fa-clock"></i></div><div class="flex flex-col"><span class="text-[10px] font-bold uppercase text-slate-500 tracking-widest leading-none mb-1" id="mp-phase">Foco: Aula</span><span class="font-mono font-bold text-lg text-slate-900 leading-none" id="mp-time">50:00</span></div></div>
         <div class="flex items-center gap-2 border-l border-slate-200 pl-3"><button onclick="window.togglePomo()" class="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center hover:scale-105 transition shadow-md" id="mp-play-btn"><i class="fas fa-pause"></i></button><button onclick="window.stopPomo()" class="w-8 h-8 rounded-full text-slate-400 hover:text-red-500 hover:bg-slate-100 transition flex items-center justify-center"><i class="fas fa-times"></i></button></div>
     </div>
+
     <!-- ================================================================
          LÓGICA E FIREBASE
          ================================================================ -->
@@ -816,11 +817,20 @@
         function _distributeBaseComInternato(tasks, weeksBase, datasRodizios, obData) {
             const startDate = new Date(obData.dataInicio.split('T')[0] + 'T12:00:00');
 
-            // Separa Preventiva das demais (Preventiva vai distribuída por todo o cronograma)
+            // ── Separa Preventiva: vai distribuída por TODO o cronograma base ──
             const preventiva = tasks.filter(t => (areaMapping[t.area]||t.area) === 'Preventiva');
             const resto      = tasks.filter(t => (areaMapping[t.area]||t.area) !== 'Preventiva');
 
-            // Agrupa matérias por grande área
+            // ── Identifica quais grandes áreas têm rodízio PENDENTE ──
+            // (rodízios já concluídos não contam — o aluno já passou por eles)
+            const areasComRodizio = new Set();
+            Object.entries(datasRodizios).forEach(([key, rd]) => {
+                if (!rd || rd.concluido || !rd.in || !rd.fim) return;
+                const ga = rodAreaMap[key];
+                if (ga) areasComRodizio.add(ga);
+            });
+
+            // ── Agrupa todas as matérias por grande área ──
             const byGrandeArea = {};
             resto.forEach(t => {
                 const ga = areaMapping[t.area] || t.area;
@@ -828,19 +838,13 @@
                 byGrandeArea[ga].push(t);
             });
 
-            // Para cada semana base, descobre qual área de rodízio está activa
-            // e constrói filas de tarefas por área
-            const areaQueues = {};
-            Object.keys(byGrandeArea).forEach(ga => {
-                areaQueues[ga] = [...byGrandeArea[ga]];
-            });
-
-            // Semanas agrupadas por área activa
-            const weeksByArea = {}; // ga → [weeks]
+            // ── Classifica semanas base por área de rodízio activa ──
+            const weeksByArea = {};  // ga → [semanas com esse rodízio activo]
             const weeksNoRodizio = []; // semanas sem rodízio activo
 
             weeksBase.forEach(w => {
-                const wDate = new Date(startDate); wDate.setDate(startDate.getDate()+(w.week-1)*7);
+                const wDate = new Date(startDate);
+                wDate.setDate(startDate.getDate() + (w.week - 1) * 7);
                 const activeArea = _getAreaForWeek(wDate, datasRodizios);
                 if (activeArea) {
                     if (!weeksByArea[activeArea]) weeksByArea[activeArea] = [];
@@ -850,33 +854,51 @@
                 }
             });
 
-            // Distribui cada área nas semanas do seu rodízio
-            Object.entries(weeksByArea).forEach(([ga, wks]) => {
-                const queue = areaQueues[ga] || [];
-                if (!queue.length || !wks.length) return;
-                const perWeek = Math.ceil(queue.length / wks.length);
-                queue.forEach((t, i) => {
-                    const wIdx = Math.floor(i / perWeek) % wks.length;
-                    wks[wIdx].tasks.push({
-                        id: `base_${Date.now()}_${Math.random().toString(36).substr(2,6)}`,
-                        category: t.area, subject: t.tema, prioridade: t.prioridade,
-                        tipo: 'materia_nova', score: t.score || 0
+            // ── REGRA PRINCIPAL: cada área com rodízio → suas semanas exclusivamente ──
+            // Áreas SEM rodízio (ou sem semanas de rodízio) → semanas livres
+            const areasParaSemanaLivre = []; // matérias de áreas sem rodízio
+
+            Object.entries(byGrandeArea).forEach(([ga, tarefas]) => {
+                const wks = weeksByArea[ga] || [];
+
+                if (wks.length > 0) {
+                    // Área tem semanas de rodízio: distribui TODAS as tarefas nessas semanas
+                    const perWeek = Math.ceil(tarefas.length / wks.length);
+                    tarefas.forEach((t, i) => {
+                        const wIdx = Math.floor(i / perWeek) % wks.length;
+                        wks[wIdx].tasks.push({
+                            id: `base_${Date.now()}_${Math.random().toString(36).substr(2,6)}`,
+                            category: t.area, subject: t.tema, prioridade: t.prioridade,
+                            tipo: 'materia_nova', score: t.score || 0
+                        });
                     });
-                    delete areaQueues[ga][i]; // marca como distribuída
-                });
-                areaQueues[ga] = []; // limpa fila usada
+                } else {
+                    // Área sem semanas de rodízio (concluída ou sem rodízio):
+                    // vai para semanas livres
+                    areasParaSemanaLivre.push(...tarefas);
+                }
             });
 
-            // Matérias de áreas cujo rodízio já foi concluído ou não tem semana
-            // → distribuídas nas semanas sem rodízio activo (ou em toda a base se não houver)
-            const sobras = [];
-            Object.values(areaQueues).forEach(q => sobras.push(...q.filter(Boolean)));
-
-            const targetFree = weeksNoRodizio.length ? weeksNoRodizio : weeksBase;
-            if (sobras.length && targetFree.length) {
-                const perWeek = Math.ceil(sobras.length / targetFree.length);
-                sobras.forEach((t, i) => {
-                    const wIdx = Math.floor(i / perWeek) % targetFree.length;
+            // ── Distribui matérias sem rodízio pelas semanas livres ──
+            const targetFree = weeksNoRodizio.length > 0 ? weeksNoRodizio : weeksBase;
+            if (areasParaSemanaLivre.length > 0 && targetFree.length > 0) {
+                // Round-robin por área para diversidade
+                const byAreaLivre = {};
+                areasParaSemanaLivre.forEach(t => {
+                    const ga = areaMapping[t.area] || t.area;
+                    if (!byAreaLivre[ga]) byAreaLivre[ga] = [];
+                    byAreaLivre[ga].push(t);
+                });
+                const interleavedLivre = [];
+                const queuesLivre = Object.values(byAreaLivre).map(a => [...a]);
+                let hasMore = true;
+                while (hasMore) {
+                    hasMore = false;
+                    queuesLivre.forEach(q => { if (q.length) { interleavedLivre.push(q.shift()); hasMore = true; } });
+                }
+                const perWeekLivre = Math.ceil(interleavedLivre.length / targetFree.length);
+                interleavedLivre.forEach((t, i) => {
+                    const wIdx = Math.floor(i / perWeekLivre) % targetFree.length;
                     targetFree[wIdx].tasks.push({
                         id: `base_${Date.now()}_${Math.random().toString(36).substr(2,6)}`,
                         category: t.area, subject: t.tema, prioridade: t.prioridade,
@@ -885,8 +907,8 @@
                 });
             }
 
-            // Preventiva: distribuída uniformemente por TODAS as semanas base
-            if (preventiva.length && weeksBase.length) {
+            // ── Preventiva: distribuída uniformemente por TODAS as semanas base ──
+            if (preventiva.length > 0 && weeksBase.length > 0) {
                 const prevPerWeek = Math.ceil(preventiva.length / weeksBase.length);
                 preventiva.forEach((t, i) => {
                     const wIdx = Math.floor(i / prevPerWeek) % weeksBase.length;
@@ -1689,8 +1711,9 @@
         };
 
         // ══════════════════════════════════════════════
-        // SESSÃO 6 — RENDER SEARCH
-        // Filtros em cascata: área → subárea → prioridade
+        // SESSÃO 6 — RENDER SEARCH com subárea corrigida
+        // Usa t.category (campo real nas tarefas geradas)
+        // como subárea, com cascata: área → categoria → prioridade
         // ══════════════════════════════════════════════
         window.renderSearch = function() {
             const content=document.getElementById('content-area');
@@ -1708,14 +1731,13 @@
                 return `<button onclick="window.toggleSearchArea('${area}')" class="filter-chip shadow-sm ${ac}"><span>${label}</span><span class="filter-badge ${bc}">${count}</span></button>`;
             }).join('');
 
-            // SUBÁREA CASCATA: usa t.subarea por área selecionada
+            // SUBÁREA CASCATA: usa t.subarea (campo real do banco, ex: "Cardiologia", "Pneumologia")
+            // t.area = grande área ("Clínica Médica"), t.subarea = especialidade real ("Cardiologia")
             let subHtml='';
             if(window.searchFilterArea!=='Todas'){
-                // Coleta as subáreas únicas do banco para a grande área selecionada
                 const subsSet=new Set();
-                bd.filter(t=>(areaMapping[t.area]||'Outros')===window.searchFilterArea).forEach(t=>{
-                    const sub = (t.subarea || t.area || '').trim();
-                    if(sub) subsSet.add(sub);
+                bd.filter(t=>(areaMapping[t.area]||t.area)===window.searchFilterArea).forEach(t=>{
+                    if(t.subarea) subsSet.add(t.subarea);
                 });
                 const subs=[...subsSet].sort();
                 if(subs.length>0){
@@ -1744,10 +1766,10 @@
             function renderSearch2(query){
                 const lq=query.toLowerCase();
                 const filtered=bd.filter(t=>{
-                    const subarea=(t.subarea||t.area||'');
-                    const tm=t.tema.toLowerCase().includes(lq)||t.area.toLowerCase().includes(lq)||subarea.toLowerCase().includes(lq);
-                    let am=true;if(window.searchFilterArea!=='Todas')am=(areaMapping[t.area]||'Outros')===window.searchFilterArea;
-                    let sm=true;if(window.searchFilterSub!=='Todas')sm=subarea===window.searchFilterSub;
+                    const tm=t.tema.toLowerCase().includes(lq)||t.area.toLowerCase().includes(lq)||(t.subarea||'').toLowerCase().includes(lq);
+                    let am=true;if(window.searchFilterArea!=='Todas')am=(areaMapping[t.area]||t.area)===window.searchFilterArea;
+                    // Filtro de subárea usa t.subarea (especialidade real do banco)
+                    let sm=true;if(window.searchFilterSub!=='Todas')sm=(t.subarea||'')===window.searchFilterSub;
                     let pm=true;if(window.searchFilterPrio!=='Todas')pm=t.prioridade==window.searchFilterPrio;
                     return tm&&am&&sm&&pm;
                 });
@@ -1757,10 +1779,9 @@
                 rc.innerHTML=filtered.map((item,idx)=>{
                     const used=sids.has(item.tema);
                     const badge=used?`<span class="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded text-[9px] font-bold border border-emerald-200"><i class="fas fa-check"></i> Na Agenda</span>`:`<span class="bg-slate-100 text-slate-500 px-2 py-0.5 rounded text-[9px] font-bold border border-slate-200">Não agendado</span>`;
-                    // Mostra subárea e grande área
                     const areaGrande=areaMapping[item.area]||item.area;
-                    const subarea=(item.subarea||item.area||'').trim();
-                    const subLabel=subarea&&subarea!==areaGrande?`<span class="text-[9px] text-slate-400 font-bold">${subarea}</span>`:'';
+                    // Mostra subárea real (t.subarea) como label granular
+                    const subLabel=item.subarea?`<span class="text-[9px] text-slate-400 font-bold bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200">${item.subarea}</span>`:'';
                     return `<div class="p-5 border border-slate-200 rounded-2xl bg-white hover:shadow-md transition-all hover:border-blue-300 card-shadow flex flex-col justify-between items-start draggable-item" draggable="true" ondragstart="window.handleDragStartSearch(event,${idx})"><div class="flex-1 w-full"><div class="font-bold text-sm text-slate-900 leading-tight mb-2">${item.tema}</div><div class="flex flex-wrap items-center gap-2 mb-4"><div class="text-[9px] font-black uppercase text-slate-500 tracking-wide">${areaGrande}</div>${subLabel}${badge}</div></div><div class="flex justify-between w-full items-center"><div class="text-[10px] text-slate-500 font-medium flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><i class="fas fa-arrows-alt text-slate-400"></i> Arraste p/ semana</div><button onclick="window.addFromBank(${idx})" class="bg-slate-900 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-blue-600 transition shadow-sm flex-shrink-0"><i class="fas fa-plus"></i> Add</button></div></div>`;
                 }).join('');
             }
