@@ -776,11 +776,43 @@
         // MODO LIVRE (sem internato):
         //   Round-robin por área para garantir diversidade em cada semana.
         // ─────────────────────────────────────────────────────────────────
+        // ─────────────────────────────────────────────────────────
+        // CONSTANTES DE CAPACIDADE POR SEMANA
+        // ─────────────────────────────────────────────────────────
+        const TASKS_MIN_PER_WEEK = 3;
+        const TASKS_MAX_PER_WEEK = 8;
+
+        function _calcTasksPerWeek(totalTasks, totalWeeks) {
+            if (!totalWeeks) return TASKS_MAX_PER_WEEK;
+            const ideal = Math.ceil(totalTasks / totalWeeks);
+            return Math.min(TASKS_MAX_PER_WEEK, Math.max(TASKS_MIN_PER_WEEK, ideal));
+        }
+
+        function _makeTask(t, tipo) {
+            return {
+                id: 'base_' + Date.now() + '_' + Math.random().toString(36).substr(2,6),
+                category: t.area, subject: t.tema, prioridade: t.prioridade,
+                tipo: tipo || 'materia_nova', score: t.score || 0
+            };
+        }
+
+        function _interleave(byArea) {
+            const result = [];
+            const queues = Object.values(byArea).map(a => [...a]);
+            let hasMore = true;
+            while (hasMore) {
+                hasMore = false;
+                queues.forEach(q => { if (q.length) { result.push(q.shift()); hasMore = true; } });
+            }
+            return result;
+        }
+
+        // ─────────────────────────────────────────────────────────
+        // FASE 1 — Entry point
+        // ─────────────────────────────────────────────────────────
         function _distributeBase(tasks, weeksBase, obData) {
             if (!weeksBase.length) return;
-
             const hasInternato = obData.internato === 'sim' && obData.datasRodizios;
-
             if (hasInternato) {
                 _distributeBaseComInternato(tasks, weeksBase, obData.datasRodizios, obData);
             } else {
@@ -788,60 +820,58 @@
             }
         }
 
+        // ─────────────────────────────────────────────────────────
+        // MODO LIVRE — sem internato
+        // Round-robin por área + limite 3-8 tarefas/semana
+        // Prioridade 1 e 2 entram sempre; 3 e 4 só se couber
+        // ─────────────────────────────────────────────────────────
         function _distributeBaseLivre(tasks, weeksBase) {
-            // Round-robin por grande área para diversidade temática
-            const byArea = {};
-            tasks.forEach(t => {
-                const area = areaMapping[t.area] || t.area;
-                if (!byArea[area]) byArea[area] = [];
-                byArea[area].push(t);
-            });
-            const interleaved = [];
-            const queues = Object.values(byArea).map(a => [...a]);
-            let hasMore = true;
-            while (hasMore) {
-                hasMore = false;
-                queues.forEach(q => { if (q.length) { interleaved.push(q.shift()); hasMore = true; } });
+            const totalWeeks = weeksBase.length;
+            const capacidade = totalWeeks * TASKS_MAX_PER_WEEK;
+            const prio12 = tasks.filter(t => t.prioridade <= 2);
+            const prio34 = tasks.filter(t => t.prioridade > 2);
+            let tasksFinal = [...prio12];
+            const espacoRestante = capacidade - prio12.length;
+            if (espacoRestante > 0) tasksFinal = tasksFinal.concat(prio34.slice(0, espacoRestante));
+            const descartadas = Math.max(0, prio34.length - Math.max(0, espacoRestante));
+            if (descartadas > 0) {
+                setTimeout(() => { if(window.showToast) window.showToast(descartadas + ' tema(s) de baixa prioridade omitidos (tempo insuficiente)'); }, 4500);
             }
-            const maxPerWeek = Math.ceil(interleaved.length / weeksBase.length);
-            interleaved.forEach((t, i) => {
-                const wIdx = Math.floor(i / maxPerWeek) % weeksBase.length;
-                weeksBase[wIdx].tasks.push({
-                    id: `base_${Date.now()}_${Math.random().toString(36).substr(2,6)}`,
-                    category: t.area, subject: t.tema, prioridade: t.prioridade,
-                    tipo: 'materia_nova', score: t.score || 0
-                });
+            const byArea = {};
+            tasksFinal.forEach(t => {
+                const ga = areaMapping[t.area] || t.area;
+                if (!byArea[ga]) byArea[ga] = [];
+                byArea[ga].push(t);
+            });
+            const interleaved = _interleave(byArea);
+            const tasksPorSemana = _calcTasksPerWeek(interleaved.length, totalWeeks);
+            let wIdx = 0, countNaSemana = 0;
+            interleaved.forEach(t => {
+                if (countNaSemana >= tasksPorSemana) { wIdx = (wIdx + 1) % totalWeeks; countNaSemana = 0; }
+                weeksBase[wIdx].tasks.push(_makeTask(t));
+                countNaSemana++;
             });
         }
 
+        // ─────────────────────────────────────────────────────────
+        // MODO INTERNATO — com rodízios
+        //
+        // REGRA:
+        //   1. Cada área com rodízio PENDENTE → vai EXCLUSIVAMENTE
+        //      para as semanas daquele rodízio (limite: 3-8/semana)
+        //   2. Preventiva → distribuída 1 por semana em TODO o base
+        //   3. Áreas SEM rodízio → semanas livres (sem rodízio activo)
+        //   4. Overflow: prio 3/4 descartadas se capacidade excedida
+        // ─────────────────────────────────────────────────────────
         function _distributeBaseComInternato(tasks, weeksBase, datasRodizios, obData) {
             const startDate = new Date(obData.dataInicio.split('T')[0] + 'T12:00:00');
 
-            // ── Separa Preventiva: vai distribuída por TODO o cronograma base ──
             const preventiva = tasks.filter(t => (areaMapping[t.area]||t.area) === 'Preventiva');
             const resto      = tasks.filter(t => (areaMapping[t.area]||t.area) !== 'Preventiva');
 
-            // ── Identifica quais grandes áreas têm rodízio PENDENTE ──
-            // (rodízios já concluídos não contam — o aluno já passou por eles)
-            const areasComRodizio = new Set();
-            Object.entries(datasRodizios).forEach(([key, rd]) => {
-                if (!rd || rd.concluido || !rd.in || !rd.fim) return;
-                const ga = rodAreaMap[key];
-                if (ga) areasComRodizio.add(ga);
-            });
-
-            // ── Agrupa todas as matérias por grande área ──
-            const byGrandeArea = {};
-            resto.forEach(t => {
-                const ga = areaMapping[t.area] || t.area;
-                if (!byGrandeArea[ga]) byGrandeArea[ga] = [];
-                byGrandeArea[ga].push(t);
-            });
-
-            // ── Classifica semanas base por área de rodízio activa ──
-            const weeksByArea = {};  // ga → [semanas com esse rodízio activo]
-            const weeksNoRodizio = []; // semanas sem rodízio activo
-
+            // Classifica semanas: com rodízio activo vs livres
+            const weeksByArea    = {};
+            const weeksNoRodizio = [];
             weeksBase.forEach(w => {
                 const wDate = new Date(startDate);
                 wDate.setDate(startDate.getDate() + (w.week - 1) * 7);
@@ -854,70 +884,71 @@
                 }
             });
 
-            // ── REGRA PRINCIPAL: cada área com rodízio → suas semanas exclusivamente ──
-            // Áreas SEM rodízio (ou sem semanas de rodízio) → semanas livres
-            const areasParaSemanaLivre = []; // matérias de áreas sem rodízio
-
-            Object.entries(byGrandeArea).forEach(([ga, tarefas]) => {
-                const wks = weeksByArea[ga] || [];
-
-                if (wks.length > 0) {
-                    // Área tem semanas de rodízio: distribui TODAS as tarefas nessas semanas
-                    const perWeek = Math.ceil(tarefas.length / wks.length);
-                    tarefas.forEach((t, i) => {
-                        const wIdx = Math.floor(i / perWeek) % wks.length;
-                        wks[wIdx].tasks.push({
-                            id: `base_${Date.now()}_${Math.random().toString(36).substr(2,6)}`,
-                            category: t.area, subject: t.tema, prioridade: t.prioridade,
-                            tipo: 'materia_nova', score: t.score || 0
-                        });
-                    });
-                } else {
-                    // Área sem semanas de rodízio (concluída ou sem rodízio):
-                    // vai para semanas livres
-                    areasParaSemanaLivre.push(...tarefas);
-                }
+            // Agrupa tarefas por grande área
+            const byGrandeArea = {};
+            resto.forEach(t => {
+                const ga = areaMapping[t.area] || t.area;
+                if (!byGrandeArea[ga]) byGrandeArea[ga] = [];
+                byGrandeArea[ga].push(t);
             });
 
-            // ── Distribui matérias sem rodízio pelas semanas livres ──
-            const targetFree = weeksNoRodizio.length > 0 ? weeksNoRodizio : weeksBase;
-            if (areasParaSemanaLivre.length > 0 && targetFree.length > 0) {
-                // Round-robin por área para diversidade
-                const byAreaLivre = {};
-                areasParaSemanaLivre.forEach(t => {
-                    const ga = areaMapping[t.area] || t.area;
-                    if (!byAreaLivre[ga]) byAreaLivre[ga] = [];
-                    byAreaLivre[ga].push(t);
+            // Distribui cada área nas suas semanas de rodízio
+            const areasParaSemanaLivre = [];
+            Object.entries(byGrandeArea).forEach(([ga, tarefas]) => {
+                const wks = weeksByArea[ga] || [];
+                if (!wks.length) { areasParaSemanaLivre.push(...tarefas); return; }
+                const capacidadeArea = wks.length * TASKS_MAX_PER_WEEK;
+                const prio12 = tarefas.filter(t => t.prioridade <= 2);
+                const prio34 = tarefas.filter(t => t.prioridade > 2);
+                let pool = [...prio12];
+                const espaco = capacidadeArea - prio12.length;
+                if (espaco > 0) pool = pool.concat(prio34.slice(0, espaco));
+                const tasksPorSemana = _calcTasksPerWeek(pool.length, wks.length);
+                let wIdx = 0, count = 0;
+                pool.forEach(t => {
+                    if (count >= tasksPorSemana) { wIdx = (wIdx + 1) % wks.length; count = 0; }
+                    wks[wIdx].tasks.push(_makeTask(t));
+                    count++;
                 });
-                const interleavedLivre = [];
-                const queuesLivre = Object.values(byAreaLivre).map(a => [...a]);
-                let hasMore = true;
-                while (hasMore) {
-                    hasMore = false;
-                    queuesLivre.forEach(q => { if (q.length) { interleavedLivre.push(q.shift()); hasMore = true; } });
-                }
-                const perWeekLivre = Math.ceil(interleavedLivre.length / targetFree.length);
-                interleavedLivre.forEach((t, i) => {
-                    const wIdx = Math.floor(i / perWeekLivre) % targetFree.length;
-                    targetFree[wIdx].tasks.push({
-                        id: `base_${Date.now()}_${Math.random().toString(36).substr(2,6)}`,
-                        category: t.area, subject: t.tema, prioridade: t.prioridade,
-                        tipo: 'materia_nova', score: t.score || 0
-                    });
+            });
+
+            // Semanas livres: áreas sem rodízio
+            const targetFree = weeksNoRodizio.length > 0 ? weeksNoRodizio : weeksBase;
+            if (areasParaSemanaLivre.length > 0) {
+                const capLivre = targetFree.length * TASKS_MAX_PER_WEEK;
+                const prio12L = areasParaSemanaLivre.filter(t => t.prioridade <= 2);
+                const prio34L = areasParaSemanaLivre.filter(t => t.prioridade > 2);
+                let poolLivre = [...prio12L];
+                const espacoL = capLivre - prio12L.length;
+                if (espacoL > 0) poolLivre = poolLivre.concat(prio34L.slice(0, espacoL));
+                const byAreaL = {};
+                poolLivre.forEach(t => {
+                    const ga = areaMapping[t.area] || t.area;
+                    if (!byAreaL[ga]) byAreaL[ga] = [];
+                    byAreaL[ga].push(t);
+                });
+                const interleavedL = _interleave(byAreaL);
+                const tpsL = _calcTasksPerWeek(interleavedL.length, targetFree.length);
+                let wIdx = 0, count = 0;
+                interleavedL.forEach(t => {
+                    if (count >= tpsL) { wIdx = (wIdx + 1) % targetFree.length; count = 0; }
+                    targetFree[wIdx].tasks.push(_makeTask(t));
+                    count++;
                 });
             }
 
-            // ── Preventiva: distribuída uniformemente por TODAS as semanas base ──
+            // Preventiva: 1 por semana distribuída em todo o cronograma base
             if (preventiva.length > 0 && weeksBase.length > 0) {
-                const prevPerWeek = Math.ceil(preventiva.length / weeksBase.length);
-                preventiva.forEach((t, i) => {
-                    const wIdx = Math.floor(i / prevPerWeek) % weeksBase.length;
-                    weeksBase[wIdx].tasks.push({
-                        id: `base_${Date.now()}_${Math.random().toString(36).substr(2,6)}`,
-                        category: t.area, subject: t.tema, prioridade: t.prioridade,
-                        tipo: 'materia_nova', score: t.score || 0
-                    });
+                const interval = Math.max(1, Math.floor(weeksBase.length / preventiva.length));
+                let prevIdx = 0;
+                weeksBase.forEach((w, i) => {
+                    if (prevIdx >= preventiva.length) return;
+                    if (i % interval === 0) { w.tasks.push(_makeTask(preventiva[prevIdx])); prevIdx++; }
                 });
+                while (prevIdx < preventiva.length) {
+                    weeksBase[prevIdx % weeksBase.length].tasks.push(_makeTask(preventiva[prevIdx]));
+                    prevIdx++;
+                }
             }
         }
 
@@ -1464,24 +1495,291 @@
         };
 
         // ──────────────────────────────────────────────
-        // RENDER HOMEPAGE
+        // RENDER HOMEPAGE — Redesenhada
         // ──────────────────────────────────────────────
         window.renderHomepage = function() {
-            const content=document.getElementById('content-area');
-            const nome=document.getElementById('user-name')?document.getElementById('user-name').innerText.split(' ')[0]:'Doutor(a)';
+            const content = document.getElementById('content-area');
+            const nomeEl  = document.getElementById('user-name');
+            const nome    = nomeEl ? nomeEl.innerText.split(' ')[0] : 'Doutor(a)';
             window.repairState();
-            const currW=window.state.weeks.find(w=>w.week===window.activeWeek)||window.state.weeks[0];
-            const todayTasks=currW&&!currW.locked?(currW.tasks||[]).filter(t=>!window.getTaskProgress(t.id).doneStatus):[];
-            const dayIdx=new Date().getDay();
-            let agendaHtml='';
-            if(currW&&currW.timeSlots){currW.timeSlots.forEach((slot,sIdx)=>{const cell=currW.agenda?currW.agenda[`d${dayIdx}_s${sIdx}`]:null;const txt=cell?cell.text:'- Estudo/Livre -';agendaHtml+=`<div class="flex items-start gap-4 timeline-item"><div class="text-[10px] font-bold font-mono text-slate-500 mt-1 w-20 shrink-0">${slot}</div><div class="font-bold text-sm text-slate-900 bg-white px-4 py-2 border border-slate-200 rounded-xl flex-1 shadow-sm break-words">${txt}</div></div>`;});}
-            else agendaHtml=`<div class="text-sm text-slate-500 italic">Horários não encontrados.</div>`;
-            const faseBadgeHtml=currW?window.getFaseBadge(currW.fase||'base'):'';
-            let html=`<div class="max-w-4xl mx-auto fade-enter"><div class="mb-10"><h1 class="text-4xl font-serif text-slate-900 tracking-tight">Bom dia, ${nome}!</h1><p class="text-slate-500 mt-2 text-lg">Aqui está o seu painel de comando de hoje.</p></div><div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10"><div class="card-shadow bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-center items-center text-center"><div class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Semana Atual</div><div class="text-xl font-bold text-blue-600 flex items-center gap-2"><i class="fas fa-calendar-week"></i> Semana ${currW?currW.week:''}</div><div class="mt-2">${faseBadgeHtml}</div></div><div class="card-shadow bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-center items-center text-center"><div class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Questões Hoje</div><div class="text-3xl font-bold text-green-500">${(window.state.dailyStats||{})[window.getTodayStr()]||0}</div></div><div class="card-shadow p-6 rounded-2xl flex flex-col justify-center items-center text-center bg-black text-white cursor-pointer hover:scale-105 transition" onclick="window.startPomoForTask('avulso')"><i class="fas fa-play text-2xl mb-2 text-blue-400"></i><div class="font-bold text-sm">Foco Livre</div></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><div><h3 class="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2"><i class="far fa-clock"></i> Linha do Tempo (Hoje)</h3><div class="card-shadow bg-white rounded-2xl border border-slate-200 p-8 pt-10">${agendaHtml}<button onclick="window.switchView('week')" class="w-full text-xs font-bold text-blue-600 hover:underline mt-4 text-center">Editar grade</button></div></div><div><h3 class="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2"><i class="fas fa-tasks"></i> Foco Principal (Sem. ${currW?currW.week:''})</h3><div class="space-y-3">`;
-            todayTasks.slice(0,6).forEach(t=>{html+=`<div class="card-shadow bg-white border border-slate-200 rounded-xl p-4 flex items-center gap-3 ${window.getPrioClass(t.prioridade,t.tipo)} cursor-pointer" onclick="window.activeWeek=${currW?currW.week:1};window.switchView('week');"><div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 shrink-0"><i class="fas fa-arrow-right"></i></div><div class="min-w-0"><div class="font-bold text-sm text-slate-900 leading-tight truncate">${t.subject}</div><span class="${window.getCategoryColor(t.category)} text-[8px] uppercase font-bold px-1.5 rounded border">${t.category}</span></div></div>`;});
-            if(!todayTasks.length) html+=`<div class="text-slate-400 text-sm text-center py-10 italic">Tudo concluído para esta semana! Descanse.</div>`;
-            html+=`</div></div></div></div>`;
-            content.innerHTML=html;
+
+            // ── Semana atual ──
+            const currW = window.state.weeks.find(w => w.week === window.activeWeek)
+                       || window.state.weeks[0];
+            const fase  = currW ? (currW.fase || 'base') : 'base';
+
+            // ── Progresso da semana ──
+            const weekTasks   = currW && !currW.locked ? (currW.tasks || []) : [];
+            const weekDone    = weekTasks.filter(t => window.getTaskProgress(t.id).doneStatus).length;
+            const weekTotal   = weekTasks.length;
+            const weekPct     = weekTotal > 0 ? Math.round((weekDone / weekTotal) * 100) : 0;
+            const pendingTasks = weekTasks.filter(t => !window.getTaskProgress(t.id).doneStatus);
+
+            // ── Métricas globais ──
+            const streak    = window.updateStreak();
+            const questHoje = (window.state.dailyStats || {})[window.getTodayStr()] || 0;
+            let totalDone = 0, totalCorrect = 0;
+            window.state.weeks.forEach(w => {
+                if (w.tasks) w.tasks.forEach(t => {
+                    const p = window.getTaskProgress(t.id);
+                    totalDone    += parseInt(p.done)    || 0;
+                    totalCorrect += parseInt(p.correct) || 0;
+                });
+            });
+            const acerto = window.calculateAccuracy(totalDone, totalCorrect);
+
+            // ── Semanas restantes até a prova ──
+            const totalWeeks = window.state.weeks ? window.state.weeks.length : 0;
+            const curWNum    = currW ? currW.week : 1;
+            const semsRestantes = Math.max(0, totalWeeks - curWNum + 1);
+
+            // ── Data de hoje ──
+            const hoje = new Date();
+            const diasSemana = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+            const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+            const dataStr = `${diasSemana[hoje.getDay()]}, ${hoje.getDate()} ${meses[hoje.getMonth()]}`;
+
+            // ── Agenda do dia ──
+            const dayIdx = hoje.getDay();
+            let agendaHtml = '';
+            if (currW && currW.timeSlots) {
+                currW.timeSlots.forEach((slot, sIdx) => {
+                    const cell = currW.agenda ? currW.agenda[`d${dayIdx}_s${sIdx}`] : null;
+                    const txt  = cell ? cell.text : '- Estudo/Livre -';
+                    agendaHtml += `<div class="flex items-start gap-3 timeline-item">
+                        <div class="text-[10px] font-bold font-mono text-slate-400 mt-1 w-20 shrink-0">${slot}</div>
+                        <div class="font-medium text-sm text-slate-700 bg-white px-3 py-1.5 border border-slate-200 rounded-lg flex-1 shadow-sm break-words">${txt}</div>
+                    </div>`;
+                });
+            }
+
+            // ── Pomodoro activo na homepage? ──
+            const isPomoActive = window.activePomoTaskId === 'avulso' && window.isPomoRunning !== undefined;
+            let pomoCardHtml = '';
+            if (window.activePomoTaskId === 'avulso') {
+                const min = Math.floor(window.pomoTime / 60);
+                const sec = window.pomoTime % 60;
+                const dt  = `${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+                const phaseLabels = { aula:'📖 Aula (50min)', descanso:'☕ Pausa (5min)', questoes:'✏️ Questões (25min)' };
+                const phaseColors = { aula:'text-blue-600 bg-blue-50', descanso:'text-amber-600 bg-amber-50', questoes:'text-emerald-600 bg-emerald-50' };
+                const phaseClass  = phaseColors[window.pomoPhase] || 'text-slate-600 bg-slate-50';
+                pomoCardHtml = `<div class="mt-4 border border-slate-200 rounded-2xl p-4 bg-white shadow-sm">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-xs font-bold px-3 py-1 rounded-full ${phaseClass}">${phaseLabels[window.pomoPhase] || 'Foco'}</span>
+                        <div class="flex gap-2">
+                            <button onclick="window.pomoToggle()" class="px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-700 transition">
+                                ${window.isPomoRunning ? '<i class="fas fa-pause"></i> Pausar' : '<i class="fas fa-play"></i> Retomar'}
+                            </button>
+                            <button onclick="window.pomoSkip()" class="px-3 py-1.5 bg-white border border-slate-200 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-50 transition">Pular</button>
+                            <button onclick="window.pomoStop();window.updateUI();" class="px-3 py-1.5 bg-red-50 border border-red-200 text-red-600 rounded-lg text-xs font-bold hover:bg-red-100 transition">Parar</button>
+                        </div>
+                    </div>
+                    <div id="pomo-display-avulso" class="font-mono font-black text-4xl text-slate-900 text-center py-2">${dt}</div>
+                    <div class="flex gap-1.5 mt-3">
+                        <div class="flex-1 h-1.5 rounded-full bg-slate-100 overflow-hidden"><div id="pomo-bar-1-avulso" class="h-full bg-blue-500 transition-all duration-1000" style="width:0%"></div></div>
+                        <div class="flex-1 h-1.5 rounded-full bg-slate-100 overflow-hidden"><div id="pomo-bar-2-avulso" class="h-full bg-amber-400 transition-all duration-1000" style="width:0%"></div></div>
+                        <div class="flex-1 h-1.5 rounded-full bg-slate-100 overflow-hidden"><div id="pomo-bar-3-avulso" class="h-full bg-emerald-500 transition-all duration-1000" style="width:0%"></div></div>
+                    </div>
+                </div>`;
+            }
+
+            // ── Lembretes pendentes ──
+            const reminders = JSON.parse(localStorage.getItem('cronomed_reminders') || '[]');
+            const todayStr  = window.getTodayStr();
+            const pending   = reminders.filter(r => !r.done && (!r.date || r.date >= todayStr)).slice(0, 3);
+            let remindersHtml = '';
+            if (pending.length) {
+                remindersHtml = pending.map(r => `
+                    <div class="flex items-center gap-3 p-2.5 rounded-xl bg-white border border-slate-200">
+                        <div class="w-2 h-2 rounded-full bg-amber-400 shrink-0"></div>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-bold text-xs text-slate-800 truncate">${r.text || 'Lembrete'}</div>
+                            ${r.date ? `<div class="text-[10px] text-slate-400 font-mono">${r.date}</div>` : ''}
+                        </div>
+                    </div>`).join('');
+            } else {
+                remindersHtml = `<div class="text-xs text-slate-400 italic py-2">Nenhum lembrete pendente.</div>`;
+            }
+
+            // ── Próximas revisões ──
+            const todayDate = new Date();
+            const in7Days   = new Date(); in7Days.setDate(todayDate.getDate() + 7);
+            const revisoes  = [];
+            window.state.weeks.forEach(w => {
+                if (!w.tasks) return;
+                w.tasks.forEach(t => {
+                    const p = window.getTaskProgress(t.id);
+                    if (!p.nextReview) return;
+                    const revDate = new Date(p.nextReview + 'T12:00:00');
+                    if (revDate >= todayDate && revDate <= in7Days) {
+                        revisoes.push({ subject: t.subject, date: p.nextReview, revDate });
+                    }
+                });
+            });
+            revisoes.sort((a, b) => a.revDate - b.revDate);
+            let revisoesHtml = '';
+            if (revisoes.length) {
+                revisoesHtml = revisoes.slice(0, 5).map(r => {
+                    const diff = Math.round((r.revDate - todayDate) / (1000*60*60*24));
+                    const label = diff === 0 ? 'Hoje' : diff === 1 ? 'Amanhã' : `Em ${diff} dias`;
+                    return `<div class="flex items-center gap-2 px-3 py-2 bg-white border border-blue-100 rounded-xl shrink-0">
+                        <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                        <div>
+                            <div class="text-[10px] font-bold text-slate-700 truncate max-w-[140px]">${r.subject}</div>
+                            <div class="text-[9px] text-blue-500 font-bold uppercase">${label}</div>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+
+            // ── Fase cor ──
+            const faseColor = window.getFaseColor(fase);
+            const faseBadge = window.getFaseBadge(fase);
+
+            // ── HTML FINAL ──
+            content.innerHTML = `<div class="max-w-5xl mx-auto fade-enter pb-8">
+
+                <!-- HERO -->
+                <div class="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+                    <div>
+                        <div class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">${dataStr}</div>
+                        <h1 class="text-3xl md:text-4xl font-black text-slate-900" style="font-family:'Fraunces',serif;">
+                            Bom dia, ${nome}!
+                        </h1>
+                        <div class="flex items-center gap-3 mt-2">
+                            <span class="text-sm text-slate-500 font-medium">Semana ${currW ? currW.week : 1}</span>
+                            ${faseBadge}
+                        </div>
+                    </div>
+                    <!-- Barra de progresso da semana -->
+                    <div class="sm:w-64">
+                        <div class="flex justify-between text-[10px] font-bold uppercase text-slate-500 tracking-widest mb-1.5">
+                            <span>Progresso da semana</span><span>${weekPct}%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                            <div class="h-2.5 rounded-full transition-all duration-700" style="width:${weekPct}%;background:${faseColor}"></div>
+                        </div>
+                        <div class="text-[10px] text-slate-400 mt-1 text-right">${weekDone}/${weekTotal} tarefas</div>
+                    </div>
+                </div>
+
+                <!-- CARDS DE MÉTRICAS -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+                    <div class="bg-white border border-slate-200 rounded-2xl p-4 text-center card-shadow cursor-pointer hover:border-orange-300 transition" onclick="window.switchView('dashboard')">
+                        <div class="text-2xl mb-1">🔥</div>
+                        <div class="text-2xl font-black text-slate-900">${streak}</div>
+                        <div class="text-[10px] font-bold uppercase text-slate-400 tracking-widest">dias de streak</div>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-2xl p-4 text-center card-shadow cursor-pointer hover:border-green-300 transition" onclick="window.activeWeek=${currW ? currW.week : 1};window.switchView('week');">
+                        <div class="text-2xl mb-1">📝</div>
+                        <div class="text-2xl font-black text-green-500">${questHoje}</div>
+                        <div class="text-[10px] font-bold uppercase text-slate-400 tracking-widest">questões hoje</div>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-2xl p-4 text-center card-shadow cursor-pointer hover:border-blue-300 transition" onclick="window.switchView('dashboard')">
+                        <div class="text-2xl mb-1">🎯</div>
+                        <div class="text-2xl font-black ${window.getAccuracyColorClass(acerto)}">${acerto}%</div>
+                        <div class="text-[10px] font-bold uppercase text-slate-400 tracking-widest">acerto médio</div>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-2xl p-4 text-center card-shadow">
+                        <div class="text-2xl mb-1">📅</div>
+                        <div class="text-2xl font-black text-slate-900">${semsRestantes}</div>
+                        <div class="text-[10px] font-bold uppercase text-slate-400 tracking-widest">semanas restantes</div>
+                    </div>
+                </div>
+
+                <!-- GRID PRINCIPAL -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+
+                    <!-- COLUNA ESQUERDA: Agenda + Foco -->
+                    <div class="flex flex-col gap-4">
+                        <div class="bg-white border border-slate-200 rounded-2xl p-5 card-shadow">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-[11px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                                    <i class="far fa-clock text-slate-400"></i> Linha do Tempo · Hoje
+                                </h3>
+                                <button onclick="window.activeWeek=${currW ? currW.week : 1};window.switchView('week');" class="text-[10px] font-bold text-blue-600 hover:underline">Editar</button>
+                            </div>
+                            <div class="space-y-1">${agendaHtml}</div>
+                        </div>
+
+                        <!-- Botão Foco Livre / Player Pomodoro -->
+                        ${window.activePomoTaskId === 'avulso' ? pomoCardHtml : `
+                        <button onclick="window.startPomoForTask('avulso')"
+                            class="w-full flex items-center justify-between bg-black text-white rounded-2xl px-6 py-4 hover:bg-slate-800 transition shadow-lg group">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
+                                    <i class="fas fa-play text-blue-400 text-xl group-hover:scale-110 transition-transform"></i>
+                                </div>
+                                <div class="text-left">
+                                    <div class="font-black text-lg">Iniciar Foco Livre</div>
+                                    <div class="text-xs text-slate-400">50min aula · 5min pausa · 25min questões</div>
+                                </div>
+                            </div>
+                            <i class="fas fa-arrow-right text-slate-500 group-hover:text-white transition"></i>
+                        </button>`}
+                    </div>
+
+                    <!-- COLUNA DIREITA: Tarefas + Lembretes -->
+                    <div class="flex flex-col gap-4">
+
+                        <!-- Tarefas prioritárias da semana -->
+                        <div class="bg-white border border-slate-200 rounded-2xl p-5 card-shadow flex-1">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-[11px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                                    <i class="fas fa-bullseye text-blue-500"></i> Foco desta semana
+                                </h3>
+                                <button onclick="window.activeWeek=${currW ? currW.week : 1};window.switchView('week');" class="text-[10px] font-bold text-blue-600 hover:underline">Ver todas</button>
+                            </div>
+                            <div class="space-y-2">
+                                ${pendingTasks.slice(0, 4).map(t => `
+                                <div class="flex items-center gap-3 p-3 rounded-xl border ${window.getPrioClass(t.prioridade, t.tipo)} bg-white hover:bg-slate-50 transition cursor-pointer"
+                                    onclick="window.activeWeek=${currW ? currW.week : 1};window.switchView('week');">
+                                    <div class="w-5 h-5 rounded-full border-2 border-slate-300 shrink-0 flex items-center justify-center">
+                                        <i class="fas fa-circle text-[6px] text-slate-300"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="font-bold text-sm text-slate-900 truncate">${t.subject}</div>
+                                        <span class="${window.getCategoryColor(t.category)} text-[8px] uppercase font-bold px-1.5 rounded border">${t.category}</span>
+                                    </div>
+                                    <i class="fas fa-chevron-right text-slate-300 text-xs shrink-0"></i>
+                                </div>`).join('')}
+                                ${pendingTasks.length === 0 ? `
+                                <div class="text-center py-6">
+                                    <div class="text-3xl mb-2">🎉</div>
+                                    <div class="font-bold text-sm text-slate-700">Semana concluída!</div>
+                                    <div class="text-xs text-slate-400 mt-1">Todas as tarefas estão feitas.</div>
+                                </div>` : ''}
+                            </div>
+                        </div>
+
+                        <!-- Card de lembretes -->
+                        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 card-shadow">
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="text-[11px] font-bold uppercase tracking-widest text-amber-700 flex items-center gap-2">
+                                    <i class="fas fa-bell text-amber-500"></i> Lembretes
+                                </h3>
+                                <button onclick="window.toggleReminderPanel()" class="text-[10px] font-bold text-amber-600 hover:text-amber-800 flex items-center gap-1">
+                                    <i class="fas fa-plus"></i> Novo
+                                </button>
+                            </div>
+                            <div class="space-y-2">${remindersHtml}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PRÓXIMAS REVISÕES -->
+                ${revisoes.length > 0 ? `
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 card-shadow">
+                    <h3 class="text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-3 flex items-center gap-2">
+                        <i class="fas fa-sync-alt text-emerald-500"></i> Próximas Revisões (7 dias)
+                    </h3>
+                    <div class="flex gap-3 overflow-x-auto pb-1">${revisoesHtml}</div>
+                </div>` : ''}
+
+            </div>`;
+
+            // Atualiza o Pomodoro UI se activo
+            setTimeout(() => window.pomoUpdateUI && window.pomoUpdateUI(), 50);
         };
 
         // ──────────────────────────────────────────────
@@ -1711,95 +2009,291 @@
         };
 
         // ══════════════════════════════════════════════
-        // SESSÃO 6 — RENDER SEARCH com subárea corrigida
-        // Usa t.category (campo real nas tarefas geradas)
-        // como subárea, com cascata: área → categoria → prioridade
+        // SESSÃO 6 — RENDER SEARCH
+        // Chips de área/subárea/prioridade com estado correcto
+        // toggles chamam renderSearch() completo → chips reiniciam com classe active
         // ══════════════════════════════════════════════
+
+        // Query de busca persistida em estado global (evita closures temporais)
+        window.searchQuery = '';
+
+        // Toggles: atualizam estado e chamam renderSearch() completo
+        // renderSearch() lê window.searchQuery directamente — sem setTimeout
+        window.toggleSearchArea = area => {
+            window.searchFilterArea = area;
+            window.searchFilterSub  = 'Todas';
+            window.renderSearch();
+        };
+        window.toggleSearchSub = sub => {
+            window.searchFilterSub = sub;
+            window.renderSearch();
+        };
+        window.toggleSearchPrio = prio => {
+            window.searchFilterPrio = prio;
+            window.renderSearch();
+        };
+
         window.renderSearch = function() {
-            const content=document.getElementById('content-area');
+            const content = document.getElementById('content-area');
             content.classList.add('fade-enter');
             window.repairState();
 
-            const bd=window.bancoDeMaterias||[];
-            const counts={'Todas':bd.length};
-            mainCategories.forEach(cat=>{counts[cat]=bd.filter(t=>(areaMapping[t.area]||'Outros')===cat).length;});
+            const bd = window.bancoDeMaterias || [];
 
-            const filterBtns=['Todas',...mainCategories].map(area=>{
-                const label=area;const count=counts[area]||0;
-                const ac=window.searchFilterArea===area?'bg-slate-900 text-white border-slate-900':'bg-white text-slate-600 border-slate-200 hover:bg-slate-50';
-                const bc=window.searchFilterArea===area?'bg-white/20 text-white':'bg-slate-100 text-slate-500';
-                return `<button onclick="window.toggleSearchArea('${area}')" class="filter-chip shadow-sm ${ac}"><span>${label}</span><span class="filter-badge ${bc}">${count}</span></button>`;
+            // ── Contagens por grande área ──
+            const counts = { 'Todas': bd.length };
+            mainCategories.forEach(cat => {
+                counts[cat] = bd.filter(t => (areaMapping[t.area] || 'Outros') === cat).length;
+            });
+
+            // ── Chips de grande área ──
+            const filterBtns = ['Todas', ...mainCategories].map(area => {
+                const count = counts[area] || 0;
+                const isActive = window.searchFilterArea === area;
+                const ac = isActive ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50';
+                const bc = isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500';
+                return `<button onclick="window.toggleSearchArea('${area}')" class="filter-chip shadow-sm ${ac}"><span>${area}</span><span class="filter-badge ${bc}">${count}</span></button>`;
             }).join('');
 
-            // SUBÁREA CASCATA: usa t.subarea (campo real do banco, ex: "Cardiologia", "Pneumologia")
-            // t.area = grande área ("Clínica Médica"), t.subarea = especialidade real ("Cardiologia")
-            let subHtml='';
-            if(window.searchFilterArea!=='Todas'){
-                const subsSet=new Set();
-                bd.filter(t=>(areaMapping[t.area]||t.area)===window.searchFilterArea).forEach(t=>{
-                    if(t.subarea) subsSet.add(t.subarea);
-                });
-                const subs=[...subsSet].sort();
-                if(subs.length>0){
-                    subHtml=`<div class="flex flex-wrap gap-2 mt-4 pl-4 border-l-2 border-slate-200">
-                        <span class="text-[10px] font-bold uppercase text-slate-400 tracking-widest self-center mr-1">Subespecialidade:</span>`
-                        +['Todas',...subs].map(sub=>{
-                            const ac=window.searchFilterSub===sub?'bg-blue-700 text-white border-blue-700':'bg-white text-slate-500 border-slate-200 hover:bg-slate-50';
-                            return `<button onclick="window.toggleSearchSub('${sub}')" class="filter-chip shadow-sm ${ac}">${sub}</button>`;
-                        }).join('')+`</div>`;
+            // ── Chips de subárea (só quando grande área seleccionada) ──
+            let subHtml = '';
+            if (window.searchFilterArea !== 'Todas') {
+                const subsSet = new Set();
+                bd.filter(t => (areaMapping[t.area] || t.area) === window.searchFilterArea)
+                  .forEach(t => { if (t.subarea) subsSet.add(t.subarea); });
+                const subs = [...subsSet].sort();
+                if (subs.length > 0) {
+                    const subBtns = ['Todas', ...subs].map(sub => {
+                        const isActive = window.searchFilterSub === sub;
+                        const ac = isActive ? 'bg-blue-700 text-white border-blue-700' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50';
+                        return `<button onclick="window.toggleSearchSub('${sub}')" class="filter-chip shadow-sm ${ac}">${sub}</button>`;
+                    }).join('');
+                    subHtml = `<div class="flex flex-wrap gap-2 mt-4 pl-4 border-l-2 border-blue-200">
+                        <span class="text-[10px] font-bold uppercase text-slate-400 tracking-widest self-center mr-1">
+                            <i class="fas fa-tag mr-1 text-blue-400"></i>Subespecialidade:
+                        </span>${subBtns}</div>`;
                 }
             }
 
-            const prios=[{l:'Todas',v:'Todas'},{l:'Alta (1)',v:1},{l:'Média (2)',v:2},{l:'Baixa (3)',v:3},{l:'Opcional (4)',v:4}];
-            const prioHtml=`<div class="flex flex-wrap items-center gap-2 mt-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest"><i class="fas fa-filter mr-1"></i> Prioridade: `+prios.map(p=>{const ac=window.searchFilterPrio==p.v?'bg-blue-600 text-white border-blue-600':'bg-white text-slate-500 border-slate-200 hover:bg-slate-50';return `<button onclick="window.toggleSearchPrio('${p.v}')" class="filter-chip shadow-sm ${ac}">${p.l}</button>`;}).join('')+`</div>`;
+            // ── Chips de prioridade ──
+            const prios = [
+                {l:'Todas', v:'Todas'},
+                {l:'Alta (1)', v:1},
+                {l:'Média (2)', v:2},
+                {l:'Baixa (3)', v:3},
+                {l:'Opcional (4)', v:4}
+            ];
+            const prioHtml = `<div class="flex flex-wrap items-center gap-2 mt-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                <i class="fas fa-filter mr-1"></i> Prioridade: ` +
+                prios.map(p => {
+                    const isActive = window.searchFilterPrio == p.v;
+                    const ac = isActive ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50';
+                    return `<button onclick="window.toggleSearchPrio('${p.v}')" class="filter-chip shadow-sm ${ac}">${p.l}</button>`;
+                }).join('') + `</div>`;
 
-            content.innerHTML=`<div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 min-h-[600px]"><div class="mb-10"><h2 class="text-3xl font-black text-slate-900 mb-6 tracking-tight">Buscar Tarefas</h2><input type="text" id="global-search-input" placeholder="Digite o tema, categoria ou palavra-chave..." class="w-full text-lg p-5 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none bg-slate-50 transition shadow-sm mb-6 font-medium"><div class="flex flex-col"><div class="flex flex-wrap gap-2">${filterBtns}</div>${subHtml}${prioHtml}</div></div><div id="search-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div></div>`;
-            setTimeout(()=>content.classList.remove('fade-enter'),500);
+            // ── Monta HTML base ──
+            content.innerHTML = `
+                <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 min-h-[600px]">
+                    <div class="mb-8">
+                        <h2 class="text-3xl font-black text-slate-900 mb-6 tracking-tight">Buscar Tarefas</h2>
+                        <input type="text" id="global-search-input"
+                            placeholder="Digite o tema, categoria ou palavra-chave..."
+                            class="w-full text-lg p-5 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none bg-slate-50 transition shadow-sm mb-5 font-medium">
+                        <div class="flex flex-col gap-1">
+                            <div class="flex flex-wrap gap-2">${filterBtns}</div>
+                            ${subHtml}
+                            ${prioHtml}
+                        </div>
+                    </div>
+                    <div id="search-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </div>`;
 
-            const si=document.getElementById('global-search-input');
-            const rc=document.getElementById('search-results');
+            setTimeout(() => content.classList.remove('fade-enter'), 500);
 
-            window.toggleSearchArea=area=>{window.searchFilterArea=area;window.searchFilterSub='Todas';renderSearch2(si.value);};
-            window.toggleSearchSub=sub=>{window.searchFilterSub=sub;renderSearch2(si.value);};
-            window.toggleSearchPrio=prio=>{window.searchFilterPrio=prio;renderSearch2(si.value);};
+            const si = document.getElementById('global-search-input');
+            const rc = document.getElementById('search-results');
 
-            function renderSearch2(query){
-                const lq=query.toLowerCase();
-                const filtered=bd.filter(t=>{
-                    const tm=t.tema.toLowerCase().includes(lq)||t.area.toLowerCase().includes(lq)||(t.subarea||'').toLowerCase().includes(lq);
-                    let am=true;if(window.searchFilterArea!=='Todas')am=(areaMapping[t.area]||t.area)===window.searchFilterArea;
-                    // Filtro de subárea usa t.subarea (especialidade real do banco)
-                    let sm=true;if(window.searchFilterSub!=='Todas')sm=(t.subarea||'')===window.searchFilterSub;
-                    let pm=true;if(window.searchFilterPrio!=='Todas')pm=t.prioridade==window.searchFilterPrio;
-                    return tm&&am&&sm&&pm;
+            // ── Função de filtragem e renderização dos cards ──
+            function renderCards(query) {
+                const lq = query.toLowerCase();
+                const filtered = bd.filter(t => {
+                    const tm = t.tema.toLowerCase().includes(lq)
+                        || t.area.toLowerCase().includes(lq)
+                        || (t.subarea || '').toLowerCase().includes(lq);
+                    let am = true;
+                    if (window.searchFilterArea !== 'Todas')
+                        am = (areaMapping[t.area] || t.area) === window.searchFilterArea;
+                    // ── Filtro de subárea usa t.subarea (campo real do banco) ──
+                    let sm = true;
+                    if (window.searchFilterSub !== 'Todas')
+                        sm = (t.subarea || '') === window.searchFilterSub;
+                    let pm = true;
+                    if (window.searchFilterPrio !== 'Todas')
+                        pm = t.prioridade == window.searchFilterPrio;
+                    return tm && am && sm && pm;
                 });
-                window._currentFilteredBank=filtered;
-                const sids=new Set();window.state.weeks.forEach(w=>{if(w.tasks)w.tasks.forEach(t=>sids.add(t.subject));});
-                if(!filtered.length){rc.innerHTML=`<div class="col-span-full text-center py-24"><i class="fas fa-search-minus text-4xl text-slate-300 mb-4 block"></i><p class="text-slate-500 font-medium">Nenhuma tarefa encontrada.</p></div>`;return;}
-                rc.innerHTML=filtered.map((item,idx)=>{
-                    const used=sids.has(item.tema);
-                    const badge=used?`<span class="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded text-[9px] font-bold border border-emerald-200"><i class="fas fa-check"></i> Na Agenda</span>`:`<span class="bg-slate-100 text-slate-500 px-2 py-0.5 rounded text-[9px] font-bold border border-slate-200">Não agendado</span>`;
-                    const areaGrande=areaMapping[item.area]||item.area;
-                    // Mostra subárea real (t.subarea) como label granular
-                    const subLabel=item.subarea?`<span class="text-[9px] text-slate-400 font-bold bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200">${item.subarea}</span>`:'';
-                    return `<div class="p-5 border border-slate-200 rounded-2xl bg-white hover:shadow-md transition-all hover:border-blue-300 card-shadow flex flex-col justify-between items-start draggable-item" draggable="true" ondragstart="window.handleDragStartSearch(event,${idx})"><div class="flex-1 w-full"><div class="font-bold text-sm text-slate-900 leading-tight mb-2">${item.tema}</div><div class="flex flex-wrap items-center gap-2 mb-4"><div class="text-[9px] font-black uppercase text-slate-500 tracking-wide">${areaGrande}</div>${subLabel}${badge}</div></div><div class="flex justify-between w-full items-center"><div class="text-[10px] text-slate-500 font-medium flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><i class="fas fa-arrows-alt text-slate-400"></i> Arraste p/ semana</div><button onclick="window.addFromBank(${idx})" class="bg-slate-900 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-blue-600 transition shadow-sm flex-shrink-0"><i class="fas fa-plus"></i> Add</button></div></div>`;
+
+                window._currentFilteredBank = filtered;
+
+                // Conjunto de temas já na agenda
+                const sids = new Set();
+                window.state.weeks.forEach(w => {
+                    if (w.tasks) w.tasks.forEach(t => sids.add(t.subject));
+                });
+
+                if (!filtered.length) {
+                    rc.innerHTML = `<div class="col-span-full text-center py-24">
+                        <i class="fas fa-search-minus text-4xl text-slate-300 mb-4 block"></i>
+                        <p class="text-slate-500 font-medium">Nenhuma tarefa encontrada.</p>
+                        <button onclick="window.searchFilterArea='Todas';window.searchFilterSub='Todas';window.searchFilterPrio='Todas';window.renderSearch();"
+                            class="mt-4 text-xs font-bold text-blue-600 hover:underline">Limpar filtros</button>
+                    </div>`;
+                    return;
+                }
+
+                rc.innerHTML = filtered.map((item, idx) => {
+                    const used = sids.has(item.tema);
+                    const badge = used
+                        ? `<span class="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded text-[9px] font-bold border border-emerald-200"><i class="fas fa-check mr-1"></i>Na Agenda</span>`
+                        : `<span class="bg-slate-100 text-slate-500 px-2 py-0.5 rounded text-[9px] font-bold border border-slate-200">Não agendado</span>`;
+                    const areaGrande = areaMapping[item.area] || item.area;
+                    // Exibe subárea como chip granular
+                    const subLabel = item.subarea
+                        ? `<span class="text-[9px] text-blue-600 font-bold bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100">${item.subarea}</span>`
+                        : '';
+                    const prioColors = { 1:'border-l-red-500', 2:'border-l-amber-400', 3:'border-l-blue-400', 4:'border-l-slate-300' };
+                    const prioColor = prioColors[item.prioridade] || 'border-l-slate-300';
+                    return `<div class="p-5 border border-slate-200 border-l-4 ${prioColor} rounded-2xl bg-white hover:shadow-md transition-all hover:border-blue-300 card-shadow flex flex-col justify-between items-start draggable-item"
+                        draggable="true" ondragstart="window.handleDragStartSearch(event,${idx})">
+                        <div class="flex-1 w-full">
+                            <div class="font-bold text-sm text-slate-900 leading-tight mb-2">${item.tema}</div>
+                            <div class="flex flex-wrap items-center gap-1.5 mb-4">
+                                <div class="text-[9px] font-black uppercase text-slate-500 tracking-wide">${areaGrande}</div>
+                                ${subLabel}${badge}
+                            </div>
+                        </div>
+                        <div class="flex justify-between w-full items-center">
+                            <div class="text-[10px] text-slate-400 font-medium flex items-center gap-1 bg-slate-50 px-2 py-1 rounded">
+                                <i class="fas fa-arrows-alt text-slate-300"></i> Arraste p/ semana
+                            </div>
+                            <button onclick="window.addFromBank(${idx})"
+                                class="bg-slate-900 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-blue-600 transition shadow-sm flex-shrink-0">
+                                <i class="fas fa-plus"></i> Add
+                            </button>
+                        </div>
+                    </div>`;
                 }).join('');
             }
 
-            si.addEventListener('input',e=>renderSearch2(e.target.value));
-            renderSearch2('');
+            // Restaura query salva no estado global
+            si.value = window.searchQuery || '';
+            si.addEventListener('input', e => {
+                window.searchQuery = e.target.value;
+                renderCards(window.searchQuery);
+            });
+            renderCards(window.searchQuery || '');
 
-            window.addFromBank=idx=>{
-                const item=window._currentFilteredBank[idx];if(!item)return;
-                let tw=window.activeWeek;if(!tw||tw===0)tw=1;
-                const w=window.state.weeks.find(w=>w.week===tw);if(!w)return;
-                window.pushState();if(!w.tasks)w.tasks=[];
-                const nid=`cstm_${Date.now()}`;
-                w.tasks.push({id:nid,category:item.area,subject:item.tema,prioridade:item.prioridade||2,customizado:true,tipo:'materia_nova',score:item.score||0});
+            window.addFromBank = idx => {
+                const item = window._currentFilteredBank[idx];
+                if (!item) return;
+                let tw = window.activeWeek;
+                if (!tw || tw === 0) tw = 1;
+                const w = window.state.weeks.find(w => w.week === tw);
+                if (!w) return;
+                window.pushState();
+                if (!w.tasks) w.tasks = [];
+                const nid = 'cstm_' + Date.now();
+                w.tasks.push({
+                    id: nid, category: item.area, subject: item.tema,
+                    prioridade: item.prioridade || 2, customizado: true,
+                    tipo: 'materia_nova', score: item.score || 0
+                });
                 window.ensureProgress(nid);
-                window.triggerSave();window.showToast(`Adicionado à Semana ${tw}!`);window.updateUI();
+                window.triggerSave();
+                window.showToast('Adicionado à Semana ' + tw + '!');
+                window.updateUI();
             };
         };
+
+        // ──────────────────────────────────────────────
+        // LEMBRETES (localStorage)
+        // ──────────────────────────────────────────────
+        function _getReminders() {
+            try { return JSON.parse(localStorage.getItem('cronomed_reminders') || '[]'); } catch(e) { return []; }
+        }
+        function _saveReminders(arr) {
+            try { localStorage.setItem('cronomed_reminders', JSON.stringify(arr)); } catch(e) {}
+        }
+
+        window.toggleReminderPanel = function() {
+            const panel = document.getElementById('reminder-panel');
+            if (!panel) return;
+            panel.classList.toggle('open');
+            if (panel.classList.contains('open')) window._renderReminderList();
+        };
+
+        window._renderReminderList = function() {
+            const listEl = document.getElementById('reminder-list');
+            if (!listEl) return;
+            const reminders = _getReminders();
+            if (!reminders.length) {
+                listEl.innerHTML = '<div class="text-xs text-slate-400 italic text-center py-2">Nenhum lembrete ainda.</div>';
+                return;
+            }
+            listEl.innerHTML = reminders.map((r, i) => `
+                <div class="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 transition">
+                    <input type="checkbox" class="custom-checkbox" ${r.done?'checked':''} onchange="window._toggleReminderDone(${i})">
+                    <div class="flex-1 min-w-0">
+                        <div class="text-xs font-bold text-slate-800 truncate ${r.done?'line-through text-slate-400':''}">${r.text||'Lembrete'}</div>
+                        ${r.date?`<div class="text-[10px] text-slate-400 font-mono">${r.date}</div>`:''}
+                    </div>
+                    <button onclick="window._deleteReminder(${i})" class="text-red-400 hover:text-red-600 text-xs w-5 h-5 flex items-center justify-center rounded hover:bg-red-50 transition">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>`).join('');
+            // Badge
+            const badge = document.getElementById('reminder-badge');
+            const pending = reminders.filter(r => !r.done).length;
+            if (badge) {
+                if (pending > 0) { badge.classList.remove('hidden'); badge.innerText = pending; }
+                else badge.classList.add('hidden');
+            }
+        };
+
+        window._toggleReminderDone = function(idx) {
+            const arr = _getReminders();
+            if (arr[idx]) arr[idx].done = !arr[idx].done;
+            _saveReminders(arr);
+            window._renderReminderList();
+            if (window.activeView === 'homepage') window.renderHomepage();
+        };
+
+        window._deleteReminder = function(idx) {
+            const arr = _getReminders();
+            arr.splice(idx, 1);
+            _saveReminders(arr);
+            window._renderReminderList();
+            if (window.activeView === 'homepage') window.renderHomepage();
+        };
+
+        window.addReminder = function() {
+            const text = document.getElementById('reminder-text')?.value?.trim();
+            const date = document.getElementById('reminder-date')?.value || '';
+            if (!text) return;
+            const arr = _getReminders();
+            arr.push({ text, date, done: false, id: Date.now() });
+            _saveReminders(arr);
+            const textEl = document.getElementById('reminder-text');
+            const dateEl = document.getElementById('reminder-date');
+            if (textEl) textEl.value = '';
+            if (dateEl) dateEl.value = '';
+            window._renderReminderList();
+            window.showToast('Lembrete adicionado!');
+            if (window.activeView === 'homepage') window.renderHomepage();
+        };
+
+        // Inicializa badge de lembretes ao carregar
+        setTimeout(() => window._renderReminderList && window._renderReminderList(), 1000);
 
         // ──────────────────────────────────────────────
         // UPDATE GLOBAL PROGRESS
