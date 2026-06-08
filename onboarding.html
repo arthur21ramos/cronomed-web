@@ -208,6 +208,31 @@
             <p class="text-xs text-gray-400">Carga máxima: Tarefas, muitas revisões espaçadas e blocos para simulados na íntegra.</p>
           </div>
         </div>
+        <div class="h-px w-full bg-white/10 my-6"></div>
+
+<h3 class="text-white font-bold text-lg mb-2">Quantos temas novos por semana?</h3>
+<p class="text-gray-400 mb-6 text-sm">Isso define o ritmo do seu cronograma. Você pode ajustar depois.</p>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10" id="ritmo-cards">
+  <div class="option-card" onclick="selectRitmo('leve', 3, this)">
+    <div class="text-2xl mb-2">🚶</div>
+    <h3 class="text-white font-bold text-lg mb-1">Leve</h3>
+    <div class="text-3xl font-black text-green-400 mb-1">3</div>
+    <p class="text-xs text-gray-400">temas por semana. Ideal para quem estuda poucas horas ou tem muito tempo disponível.</p>
+  </div>
+  <div class="option-card selected" onclick="selectRitmo('padrao', 5, this)">
+    <div class="text-2xl mb-2">🎯</div>
+    <h3 class="text-white font-bold text-lg mb-1">Padrão</h3>
+    <div class="text-3xl font-black text-green-400 mb-1">5</div>
+    <p class="text-xs text-gray-400">temas por semana. Equilíbrio entre cobertura e assimilação. Recomendado.</p>
+  </div>
+  <div class="option-card" onclick="selectRitmo('intenso', 8, this)">
+    <div class="text-2xl mb-2">🔥</div>
+    <h3 class="text-white font-bold text-lg mb-1">Intenso</h3>
+    <div class="text-3xl font-black text-green-400 mb-1">8</div>
+    <p class="text-xs text-gray-400">temas por semana. Para quem estuda 5+ horas e quer cobrir o máximo possível.</p>
+  </div>
+</div>
 
         <div class="flex justify-between items-center">
           <button class="btn-back" onclick="prevStep(1)"><i class="fas fa-arrow-left"></i> Voltar</button>
@@ -532,6 +557,7 @@
       internato: "",
       datasRodizios: {},
       fasesConfig: { baseWeeks: 0, revisaoWeeks: 0, intensivaoWeeks: 0 }
+      ritmo: { label: 'padrao', temasPorSemana: 5 }
     };
 
     // ─────────────────────────────────────────────
@@ -609,6 +635,12 @@
       _initStep5();
       window.nextStep(5);
     };
+    window.selectRitmo = function(label, temas, el) {
+    answers.ritmo = { label, temasPorSemana: temas };
+    const siblings = document.getElementById('ritmo-cards').children;
+    for (let s of siblings) s.classList.remove('selected');
+    el.classList.add('selected');
+};
 
     window.toggleRodizioAtivo = (rod, done) => {
       const c = document.getElementById(`dates-${rod}`);
