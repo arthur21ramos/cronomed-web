@@ -777,15 +777,29 @@
         //   Round-robin por área para garantir diversidade em cada semana.
         // ─────────────────────────────────────────────────────────────────
         // ─────────────────────────────────────────────────────────
-        // CONSTANTES DE CAPACIDADE POR SEMANA
         // ─────────────────────────────────────────────────────────
-        const TASKS_MIN_PER_WEEK = 3;
-        const TASKS_MAX_PER_WEEK = 8;
+        // CAPACIDADE: lida do ritmo definido pelo aluno no onboarding
+        // Fallback: 5 temas/semana se não definido
+        // ─────────────────────────────────────────────────────────
+        function _getTasksPerWeek(obData) {
+            return (obData && obData.ritmo && obData.ritmo.temasPorSemana)
+                ? obData.ritmo.temasPorSemana
+                : 5;
+        }
 
-        function _calcTasksPerWeek(totalTasks, totalWeeks) {
-            if (!totalWeeks) return TASKS_MAX_PER_WEEK;
-            const ideal = Math.ceil(totalTasks / totalWeeks);
-            return Math.min(TASKS_MAX_PER_WEEK, Math.max(TASKS_MIN_PER_WEEK, ideal));
+        // Seleciona temas por prioridade até a capacidade total
+        // Prio 1 sempre entra; Prio 2,3,4 entram se houver espaço
+        function _selecionarTemas(tasks, capacidadeTotal) {
+            const grupos = [1, 2, 3, 4].map(p => tasks.filter(t => t.prioridade === p));
+            let selecionados = [];
+            let descartadas  = 0;
+            for (const grupo of grupos) {
+                const espaco = capacidadeTotal - selecionados.length;
+                if (espaco <= 0) { descartadas += grupo.length; continue; }
+                selecionados = selecionados.concat(grupo.slice(0, espaco));
+                descartadas += Math.max(0, grupo.length - espaco);
+            }
+            return { selecionados, descartadas };
         }
 
         function _makeTask(t, tipo) {
@@ -812,42 +826,39 @@
         // ─────────────────────────────────────────────────────────
         function _distributeBase(tasks, weeksBase, obData) {
             if (!weeksBase.length) return;
+            const temasPorSemana  = _getTasksPerWeek(obData);
+            const capacidade      = weeksBase.length * temasPorSemana;
+            const { selecionados, descartadas } = _selecionarTemas(tasks, capacidade);
+
+            // Guarda stats para o toast informativo
+            window._lastScheduleStats = window._lastScheduleStats || {};
+            window._lastScheduleStats.selecionados = (window._lastScheduleStats.selecionados || 0) + selecionados.length;
+            window._lastScheduleStats.descartadas  = (window._lastScheduleStats.descartadas  || 0) + descartadas;
+
             const hasInternato = obData.internato === 'sim' && obData.datasRodizios;
             if (hasInternato) {
-                _distributeBaseComInternato(tasks, weeksBase, obData.datasRodizios, obData);
+                _distributeBaseComInternato(selecionados, weeksBase, obData.datasRodizios, obData, temasPorSemana);
             } else {
-                _distributeBaseLivre(tasks, weeksBase);
+                _distributeBaseLivre(selecionados, weeksBase, temasPorSemana);
             }
         }
 
         // ─────────────────────────────────────────────────────────
         // MODO LIVRE — sem internato
-        // Round-robin por área + limite 3-8 tarefas/semana
-        // Prioridade 1 e 2 entram sempre; 3 e 4 só se couber
+        // Recebe temas já seleccionados por _selecionarTemas
+        // Distribui em round-robin com limite = temasPorSemana
         // ─────────────────────────────────────────────────────────
-        function _distributeBaseLivre(tasks, weeksBase) {
-            const totalWeeks = weeksBase.length;
-            const capacidade = totalWeeks * TASKS_MAX_PER_WEEK;
-            const prio12 = tasks.filter(t => t.prioridade <= 2);
-            const prio34 = tasks.filter(t => t.prioridade > 2);
-            let tasksFinal = [...prio12];
-            const espacoRestante = capacidade - prio12.length;
-            if (espacoRestante > 0) tasksFinal = tasksFinal.concat(prio34.slice(0, espacoRestante));
-            const descartadas = Math.max(0, prio34.length - Math.max(0, espacoRestante));
-            if (descartadas > 0) {
-                setTimeout(() => { if(window.showToast) window.showToast(descartadas + ' tema(s) de baixa prioridade omitidos (tempo insuficiente)'); }, 4500);
-            }
+        function _distributeBaseLivre(tasks, weeksBase, temasPorSemana) {
             const byArea = {};
-            tasksFinal.forEach(t => {
+            tasks.forEach(t => {
                 const ga = areaMapping[t.area] || t.area;
                 if (!byArea[ga]) byArea[ga] = [];
                 byArea[ga].push(t);
             });
             const interleaved = _interleave(byArea);
-            const tasksPorSemana = _calcTasksPerWeek(interleaved.length, totalWeeks);
             let wIdx = 0, countNaSemana = 0;
             interleaved.forEach(t => {
-                if (countNaSemana >= tasksPorSemana) { wIdx = (wIdx + 1) % totalWeeks; countNaSemana = 0; }
+                if (countNaSemana >= temasPorSemana) { wIdx = (wIdx + 1) % weeksBase.length; countNaSemana = 0; }
                 weeksBase[wIdx].tasks.push(_makeTask(t));
                 countNaSemana++;
             });
@@ -863,7 +874,7 @@
         //   3. Áreas SEM rodízio → semanas livres (sem rodízio activo)
         //   4. Overflow: prio 3/4 descartadas se capacidade excedida
         // ─────────────────────────────────────────────────────────
-        function _distributeBaseComInternato(tasks, weeksBase, datasRodizios, obData) {
+        function _distributeBaseComInternato(tasks, weeksBase, datasRodizios, obData, temasPorSemana) {
             const startDate = new Date(obData.dataInicio.split('T')[0] + 'T12:00:00');
 
             const preventiva = tasks.filter(t => (areaMapping[t.area]||t.area) === 'Preventiva');
@@ -897,16 +908,9 @@
             Object.entries(byGrandeArea).forEach(([ga, tarefas]) => {
                 const wks = weeksByArea[ga] || [];
                 if (!wks.length) { areasParaSemanaLivre.push(...tarefas); return; }
-                const capacidadeArea = wks.length * TASKS_MAX_PER_WEEK;
-                const prio12 = tarefas.filter(t => t.prioridade <= 2);
-                const prio34 = tarefas.filter(t => t.prioridade > 2);
-                let pool = [...prio12];
-                const espaco = capacidadeArea - prio12.length;
-                if (espaco > 0) pool = pool.concat(prio34.slice(0, espaco));
-                const tasksPorSemana = _calcTasksPerWeek(pool.length, wks.length);
                 let wIdx = 0, count = 0;
-                pool.forEach(t => {
-                    if (count >= tasksPorSemana) { wIdx = (wIdx + 1) % wks.length; count = 0; }
+                tarefas.forEach(t => {
+                    if (count >= temasPorSemana) { wIdx = (wIdx + 1) % wks.length; count = 0; }
                     wks[wIdx].tasks.push(_makeTask(t));
                     count++;
                 });
@@ -915,23 +919,16 @@
             // Semanas livres: áreas sem rodízio
             const targetFree = weeksNoRodizio.length > 0 ? weeksNoRodizio : weeksBase;
             if (areasParaSemanaLivre.length > 0) {
-                const capLivre = targetFree.length * TASKS_MAX_PER_WEEK;
-                const prio12L = areasParaSemanaLivre.filter(t => t.prioridade <= 2);
-                const prio34L = areasParaSemanaLivre.filter(t => t.prioridade > 2);
-                let poolLivre = [...prio12L];
-                const espacoL = capLivre - prio12L.length;
-                if (espacoL > 0) poolLivre = poolLivre.concat(prio34L.slice(0, espacoL));
                 const byAreaL = {};
-                poolLivre.forEach(t => {
+                areasParaSemanaLivre.forEach(t => {
                     const ga = areaMapping[t.area] || t.area;
                     if (!byAreaL[ga]) byAreaL[ga] = [];
                     byAreaL[ga].push(t);
                 });
                 const interleavedL = _interleave(byAreaL);
-                const tpsL = _calcTasksPerWeek(interleavedL.length, targetFree.length);
                 let wIdx = 0, count = 0;
                 interleavedL.forEach(t => {
-                    if (count >= tpsL) { wIdx = (wIdx + 1) % targetFree.length; count = 0; }
+                    if (count >= temasPorSemana) { wIdx = (wIdx + 1) % targetFree.length; count = 0; }
                     targetFree[wIdx].tasks.push(_makeTask(t));
                     count++;
                 });
@@ -997,6 +994,18 @@
             window.toggleDarkMode(localStorage.getItem('darkMode') === '1');
             window.expandedCards = window.expandedCards || {};
             window.updateUI();
+
+            // Toast informativo sobre temas selecionados vs omitidos
+            if (window._lastScheduleStats && window._lastScheduleStats.selecionados > 0) {
+                const { selecionados, descartadas } = window._lastScheduleStats;
+                setTimeout(() => {
+                    const msg = descartadas > 0
+                        ? `📚 ${selecionados} temas no cronograma · ${descartadas} omitidos (disponíveis na busca)`
+                        : `📚 ${selecionados} temas incluídos — banco completo!`;
+                    window.showToast(msg);
+                }, 1800);
+                window._lastScheduleStats = null;
+            }
         }
 
         window.saveToCloud = async function() {
@@ -2046,6 +2055,12 @@
                 counts[cat] = bd.filter(t => (areaMapping[t.area] || 'Outros') === cat).length;
             });
 
+            // ── Temas fora do cronograma (não estão em nenhuma semana) ──
+            const temasSemana = new Set();
+            window.state.weeks.forEach(w => { if (w.tasks) w.tasks.forEach(t => temasSemana.add(t.subject)); });
+            const foraCount = bd.filter(t => !temasSemana.has(t.tema)).length;
+            const isFora = window.searchFilterArea === '__fora__';
+
             // ── Chips de grande área ──
             const filterBtns = ['Todas', ...mainCategories].map(area => {
                 const count = counts[area] || 0;
@@ -2054,6 +2069,12 @@
                 const bc = isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500';
                 return `<button onclick="window.toggleSearchArea('${area}')" class="filter-chip shadow-sm ${ac}"><span>${area}</span><span class="filter-badge ${bc}">${count}</span></button>`;
             }).join('');
+
+            const foraChip = `<button onclick="window.toggleSearchArea('__fora__')"
+                class="filter-chip shadow-sm ${isFora ? 'bg-orange-600 text-white border-orange-600' : 'bg-white text-orange-600 border-orange-300 hover:bg-orange-50'}">
+                <i class="fas fa-eye-slash mr-1"></i>Fora do Cronograma
+                <span class="filter-badge ${isFora ? 'bg-white/20 text-white' : 'bg-orange-50 text-orange-500'}">${foraCount}</span>
+            </button>`;
 
             // ── Chips de subárea (só quando grande área seleccionada) ──
             let subHtml = '';
@@ -2100,7 +2121,7 @@
                             placeholder="Digite o tema, categoria ou palavra-chave..."
                             class="w-full text-lg p-5 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none bg-slate-50 transition shadow-sm mb-5 font-medium">
                         <div class="flex flex-col gap-1">
-                            <div class="flex flex-wrap gap-2">${filterBtns}</div>
+                            <div class="flex flex-wrap gap-2">${filterBtns}${foraChip}</div>
                             ${subHtml}
                             ${prioHtml}
                         </div>
@@ -2120,6 +2141,10 @@
                     const tm = t.tema.toLowerCase().includes(lq)
                         || t.area.toLowerCase().includes(lq)
                         || (t.subarea || '').toLowerCase().includes(lq);
+
+                    // Filtro especial: temas fora do cronograma
+                    if (window.searchFilterArea === '__fora__') return tm && !temasSemana.has(t.tema);
+
                     let am = true;
                     if (window.searchFilterArea !== 'Todas')
                         am = (areaMapping[t.area] || t.area) === window.searchFilterArea;
