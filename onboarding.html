@@ -556,7 +556,7 @@
       horas: "",
       internato: "",
       datasRodizios: {},
-      fasesConfig: { baseWeeks: 0, revisaoWeeks: 0, intensivaoWeeks: 0 }
+      fasesConfig: { baseWeeks: 0, revisaoWeeks: 0, intensivaoWeeks: 0 },
       ritmo: { label: 'padrao', temasPorSemana: 5 }
     };
 
@@ -636,11 +636,11 @@
       window.nextStep(5);
     };
     window.selectRitmo = function(label, temas, el) {
-    answers.ritmo = { label, temasPorSemana: temas };
-    const siblings = document.getElementById('ritmo-cards').children;
-    for (let s of siblings) s.classList.remove('selected');
-    el.classList.add('selected');
-};
+        answers.ritmo = { label, temasPorSemana: temas };
+        const siblings = document.getElementById('ritmo-cards').children;
+        for (let s of siblings) s.classList.remove('selected');
+        el.classList.add('selected');
+    };
 
     window.toggleRodizioAtivo = (rod, done) => {
       const c = document.getElementById(`dates-${rod}`);
