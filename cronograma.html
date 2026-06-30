@@ -180,7 +180,7 @@
                     <button onclick="window.switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 text-left"><i class="fas fa-chart-line text-lg w-5 text-center"></i><span>Dashboard &amp; Metas</span></button>
                     <button onclick="window.switchView('search')" id="nav-search" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 text-left"><i class="fas fa-search text-lg w-5 text-center"></i><span>Busca de Tarefas</span></button>
                     <button onclick="window.openRemanejoModal()" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-purple-50 border border-purple-200 text-purple-700 hover:bg-purple-100 text-left"><i class="fas fa-wand-magic-sparkles text-lg w-5 text-center"></i><span>Remanejamento IA</span></button>
-                    <button onclick="window.openIntensivao()" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm border text-left" style="background:linear-gradient(135deg,#78350f,#92400e);border-color:#b45309;color:#fef3c7;"><i class="fas fa-bolt text-lg w-5 text-center" style="color:#fcd34d;"></i><span>⚡ Intensivão Final</span></button>
+                    <button onclick="window.switchView('intensivao')" id="nav-intensivao" class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all shadow-sm border text-left" style="background:linear-gradient(135deg,#78350f,#92400e);border-color:#b45309;color:#fef3c7;"><i class="fas fa-bolt text-lg w-5 text-center" style="color:#fcd34d;"></i><span>⚡ Intensivão Final</span></button>
                 </div>
                 <nav class="p-4 space-y-2 sidebar-content" id="week-nav"></nav>
             </aside>
@@ -215,6 +215,7 @@
                     <div class="font-bold text-sm text-slate-900 truncate" id="user-name">Usuário</div>
                     <div class="text-[10px] text-slate-500 truncate" id="user-email">email@email.com</div>
                 </div>
+                <button onclick="window.openBackupModal()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-200 bg-white hover:bg-green-50 text-green-700 font-bold text-sm transition card-shadow mb-2"><i class="fas fa-shield-alt"></i> Backup Manual</button>
                 <button onclick="window.openFasesModal()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-200 bg-white hover:bg-purple-50 text-purple-700 font-bold text-sm transition card-shadow mb-2"><i class="fas fa-layer-group"></i> Reajustar Fases do Cronograma</button>
                 <button onclick="window.openFeriasModal()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-200 bg-white hover:bg-orange-50 text-orange-600 font-bold text-sm transition card-shadow mb-2"><i class="fas fa-umbrella-beach"></i> Configurar Férias</button>
                 <button onclick="window.recalculateRoute()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-200 bg-white hover:bg-blue-50 text-blue-700 font-bold text-sm transition card-shadow mb-2"><i class="fas fa-sync-alt"></i> Recalcular Rota (Novo Ano)</button>
@@ -375,65 +376,42 @@
     </div>
 
 
-    <!-- MODAL INTENSIVÃO -->
-    <div id="modal-intensivao" class="fixed inset-0 z-[200] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.7);">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden" style="border-top:4px solid #d97706;">
-            <!-- Header -->
-            <div class="px-6 pt-5 pb-4 shrink-0" style="background:linear-gradient(135deg,#78350f,#92400e);">
-                <div class="flex justify-between items-start mb-3">
-                    <div>
-                        <div class="flex items-center gap-2 mb-1">
-                            <span style="color:#fcd34d;font-size:1.3rem;">⚡</span>
-                            <h2 class="text-xl font-black text-white">Intensivão Final</h2>
-                        </div>
-                        <div id="int-subtitle" class="text-amber-200 text-xs font-medium">10 semanas · temas mais cobrados do ENAMED</div>
-                    </div>
-                    <button onclick="window.closeIntensivao()" class="text-amber-200 hover:text-white w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center transition"><i class="fas fa-times"></i></button>
-                </div>
-                <!-- Barra de progresso geral -->
-                <div id="int-header-progress" class="hidden">
-                    <div class="flex justify-between text-[10px] font-bold text-amber-200 mb-1.5">
-                        <span id="int-prog-label">0/70 temas concluídos</span>
-                        <span id="int-prog-pct">0%</span>
-                    </div>
-                    <div class="w-full rounded-full h-2" style="background:rgba(255,255,255,0.15);">
-                        <div id="int-prog-bar" class="h-2 rounded-full transition-all duration-700" style="width:0%;background:#fcd34d;"></div>
-                    </div>
-                    <div class="flex gap-4 mt-2 text-[10px] text-amber-200">
-                        <span>📝 <span id="int-stat-q">0</span> questões</span>
-                        <span>🎯 <span id="int-stat-a">0%</span> acerto</span>
-                    </div>
-                </div>
+    <!-- MODAL BACKUP -->
+    <div id="modal-backup" class="fixed inset-0 z-[200] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.5);">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="flex justify-between items-center px-6 pt-6 pb-4 border-b border-slate-100">
+                <h3 class="text-xl font-black text-slate-900">Backup Manual</h3>
+                <button onclick="window.closeModal('backup')" class="text-slate-400 hover:text-slate-800 w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition"><i class="fas fa-times"></i></button>
             </div>
+            <div class="px-6 py-5">
+                <p class="text-sm text-slate-500 mb-6">Guarde o código abaixo para salvar o seu progresso em texto puro ou cole um código para restaurar.</p>
 
-            <!-- Tela de início (se não iniciado) -->
-            <div id="int-start-screen" class="flex-1 flex flex-col items-center justify-center p-8 text-center">
-                <div class="text-5xl mb-4">⚡</div>
-                <h3 class="text-2xl font-black text-slate-900 mb-2">Pronto para o sprint final?</h3>
-                <p class="text-slate-500 text-sm mb-6 max-w-xs">10 semanas com os temas mais cobrados do ENAMED/INEP, organizados por frequência de cobrança.</p>
-                <div class="mb-6 w-full max-w-xs">
-                    <label class="text-xs font-bold text-slate-600 uppercase tracking-widest mb-2 block">Data de início</label>
-                    <input type="date" id="int-start-date" class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-amber-500 transition">
-                </div>
-                <button onclick="window.iniciarIntensivao()" class="px-8 py-3.5 rounded-2xl font-black text-white shadow-lg hover:opacity-90 transition text-sm" style="background:linear-gradient(135deg,#d97706,#b45309);">
-                    ⚡ Iniciar Intensivão
-                </button>
-            </div>
-
-            <!-- Conteúdo acordeão (após início) -->
-            <div id="int-main-screen" class="hidden flex-1 overflow-y-auto">
-                <!-- Barra de busca para adicionar temas -->
-                <div id="int-add-panel" class="hidden px-4 pt-4 pb-2 border-b border-amber-100 bg-amber-50">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="text-xs font-bold text-amber-800">Adicionar tema à Semana <span id="int-add-sem-label">1</span>:</span>
-                        <button onclick="document.getElementById('int-add-panel').classList.add('hidden')" class="ml-auto text-amber-600 text-xs hover:underline">Cancelar</button>
+                <!-- Salvar -->
+                <div class="mb-6">
+                    <div class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">1. Salvar (Copiar Código)</div>
+                    <div class="flex gap-2">
+                        <input id="backup-code-out" readonly
+                            class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-mono text-slate-600 outline-none truncate"
+                            onclick="this.select()">
+                        <button onclick="window.copyBackupCode()"
+                            class="px-5 py-3 bg-slate-900 text-white rounded-xl text-xs font-black hover:bg-slate-700 transition shrink-0">
+                            Copiar
+                        </button>
                     </div>
-                    <input type="text" id="int-add-search" placeholder="Buscar tema do banco..." oninput="window.renderIntAddResults(this.value)"
-                        class="w-full border border-amber-300 rounded-xl px-3 py-2 text-xs outline-none focus:border-amber-500 bg-white mb-2">
-                    <div id="int-add-results" class="max-h-36 overflow-y-auto space-y-1"></div>
                 </div>
-                <!-- Semanas acordeão -->
-                <div id="int-accordion" class="p-4 space-y-3"></div>
+
+                <!-- Restaurar -->
+                <div>
+                    <div class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">2. Restaurar (Colar Código)</div>
+                    <textarea id="backup-code-in" rows="4"
+                        placeholder="Cole aqui seu código de backup..."
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-mono text-slate-600 outline-none focus:border-green-500 resize-none transition mb-3"></textarea>
+                    <button onclick="window.restoreBackup()"
+                        class="w-full py-3.5 rounded-xl font-black text-white text-sm transition hover:opacity-90 flex items-center justify-center gap-2"
+                        style="background:#10b981;">
+                        <i class="fas fa-sync-alt"></i> Restaurar Dados
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -2383,6 +2361,7 @@
             if(window.activeView==='homepage')       window.renderHomepage();
             else if(window.activeView==='dashboard') window.renderDashboard();
             else if(window.activeView==='search')    window.renderSearch();
+            else if(window.activeView==='intensivao') window.renderIntensivao();
             else                                     window.renderWeek();
             window.updateGlobalProgress();
             window.pomoUpdateUI();
@@ -2390,499 +2369,459 @@
 
 
         // ══════════════════════════════════════════════════════════════
-        // MÓDULO INTENSIVÃO FINAL
-        // Cronograma fixo de 10 semanas — independente do cronograma principal
-        // Progresso salvo em state.intensivao (Firestore)
-        // Conteúdo hardcoded — só progresso e reorganização vão para a nuvem
+        // BACKUP MANUAL — exportar/restaurar state como Base64
+        // ══════════════════════════════════════════════════════════════
+        window.openBackupModal = function() {
+            const modal = document.getElementById('modal-backup');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            // Gera o código de backup (state serializado em Base64)
+            try {
+                const json    = JSON.stringify(window.state);
+                const encoded = btoa(unescape(encodeURIComponent(json)));
+                document.getElementById('backup-code-out').value = encoded;
+            } catch(e) {
+                document.getElementById('backup-code-out').value = 'Erro ao gerar backup.';
+            }
+        };
+
+        window.copyBackupCode = function() {
+            const el = document.getElementById('backup-code-out');
+            el.select();
+            try {
+                navigator.clipboard.writeText(el.value).then(() => {
+                    window.showToast('Código copiado! Guarde em local seguro.');
+                });
+            } catch(e) {
+                document.execCommand('copy');
+                window.showToast('Código copiado!');
+            }
+        };
+
+        window.restoreBackup = function() {
+            const code = (document.getElementById('backup-code-in').value || '').trim();
+            if (!code) { window.showToast('Cole o código de backup primeiro.'); return; }
+            try {
+                const json     = decodeURIComponent(escape(atob(code)));
+                const restored = JSON.parse(json);
+                if (!restored.weeks || !Array.isArray(restored.weeks)) {
+                    throw new Error('Formato inválido');
+                }
+                if (!confirm('Isso vai substituir todos os seus dados atuais pelo backup. Confirmar?')) return;
+                window.state = restored;
+                window.triggerSave();
+                window.closeModal('backup');
+                window.updateUI();
+                window.showToast('✅ Dados restaurados com sucesso!');
+            } catch(e) {
+                window.showToast('❌ Código inválido ou corrompido. Verifique e tente novamente.');
+            }
+        };
+
+        // ══════════════════════════════════════════════════════════════
+        // MÓDULO INTENSIVÃO FINAL — renderizado como VIEW (não modal)
         // ══════════════════════════════════════════════════════════════
 
-        // ── Dados fixos das 10 semanas (baseados nos dados do ENAMED 2011-2025.1) ──
         window.intensivaoData = [
-            {
-                semana: 1,
-                titulo: "APS — Doenças Crônicas I",
-                cor: "#d97706",
-                temas: [
-                    { id: "int_001", tema: "Hipertensão Arterial Sistêmica — Diagnóstico e Tratamento", area: "Clínica Médica" },
-                    { id: "int_002", tema: "Diabetes Mellitus Tipo 2 — Manejo na APS", area: "Clínica Médica" },
-                    { id: "int_003", tema: "Cetoacidose Diabética e Estado Hiperosmolar", area: "Clínica Médica" },
-                    { id: "int_004", tema: "Dislipidemia e Estratificação de Risco Cardiovascular", area: "Clínica Médica" },
-                    { id: "int_005", tema: "Hipotireoidismo e Hipertireoidismo — Diagnóstico e Tratamento", area: "Clínica Médica" },
-                    { id: "int_006", tema: "Obesidade e Síndrome Metabólica", area: "Clínica Médica" },
-                    { id: "int_007", tema: "Osteoporose — DXA e Prevenção de Quedas", area: "Clínica Médica" },
-                ]
-            },
-            {
-                semana: 2,
-                titulo: "APS — Puericultura e Neonatologia",
-                cor: "#d97706",
-                temas: [
-                    { id: "int_008", tema: "Calendário Vacinal PNI — Criança e Adolescente", area: "Pediatria" },
-                    { id: "int_009", tema: "Aleitamento Materno — Técnica e Contraindicações", area: "Pediatria" },
-                    { id: "int_010", tema: "Crescimento e Desenvolvimento Neuropsicomotor", area: "Pediatria" },
-                    { id: "int_011", tema: "Icterícia Neonatal — Causas e Fototerapia", area: "Pediatria" },
-                    { id: "int_012", tema: "Sepse Neonatal — Precoce vs Tardia", area: "Pediatria" },
-                    { id: "int_013", tema: "Diarreia Aguda e Desidratação — Planos A, B e C", area: "Pediatria" },
-                    { id: "int_014", tema: "Asma na Infância — Classificação e Tratamento", area: "Pediatria" },
-                ]
-            },
-            {
-                semana: 3,
-                titulo: "APS — Saúde da Mulher e Preventiva",
-                cor: "#d97706",
-                temas: [
-                    { id: "int_015", tema: "Assistência Pré-natal de Baixo Risco — Rotinas", area: "Ginecologia e Obstetrícia" },
-                    { id: "int_016", tema: "Sífilis na Gestação — Tratamento e Notificação", area: "Ginecologia e Obstetrícia" },
-                    { id: "int_017", tema: "Rastreamento de Câncer de Colo Uterino (Papanicolau)", area: "Ginecologia e Obstetrícia" },
-                    { id: "int_018", tema: "Rastreamento de Câncer de Mama — BI-RADS", area: "Ginecologia e Obstetrícia" },
-                    { id: "int_019", tema: "Planejamento Familiar — Métodos Contraceptivos", area: "Ginecologia e Obstetrícia" },
-                    { id: "int_020", tema: "Epidemiologia — Medidas de Frequência e Associação", area: "Preventiva" },
-                    { id: "int_021", tema: "SUS — Princípios, Atenção Primária e Ética Médica", area: "Preventiva" },
-                ]
-            },
-            {
-                semana: 4,
-                titulo: "Infectologia",
-                cor: "#b45309",
-                temas: [
-                    { id: "int_022", tema: "Arboviroses — Dengue, Chikungunya e Zika", area: "Clínica Médica" },
-                    { id: "int_023", tema: "Tuberculose — Diagnóstico, Tratamento e DOTS", area: "Clínica Médica" },
-                    { id: "int_024", tema: "Meningite Bacteriana — Antibioticoterapia Empírica", area: "Clínica Médica" },
-                    { id: "int_025", tema: "HIV — Diagnóstico, TARV e Profilaxias", area: "Clínica Médica" },
-                    { id: "int_026", tema: "Sepse e Choque Séptico — Critérios e Bundle", area: "Clínica Médica" },
-                    { id: "int_027", tema: "Pneumonias Bacterianas — Etiologia por Cenário", area: "Clínica Médica" },
-                    { id: "int_028", tema: "Parasitoses e Animais Peçonhentos", area: "Clínica Médica" },
-                ]
-            },
-            {
-                semana: 5,
-                titulo: "Obstetrícia",
-                cor: "#b45309",
-                temas: [
-                    { id: "int_029", tema: "Distúrbios Hipertensivos da Gestação — DHG, PE, Eclâmpsia", area: "Ginecologia e Obstetrícia" },
-                    { id: "int_030", tema: "Sangramento da Primeira Metade — Aborto e Gravidez Ectópica", area: "Ginecologia e Obstetrícia" },
-                    { id: "int_031", tema: "Sangramento da Segunda Metade — PP e DPPNI", area: "Ginecologia e Obstetrícia" },
-                    { id: "int_032", tema: "Partograma e Distócias — Diagnóstico e Conduta", area: "Ginecologia e Obstetrícia" },
-                    { id: "int_033", tema: "Hemorragia Pós-Parto — 4 T's e Manejo", area: "Ginecologia e Obstetrícia" },
-                    { id: "int_034", tema: "Diabetes Gestacional — Diagnóstico e Controle", area: "Ginecologia e Obstetrícia" },
-                    { id: "int_035", tema: "Síndrome HELLP e Mola Hidatiforme", area: "Ginecologia e Obstetrícia" },
-                ]
-            },
-            {
-                semana: 6,
-                titulo: "Cirurgia — Trauma e Urgências Abdominais",
-                cor: "#92400e",
-                temas: [
-                    { id: "int_036", tema: "ATLS — Avaliação Inicial, Vias Aéreas e Choque", area: "Cirurgia" },
-                    { id: "int_037", tema: "Trauma Torácico — Pneumotórax e Hemotórax", area: "Cirurgia" },
-                    { id: "int_038", tema: "Trauma Abdominal e Pélvico — FAST e Laparotomia", area: "Cirurgia" },
-                    { id: "int_039", tema: "Abdome Agudo — Diagnóstico Diferencial por Quadrante", area: "Cirurgia" },
-                    { id: "int_040", tema: "Apendicite Aguda — Diagnóstico e Complicações", area: "Cirurgia" },
-                    { id: "int_041", tema: "Colecistite e Coledocolitíase — Vesícula e Vias Biliares", area: "Cirurgia" },
-                    { id: "int_042", tema: "Queimaduras — SCQ, Parkland e Manejo", area: "Cirurgia" },
-                ]
-            },
-            {
-                semana: 7,
-                titulo: "Pediatria Avançada e Cirurgia Pediátrica",
-                cor: "#92400e",
-                temas: [
-                    { id: "int_043", tema: "Febre Reumática — Critérios de Jones e Profilaxia", area: "Pediatria" },
-                    { id: "int_044", tema: "Cardiopatias Congênitas — Acianóticas e Cianóticas", area: "Pediatria" },
-                    { id: "int_045", tema: "Pneumonia na Infância — Etiologia por Faixa Etária", area: "Pediatria" },
-                    { id: "int_046", tema: "Doença de Kawasaki — Critérios e Tratamento", area: "Pediatria" },
-                    { id: "int_047", tema: "Estenose Hipertrófica do Piloro", area: "Cirurgia" },
-                    { id: "int_048", tema: "Invaginação Intestinal — Diagnóstico e Enema", area: "Cirurgia" },
-                    { id: "int_049", tema: "Doença de Hirschsprung e Atresia Intestinal", area: "Cirurgia" },
-                ]
-            },
-            {
-                semana: 8,
-                titulo: "Clínica Médica — Urgências e Cardiologia",
-                cor: "#78350f",
-                temas: [
-                    { id: "int_050", tema: "Síndrome Coronariana Aguda — IAMCSSST e SCA SEM supra", area: "Clínica Médica" },
-                    { id: "int_051", tema: "Insuficiência Cardíaca — Diagnóstico e Tratamento", area: "Clínica Médica" },
-                    { id: "int_052", tema: "Fibrilação Atrial — Controle de Ritmo e Anticoagulação", area: "Clínica Médica" },
-                    { id: "int_053", tema: "AVC Isquêmico — Trombólise e Janela Terapêutica", area: "Clínica Médica" },
-                    { id: "int_054", tema: "Parada Cardiorrespiratória — BLS e ACLS", area: "Clínica Médica" },
-                    { id: "int_055", tema: "Crise Hipertensiva — Urgência vs Emergência", area: "Clínica Médica" },
-                    { id: "int_056", tema: "Choque — Classificação e Manejo Inicial", area: "Clínica Médica" },
-                ]
-            },
-            {
-                semana: 9,
-                titulo: "Gastro, Hepato, Endocrino e Psiquiatria",
-                cor: "#78350f",
-                temas: [
-                    { id: "int_057", tema: "Hemorragia Digestiva Alta — Varicosa e Não Varicosa", area: "Clínica Médica" },
-                    { id: "int_058", tema: "Doença Inflamatória Intestinal — Crohn e RCU", area: "Clínica Médica" },
-                    { id: "int_059", tema: "Hepatites Virais B e C — Marcadores e Tratamento", area: "Clínica Médica" },
-                    { id: "int_060", tema: "Cirrose Hepática — Child-Pugh, MELD e Complicações", area: "Clínica Médica" },
-                    { id: "int_061", tema: "Doença Ulcerosa Péptica e H. pylori", area: "Clínica Médica" },
-                    { id: "int_062", tema: "Dependência Química — Álcool e Abstinência", area: "Clínica Médica" },
-                    { id: "int_063", tema: "Intoxicações Exógenas — Organofosforado e Paracetamol", area: "Clínica Médica" },
-                ]
-            },
-            {
-                semana: 10,
-                titulo: "Especialidades e Revisão Final",
-                cor: "#78350f",
-                temas: [
-                    { id: "int_064", tema: "Anemias — Ferropriva, Megaloblástica e Hemolítica", area: "Clínica Médica" },
-                    { id: "int_065", tema: "ITU e Glomerulopatias — LRA e Síndrome Nefrótica", area: "Clínica Médica" },
-                    { id: "int_066", tema: "Lúpus, Artrite Reumatoide e Gota", area: "Clínica Médica" },
-                    { id: "int_067", tema: "Asma Grave, DPOC e TEP", area: "Clínica Médica" },
-                    { id: "int_068", tema: "Hanseníase — Classificação e PQT", area: "Clínica Médica" },
-                    { id: "int_069", tema: "Câncer de Pele — Melanoma, CBC e CEC", area: "Clínica Médica" },
-                    { id: "int_070", tema: "Olho Vermelho, Trauma Ocular e Infecções VAS", area: "Clínica Médica" },
-                ]
-            },
+            { semana:1, titulo:"APS — Doenças Crônicas I", temas:[
+                {id:"int_001",tema:"Hipertensão Arterial Sistêmica — Diagnóstico e Tratamento",area:"Clínica Médica"},
+                {id:"int_002",tema:"Diabetes Mellitus Tipo 2 — Manejo na APS",area:"Clínica Médica"},
+                {id:"int_003",tema:"Cetoacidose Diabética e Estado Hiperosmolar",area:"Clínica Médica"},
+                {id:"int_004",tema:"Dislipidemia e Estratificação de Risco Cardiovascular",area:"Clínica Médica"},
+                {id:"int_005",tema:"Hipotireoidismo e Hipertireoidismo — Diagnóstico e Tratamento",area:"Clínica Médica"},
+                {id:"int_006",tema:"Obesidade e Síndrome Metabólica",area:"Clínica Médica"},
+                {id:"int_007",tema:"Osteoporose — DXA e Prevenção de Quedas",area:"Clínica Médica"},
+            ]},
+            { semana:2, titulo:"APS — Puericultura e Neonatologia", temas:[
+                {id:"int_008",tema:"Calendário Vacinal PNI — Criança e Adolescente",area:"Pediatria"},
+                {id:"int_009",tema:"Aleitamento Materno — Técnica e Contraindicações",area:"Pediatria"},
+                {id:"int_010",tema:"Crescimento e Desenvolvimento Neuropsicomotor",area:"Pediatria"},
+                {id:"int_011",tema:"Icterícia Neonatal — Causas e Fototerapia",area:"Pediatria"},
+                {id:"int_012",tema:"Sepse Neonatal — Precoce vs Tardia",area:"Pediatria"},
+                {id:"int_013",tema:"Diarreia Aguda e Desidratação — Planos A, B e C",area:"Pediatria"},
+                {id:"int_014",tema:"Asma na Infância — Classificação e Tratamento",area:"Pediatria"},
+            ]},
+            { semana:3, titulo:"APS — Saúde da Mulher e Preventiva", temas:[
+                {id:"int_015",tema:"Assistência Pré-natal de Baixo Risco — Rotinas",area:"Ginecologia e Obstetrícia"},
+                {id:"int_016",tema:"Sífilis na Gestação — Tratamento e Notificação",area:"Ginecologia e Obstetrícia"},
+                {id:"int_017",tema:"Rastreamento de Câncer de Colo Uterino (Papanicolau)",area:"Ginecologia e Obstetrícia"},
+                {id:"int_018",tema:"Rastreamento de Câncer de Mama — BI-RADS",area:"Ginecologia e Obstetrícia"},
+                {id:"int_019",tema:"Planejamento Familiar — Métodos Contraceptivos",area:"Ginecologia e Obstetrícia"},
+                {id:"int_020",tema:"Epidemiologia — Medidas de Frequência e Associação",area:"Preventiva"},
+                {id:"int_021",tema:"SUS — Princípios, Atenção Primária e Ética Médica",area:"Preventiva"},
+            ]},
+            { semana:4, titulo:"Infectologia", temas:[
+                {id:"int_022",tema:"Arboviroses — Dengue, Chikungunya e Zika",area:"Clínica Médica"},
+                {id:"int_023",tema:"Tuberculose — Diagnóstico, Tratamento e DOTS",area:"Clínica Médica"},
+                {id:"int_024",tema:"Meningite Bacteriana — Antibioticoterapia Empírica",area:"Clínica Médica"},
+                {id:"int_025",tema:"HIV — Diagnóstico, TARV e Profilaxias",area:"Clínica Médica"},
+                {id:"int_026",tema:"Sepse e Choque Séptico — Critérios e Bundle",area:"Clínica Médica"},
+                {id:"int_027",tema:"Pneumonias Bacterianas — Etiologia por Cenário",area:"Clínica Médica"},
+                {id:"int_028",tema:"Parasitoses e Animais Peçonhentos",area:"Clínica Médica"},
+            ]},
+            { semana:5, titulo:"Obstetrícia", temas:[
+                {id:"int_029",tema:"Distúrbios Hipertensivos da Gestação — DHG, PE, Eclâmpsia",area:"Ginecologia e Obstetrícia"},
+                {id:"int_030",tema:"Sangramento da Primeira Metade — Aborto e Gravidez Ectópica",area:"Ginecologia e Obstetrícia"},
+                {id:"int_031",tema:"Sangramento da Segunda Metade — PP e DPPNI",area:"Ginecologia e Obstetrícia"},
+                {id:"int_032",tema:"Partograma e Distócias — Diagnóstico e Conduta",area:"Ginecologia e Obstetrícia"},
+                {id:"int_033",tema:"Hemorragia Pós-Parto — 4 T's e Manejo",area:"Ginecologia e Obstetrícia"},
+                {id:"int_034",tema:"Diabetes Gestacional — Diagnóstico e Controle",area:"Ginecologia e Obstetrícia"},
+                {id:"int_035",tema:"Síndrome HELLP e Mola Hidatiforme",area:"Ginecologia e Obstetrícia"},
+            ]},
+            { semana:6, titulo:"Cirurgia — Trauma e Urgências Abdominais", temas:[
+                {id:"int_036",tema:"ATLS — Avaliação Inicial, Vias Aéreas e Choque",area:"Cirurgia"},
+                {id:"int_037",tema:"Trauma Torácico — Pneumotórax e Hemotórax",area:"Cirurgia"},
+                {id:"int_038",tema:"Trauma Abdominal e Pélvico — FAST e Laparotomia",area:"Cirurgia"},
+                {id:"int_039",tema:"Abdome Agudo — Diagnóstico Diferencial por Quadrante",area:"Cirurgia"},
+                {id:"int_040",tema:"Apendicite Aguda — Diagnóstico e Complicações",area:"Cirurgia"},
+                {id:"int_041",tema:"Colecistite e Coledocolitíase — Vesícula e Vias Biliares",area:"Cirurgia"},
+                {id:"int_042",tema:"Queimaduras — SCQ, Parkland e Manejo",area:"Cirurgia"},
+            ]},
+            { semana:7, titulo:"Pediatria Avançada e Cirurgia Pediátrica", temas:[
+                {id:"int_043",tema:"Febre Reumática — Critérios de Jones e Profilaxia",area:"Pediatria"},
+                {id:"int_044",tema:"Cardiopatias Congênitas — Acianóticas e Cianóticas",area:"Pediatria"},
+                {id:"int_045",tema:"Pneumonia na Infância — Etiologia por Faixa Etária",area:"Pediatria"},
+                {id:"int_046",tema:"Doença de Kawasaki — Critérios e Tratamento",area:"Pediatria"},
+                {id:"int_047",tema:"Estenose Hipertrófica do Piloro",area:"Cirurgia"},
+                {id:"int_048",tema:"Invaginação Intestinal — Diagnóstico e Enema",area:"Cirurgia"},
+                {id:"int_049",tema:"Doença de Hirschsprung e Atresia Intestinal",area:"Cirurgia"},
+            ]},
+            { semana:8, titulo:"Clínica Médica — Urgências e Cardiologia", temas:[
+                {id:"int_050",tema:"Síndrome Coronariana Aguda — IAM e SCA sem supra",area:"Clínica Médica"},
+                {id:"int_051",tema:"Insuficiência Cardíaca — Diagnóstico e Tratamento",area:"Clínica Médica"},
+                {id:"int_052",tema:"Fibrilação Atrial — Controle de Ritmo e Anticoagulação",area:"Clínica Médica"},
+                {id:"int_053",tema:"AVC Isquêmico — Trombólise e Janela Terapêutica",area:"Clínica Médica"},
+                {id:"int_054",tema:"Parada Cardiorrespiratória — BLS e ACLS",area:"Clínica Médica"},
+                {id:"int_055",tema:"Crise Hipertensiva — Urgência vs Emergência",area:"Clínica Médica"},
+                {id:"int_056",tema:"Choque — Classificação e Manejo Inicial",area:"Clínica Médica"},
+            ]},
+            { semana:9, titulo:"Gastro, Hepato, Endocrino e Psiquiatria", temas:[
+                {id:"int_057",tema:"Hemorragia Digestiva Alta — Varicosa e Não Varicosa",area:"Clínica Médica"},
+                {id:"int_058",tema:"Doença Inflamatória Intestinal — Crohn e RCU",area:"Clínica Médica"},
+                {id:"int_059",tema:"Hepatites Virais B e C — Marcadores e Tratamento",area:"Clínica Médica"},
+                {id:"int_060",tema:"Cirrose Hepática — Child-Pugh, MELD e Complicações",area:"Clínica Médica"},
+                {id:"int_061",tema:"Doença Ulcerosa Péptica e H. pylori",area:"Clínica Médica"},
+                {id:"int_062",tema:"Dependência Química — Álcool e Abstinência",area:"Clínica Médica"},
+                {id:"int_063",tema:"Intoxicações Exógenas — Organofosforado e Paracetamol",area:"Clínica Médica"},
+            ]},
+            { semana:10, titulo:"Especialidades e Revisão Final", temas:[
+                {id:"int_064",tema:"Anemias — Ferropriva, Megaloblástica e Hemolítica",area:"Clínica Médica"},
+                {id:"int_065",tema:"ITU e Glomerulopatias — LRA e Síndrome Nefrótica",area:"Clínica Médica"},
+                {id:"int_066",tema:"Lúpus, Artrite Reumatoide e Gota",area:"Clínica Médica"},
+                {id:"int_067",tema:"Asma Grave, DPOC e TEP",area:"Clínica Médica"},
+                {id:"int_068",tema:"Hanseníase — Classificação e PQT",area:"Clínica Médica"},
+                {id:"int_069",tema:"Câncer de Pele — Melanoma, CBC e CEC",area:"Clínica Médica"},
+                {id:"int_070",tema:"Olho Vermelho, Trauma Ocular e Infecções VAS",area:"Clínica Médica"},
+            ]},
         ];
 
-        // ── Estado interno ──
-        window._intExpandedSem = null;  // semana expandida no acordeão
-        window._intDragTemaId  = null;  // tema sendo arrastado
-        window._intDragFromSem = null;  // semana de origem do drag
-        window._intAddTargetSem = null; // semana alvo do "adicionar tema"
+        window._intExpandedSem = null;
+        window._intDragTemaId  = null;
+        window._intDragFromSem = null;
+        window._intAddTargetSem = null;
 
-        // ── Inicialização do state.intensivao ──
         function _intEnsureState() {
-            if (!window.state.intensivao) {
-                window.state.intensivao = { ativo: false, dataInicio: '', semanas: [], progress: {} };
-            }
+            if (!window.state.intensivao) window.state.intensivao = {ativo:false,dataInicio:'',semanas:[],progress:{}};
             const st = window.state.intensivao;
-            // Se semanas vazias, inicializa com a ordem padrão dos temas
             if (!st.semanas || st.semanas.length === 0) {
-                st.semanas = window.intensivaoData.map(s => ({
-                    semana: s.semana,
-                    temas: s.temas.map(t => t.id)
-                }));
+                st.semanas = window.intensivaoData.map(s => ({semana:s.semana, temas:s.temas.map(t=>t.id)}));
             }
             if (!st.progress) st.progress = {};
         }
 
-        // ── Helpers de progresso ──
-        function _intGetProgress(temaId) {
+        function _intGetProgress(id) {
             _intEnsureState();
-            if (!window.state.intensivao.progress[temaId]) {
-                window.state.intensivao.progress[temaId] = { done: false, questoes: 0, acertos: 0 };
-            }
-            return window.state.intensivao.progress[temaId];
+            if (!window.state.intensivao.progress[id])
+                window.state.intensivao.progress[id] = {done:false,questoes:0,acertos:0};
+            return window.state.intensivao.progress[id];
         }
 
         function _intGetTemaById(id) {
-            for (const sem of window.intensivaoData) {
-                const found = sem.temas.find(t => t.id === id);
-                if (found) return found;
+            for (const s of window.intensivaoData) {
+                const f = s.temas.find(t => t.id === id);
+                if (f) return f;
             }
-            // Temas customizados ficam em state.intensivao.customTemas
-            const custom = (window.state.intensivao.customTemas || []).find(t => t.id === id);
-            return custom || { id, tema: id, area: '' };
+            return ((window.state.intensivao||{}).customTemas||[]).find(t=>t.id===id) || {id,tema:id,area:''};
         }
 
         function _intCalcStats() {
             _intEnsureState();
-            const st = window.state.intensivao;
-            let total = 0, done = 0, questoes = 0, acertos = 0;
-            st.semanas.forEach(s => {
-                s.temas.forEach(id => {
-                    total++;
-                    const p = _intGetProgress(id);
-                    if (p.done) done++;
-                    questoes += parseInt(p.questoes) || 0;
-                    acertos  += parseInt(p.acertos)  || 0;
-                });
-            });
-            const pct    = total > 0 ? Math.round((done / total) * 100) : 0;
-            const acerto = questoes > 0 ? Math.round((acertos / questoes) * 100) : 0;
-            return { total, done, pct, questoes, acertos, acerto };
+            let total=0,done=0,questoes=0,acertos=0;
+            window.state.intensivao.semanas.forEach(s => s.temas.forEach(id => {
+                total++;
+                const p = _intGetProgress(id);
+                if (p.done) done++;
+                questoes += parseInt(p.questoes)||0;
+                acertos  += parseInt(p.acertos)||0;
+            }));
+            return {total,done,pct:total>0?Math.round(done/total*100):0,questoes,acerto:questoes>0?Math.round(acertos/questoes*100):0};
         }
 
-        // ── Abrir/fechar modal ──
-        window.openIntensivao = function() {
-            _intEnsureState();
-            const modal = document.getElementById('modal-intensivao');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            const st = window.state.intensivao;
-            if (st.ativo) {
-                document.getElementById('int-start-screen').classList.add('hidden');
-                document.getElementById('int-main-screen').classList.remove('hidden');
-                document.getElementById('int-header-progress').classList.remove('hidden');
-                _intUpdateHeader();
-                _intRenderAccordion();
-            } else {
-                document.getElementById('int-start-screen').classList.remove('hidden');
-                document.getElementById('int-main-screen').classList.add('hidden');
-                document.getElementById('int-header-progress').classList.add('hidden');
-                // Sugere hoje como data de início
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('int-start-date').value = today;
-            }
-        };
-
-        window.closeIntensivao = function() {
-            const modal = document.getElementById('modal-intensivao');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        };
-
-        window.iniciarIntensivao = function() {
-            const dateEl = document.getElementById('int-start-date');
-            const data   = dateEl ? dateEl.value : new Date().toISOString().split('T')[0];
-            _intEnsureState();
-            window.state.intensivao.ativo      = true;
-            window.state.intensivao.dataInicio = data;
-            window.triggerSave();
-            document.getElementById('int-start-screen').classList.add('hidden');
-            document.getElementById('int-main-screen').classList.remove('hidden');
-            document.getElementById('int-header-progress').classList.remove('hidden');
-            _intUpdateHeader();
-            _intRenderAccordion();
-        };
-
-        function _intUpdateHeader() {
-            const s = _intCalcStats();
-            const st = window.state.intensivao;
-            const dataFmt = st.dataInicio
-                ? new Date(st.dataInicio + 'T12:00:00').toLocaleDateString('pt-BR')
-                : '';
-            document.getElementById('int-subtitle').textContent =
-                `Iniciado em ${dataFmt} · ${s.done}/${s.total} temas`;
-            document.getElementById('int-prog-label').textContent =
-                `${s.done}/${s.total} temas concluídos`;
-            document.getElementById('int-prog-pct').textContent  = `${s.pct}%`;
-            document.getElementById('int-prog-bar').style.width  = `${s.pct}%`;
-            document.getElementById('int-stat-q').textContent    = s.questoes;
-            document.getElementById('int-stat-a').textContent    = `${s.acerto}%`;
-        }
-
-        // ── Renderiza o acordeão de semanas ──
-        function _intRenderAccordion() {
+        // ── RENDER INTENSIVÃO como view completa ──
+        window.renderIntensivao = function() {
+            const content = document.getElementById('content-area');
             _intEnsureState();
             const st  = window.state.intensivao;
-            const acc = document.getElementById('int-accordion');
-            if (!acc) return;
 
-            acc.innerHTML = st.semanas.map((semObj, sIdx) => {
-                const intSemData = window.intensivaoData[sIdx] || {};
-                const titulo     = intSemData.titulo || `Semana ${semObj.semana}`;
-                const expanded   = window._intExpandedSem === sIdx;
+            // Tela de início
+            if (!st.ativo) {
+                const today = new Date().toISOString().split('T')[0];
+                content.innerHTML = `
+                <div class="max-w-lg mx-auto mt-16 text-center fade-enter">
+                    <div class="text-6xl mb-4">⚡</div>
+                    <h1 class="text-3xl font-black text-slate-900 mb-2" style="font-family:'Fraunces',serif;">Intensivão Final</h1>
+                    <p class="text-slate-500 text-sm mb-8 max-w-sm mx-auto">10 semanas com os temas mais cobrados do ENAMED/INEP, organizados por frequência de cobrança. Progresso independente do seu cronograma.</p>
+                    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm text-left mb-6">
+                        <label class="text-xs font-bold text-slate-600 uppercase tracking-widest mb-2 block">Data de início</label>
+                        <input type="date" id="int-start-date" value="${today}"
+                            class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-amber-500 transition mb-4">
+                        <button onclick="window.iniciarIntensivao()"
+                            class="w-full py-4 rounded-2xl font-black text-white shadow-lg hover:opacity-90 transition text-sm flex items-center justify-center gap-2"
+                            style="background:linear-gradient(135deg,#d97706,#b45309);">
+                            ⚡ Iniciar Intensivão
+                        </button>
+                    </div>
+                    <button onclick="window.switchView('homepage')" class="text-xs text-slate-400 hover:text-slate-600 hover:underline transition">
+                        ← Voltar à página inicial
+                    </button>
+                </div>`;
+                return;
+            }
 
-                // Contagem de temas concluídos nessa semana
-                const doneCount  = semObj.temas.filter(id => _intGetProgress(id).done).length;
-                const totalCount = semObj.temas.length;
-                const allDone    = doneCount === totalCount && totalCount > 0;
+            // View principal
+            const stats    = _intCalcStats();
+            const dataFmt  = st.dataInicio ? new Date(st.dataInicio+'T12:00:00').toLocaleDateString('pt-BR') : '';
 
-                // Ícone de status
-                const statusIcon = allDone
-                    ? '<i class="fas fa-check-circle" style="color:#10b981;"></i>'
-                    : `<span class="text-xs font-bold" style="color:#d97706;">${doneCount}/${totalCount}</span>`;
+            // Monta o acordeão
+            const accordionHtml = st.semanas.map((semObj, sIdx) => {
+                const def       = window.intensivaoData[sIdx] || {};
+                const titulo    = def.titulo || `Semana ${semObj.semana}`;
+                const expanded  = window._intExpandedSem === sIdx;
+                const doneCount = semObj.temas.filter(id => _intGetProgress(id).done).length;
+                const total     = semObj.temas.length;
+                const allDone   = doneCount === total && total > 0;
+                const pct       = total > 0 ? Math.round(doneCount/total*100) : 0;
 
-                // Conteúdo dos temas (só se expandido)
+                const statusBadge = allDone
+                    ? `<span class="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">✓ Completa</span>`
+                    : `<span class="text-[10px] font-black px-2 py-0.5 rounded-full border" style="color:#d97706;background:#fffbeb;border-color:#fde68a;">${doneCount}/${total}</span>`;
+
                 let temasHtml = '';
                 if (expanded) {
-                    temasHtml = semObj.temas.map((id, tIdx) => {
-                        const temaData = _intGetTemaById(id);
-                        const prog     = _intGetProgress(id);
-                        const isCustom = id.startsWith('int_custom_');
-
-                        return `<div class="int-tema-card p-3 rounded-xl border mb-2 bg-white transition hover:shadow-sm"
+                    temasHtml = semObj.temas.map(id => {
+                        const t    = _intGetTemaById(id);
+                        const p    = _intGetProgress(id);
+                        const isC  = id.startsWith('int_custom_');
+                        const acertoStr = p.questoes > 0 ? Math.round(p.acertos/p.questoes*100)+'%' : '';
+                        return `<div class="flex items-start gap-3 p-3 rounded-xl border mb-2 bg-white hover:shadow-sm transition"
                             style="border-color:#fde68a;border-left:3px solid #d97706;"
                             draggable="true"
                             ondragstart="window._intDragStart(event,'${id}',${sIdx})"
                             ondragover="event.preventDefault()"
                             ondrop="window._intDrop(event,${sIdx})">
-                            <div class="flex items-start gap-3">
-                                <div class="flex flex-col items-center gap-1 shrink-0 pt-0.5">
-                                    <i class="fas fa-grip-vertical text-slate-300 text-xs cursor-grab"></i>
-                                    <input type="checkbox" class="w-4 h-4 rounded accent-amber-500 cursor-pointer"
-                                        ${prog.done ? 'checked' : ''}
-                                        onchange="window._intToggleDone('${id}')">
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="font-bold text-sm text-slate-900 leading-tight ${prog.done ? 'line-through text-slate-400' : ''}">${temaData.tema}</div>
-                                    <div class="text-[9px] font-bold uppercase tracking-widest mt-0.5" style="color:#d97706;">${temaData.area}</div>
-                                    ${prog.done ? `
-                                    <div class="flex items-center gap-2 mt-2">
-                                        <div class="flex items-center gap-1 bg-slate-50 rounded-lg px-2 py-1 border border-slate-200">
-                                            <span class="text-[9px] text-slate-500 font-bold">Q:</span>
-                                            <input type="number" min="0" value="${prog.questoes || 0}"
-                                                onchange="window._intSaveQA('${id}','questoes',this.value)"
-                                                class="w-10 text-xs font-bold text-slate-700 bg-transparent outline-none">
-                                        </div>
-                                        <div class="flex items-center gap-1 bg-slate-50 rounded-lg px-2 py-1 border border-slate-200">
-                                            <span class="text-[9px] text-slate-500 font-bold">✓:</span>
-                                            <input type="number" min="0" value="${prog.acertos || 0}"
-                                                onchange="window._intSaveQA('${id}','acertos',this.value)"
-                                                class="w-10 text-xs font-bold text-slate-700 bg-transparent outline-none">
-                                        </div>
-                                        ${prog.questoes > 0 ? `<span class="text-[9px] font-bold" style="color:#d97706;">${Math.round((prog.acertos/prog.questoes)*100)}%</span>` : ''}
-                                    </div>` : ''}
-                                </div>
-                                ${isCustom ? `<button onclick="window._intRemoveTema('${id}',${sIdx})" class="text-red-400 hover:text-red-600 text-xs shrink-0"><i class="fas fa-times"></i></button>` : ''}
+                            <div class="flex flex-col items-center gap-1 shrink-0 pt-0.5">
+                                <i class="fas fa-grip-vertical text-slate-300 text-xs cursor-grab"></i>
+                                <input type="checkbox" class="w-4 h-4 rounded cursor-pointer" style="accent-color:#d97706;"
+                                    ${p.done?'checked':''}
+                                    onchange="window._intToggleDone('${id}')">
                             </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="font-bold text-sm text-slate-900 leading-tight ${p.done?'line-through text-slate-400':''}">${t.tema}</div>
+                                <div class="text-[9px] font-black uppercase tracking-widest mt-0.5" style="color:#d97706;">${t.area}</div>
+                                ${p.done ? `<div class="flex items-center gap-2 mt-2 flex-wrap">
+                                    <div class="flex items-center gap-1 bg-slate-50 rounded-lg px-2 py-1 border border-slate-200">
+                                        <span class="text-[9px] text-slate-500 font-bold">Q feitas:</span>
+                                        <input type="number" min="0" value="${p.questoes||0}"
+                                            onchange="window._intSaveQA('${id}','questoes',this.value)"
+                                            class="w-12 text-xs font-bold text-slate-700 bg-transparent outline-none">
+                                    </div>
+                                    <div class="flex items-center gap-1 bg-slate-50 rounded-lg px-2 py-1 border border-slate-200">
+                                        <span class="text-[9px] text-slate-500 font-bold">Acertos:</span>
+                                        <input type="number" min="0" value="${p.acertos||0}"
+                                            onchange="window._intSaveQA('${id}','acertos',this.value)"
+                                            class="w-12 text-xs font-bold text-slate-700 bg-transparent outline-none">
+                                    </div>
+                                    ${acertoStr ? `<span class="text-xs font-black" style="color:#d97706;">${acertoStr} acerto</span>` : ''}
+                                </div>` : ''}
+                            </div>
+                            ${isC ? `<button onclick="window._intRemoveTema('${id}',${sIdx})" class="text-red-400 hover:text-red-600 text-xs shrink-0 ml-1"><i class="fas fa-times"></i></button>` : ''}
                         </div>`;
                     }).join('');
 
+                    // Busca inline de temas
                     temasHtml += `
-                        <button onclick="window._intOpenAddPanel(${sIdx})"
-                            class="w-full py-2.5 rounded-xl border border-dashed text-xs font-bold transition mt-1"
-                            style="border-color:#d97706;color:#d97706;background:#fffbeb;">
-                            <i class="fas fa-plus mr-1"></i> Adicionar tema do banco
-                        </button>`;
+                        <div id="int-add-zone-${sIdx}" class="mt-2">
+                            <button onclick="window._intOpenAddZone(${sIdx})"
+                                class="w-full py-2.5 rounded-xl border border-dashed text-xs font-bold transition"
+                                style="border-color:#d97706;color:#d97706;background:#fffbeb;">
+                                <i class="fas fa-plus mr-1"></i> Adicionar tema do banco
+                            </button>
+                            <div id="int-add-results-${sIdx}" class="hidden mt-2">
+                                <input type="text" placeholder="Buscar tema..."
+                                    oninput="window._intSearchAdd(this.value,${sIdx})"
+                                    class="w-full border border-amber-300 rounded-xl px-3 py-2 text-xs outline-none focus:border-amber-500 mb-2">
+                                <div id="int-add-list-${sIdx}" class="max-h-36 overflow-y-auto space-y-1"></div>
+                            </div>
+                        </div>`;
                 }
 
-                return `<div class="rounded-2xl border overflow-hidden transition-all"
-                    style="border-color:${expanded ? '#d97706' : '#fde68a'};"
-                    ondragover="event.preventDefault()"
-                    ondrop="window._intDrop(event,${sIdx})">
-
-                    <!-- Header da semana (clicável) -->
-                    <div class="flex items-center justify-between px-4 py-3 cursor-pointer select-none transition"
-                        style="background:${expanded ? '#fffbeb' : 'white'};"
+                return `<div class="rounded-2xl border overflow-hidden mb-3 transition-all"
+                    style="border-color:${expanded?'#d97706':'#fde68a'};"
+                    ondragover="event.preventDefault()" ondrop="window._intDrop(event,${sIdx})">
+                    <div class="flex items-center justify-between px-5 py-4 cursor-pointer select-none"
+                        style="background:${expanded?'#fffbeb':'white'};"
                         onclick="window._intToggleSem(${sIdx})">
                         <div class="flex items-center gap-3">
-                            <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-black shrink-0"
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-black shrink-0"
                                 style="background:#d97706;">${semObj.semana}</div>
                             <div>
                                 <div class="font-bold text-sm text-slate-900">${titulo}</div>
-                                <div class="text-[10px] text-slate-400 font-medium">${totalCount} temas</div>
+                                <div class="w-24 bg-slate-200 rounded-full h-1 mt-1">
+                                    <div class="h-1 rounded-full" style="width:${pct}%;background:#d97706;"></div>
+                                </div>
                             </div>
                         </div>
-                        <div class="flex items-center gap-3">
-                            ${statusIcon}
-                            <i class="fas fa-chevron-${expanded ? 'up' : 'down'} text-slate-400 text-xs"></i>
+                        <div class="flex items-center gap-2">
+                            ${statusBadge}
+                            <i class="fas fa-chevron-${expanded?'up':'down'} text-slate-400 text-xs ml-1"></i>
                         </div>
                     </div>
-
-                    <!-- Conteúdo expansível -->
                     ${expanded ? `<div class="px-4 pb-4 pt-2" style="background:#fffbeb;">${temasHtml}</div>` : ''}
                 </div>`;
             }).join('');
-        }
 
-        // ── Toggle semana no acordeão ──
+            content.innerHTML = `
+            <div class="max-w-3xl mx-auto pb-12 fade-enter">
+                <!-- Header dourado -->
+                <div class="rounded-3xl p-6 mb-6 text-white" style="background:linear-gradient(135deg,#78350f,#92400e);">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span style="font-size:1.4rem;">⚡</span>
+                                <h1 class="text-2xl font-black" style="font-family:'Fraunces',serif;">Intensivão Final</h1>
+                            </div>
+                            <div class="text-amber-200 text-xs">Iniciado em ${dataFmt} · ${stats.done}/${stats.total} temas concluídos</div>
+                        </div>
+                        <button onclick="window.switchView('homepage')"
+                            class="flex items-center gap-1.5 text-amber-200 hover:text-white text-xs font-bold transition px-3 py-1.5 rounded-lg hover:bg-white/10">
+                            <i class="fas fa-arrow-left text-xs"></i> Voltar
+                        </button>
+                    </div>
+                    <!-- Barra de progresso -->
+                    <div class="flex justify-between text-[10px] font-bold text-amber-200 mb-1.5">
+                        <span>${stats.done}/${stats.total} temas</span>
+                        <span>${stats.pct}%</span>
+                    </div>
+                    <div class="w-full rounded-full h-2.5 mb-3" style="background:rgba(255,255,255,0.15);">
+                        <div class="h-2.5 rounded-full transition-all duration-700" style="width:${stats.pct}%;background:#fcd34d;"></div>
+                    </div>
+                    <div class="flex gap-5 text-xs text-amber-200">
+                        <span>📝 <strong class="text-white">${stats.questoes}</strong> questões</span>
+                        <span>🎯 <strong class="text-white">${stats.acerto}%</strong> acerto</span>
+                    </div>
+                </div>
+
+                <!-- Acordeão de semanas -->
+                ${accordionHtml}
+            </div>`;
+        };
+
+        window.iniciarIntensivao = function() {
+            const el   = document.getElementById('int-start-date');
+            const data = el ? el.value : new Date().toISOString().split('T')[0];
+            _intEnsureState();
+            window.state.intensivao.ativo      = true;
+            window.state.intensivao.dataInicio = data;
+            window.triggerSave();
+            window.renderIntensivao();
+        };
+
         window._intToggleSem = function(sIdx) {
             window._intExpandedSem = window._intExpandedSem === sIdx ? null : sIdx;
-            _intRenderAccordion();
+            window.renderIntensivao();
         };
 
-        // ── Toggle tema concluído ──
-        window._intToggleDone = function(temaId) {
-            const p = _intGetProgress(temaId);
+        window._intToggleDone = function(id) {
+            const p = _intGetProgress(id);
             p.done  = !p.done;
             window.triggerSave();
-            _intUpdateHeader();
-            _intRenderAccordion();
+            window.renderIntensivao();
         };
 
-        // ── Salvar questões/acertos ──
-        window._intSaveQA = function(temaId, field, val) {
-            const p   = _intGetProgress(temaId);
-            p[field]  = parseInt(val) || 0;
+        window._intSaveQA = function(id, field, val) {
+            _intGetProgress(id)[field] = parseInt(val)||0;
             window.triggerSave();
-            _intUpdateHeader();
         };
 
-        // ── Drag-and-drop entre semanas ──
-        window._intDragStart = function(event, temaId, fromSemIdx) {
-            window._intDragTemaId  = temaId;
-            window._intDragFromSem = fromSemIdx;
+        window._intDragStart = function(event, id, fromIdx) {
+            window._intDragTemaId  = id;
+            window._intDragFromSem = fromIdx;
             event.dataTransfer.effectAllowed = 'move';
         };
 
-        window._intDrop = function(event, toSemIdx) {
+        window._intDrop = function(event, toIdx) {
             event.preventDefault();
-            const id      = window._intDragTemaId;
-            const fromIdx = window._intDragFromSem;
-            if (id === null || fromIdx === toSemIdx) return;
-
+            const id  = window._intDragTemaId;
+            const frm = window._intDragFromSem;
+            if (!id || frm === toIdx) return;
             _intEnsureState();
-            const semanas = window.state.intensivao.semanas;
-
-            // Remove da semana de origem
-            semanas[fromIdx].temas = semanas[fromIdx].temas.filter(t => t !== id);
-
-            // Adiciona à semana destino
-            if (!semanas[toSemIdx].temas) semanas[toSemIdx].temas = [];
-            semanas[toSemIdx].temas.push(id);
-
+            const sems = window.state.intensivao.semanas;
+            sems[frm].temas = sems[frm].temas.filter(t => t !== id);
+            if (!sems[toIdx].temas) sems[toIdx].temas = [];
+            sems[toIdx].temas.push(id);
             window._intDragTemaId  = null;
             window._intDragFromSem = null;
-            window._intExpandedSem = toSemIdx; // abre a semana destino
+            window._intExpandedSem = toIdx;
             window.triggerSave();
-            _intRenderAccordion();
+            window.renderIntensivao();
         };
 
-        // ── Adicionar tema do banco ──
-        window._intOpenAddPanel = function(semIdx) {
-            window._intAddTargetSem = semIdx;
-            const panel = document.getElementById('int-add-panel');
-            panel.classList.remove('hidden');
-            document.getElementById('int-add-sem-label').textContent = semIdx + 1;
-            document.getElementById('int-add-search').value = '';
-            document.getElementById('int-add-results').innerHTML = '';
-            document.getElementById('int-add-search').focus();
+        window._intOpenAddZone = function(sIdx) {
+            const zone = document.getElementById(`int-add-results-${sIdx}`);
+            if (zone) zone.classList.toggle('hidden');
+            window._intAddTargetSem = sIdx;
         };
 
-        window.renderIntAddResults = function(query) {
-            const bd  = window.bancoDeMaterias || [];
-            const res = document.getElementById('int-add-results');
-            if (!query || query.length < 2) { res.innerHTML = ''; return; }
-            const lq  = query.toLowerCase();
+        window._intSearchAdd = function(query, sIdx) {
+            const list = document.getElementById(`int-add-list-${sIdx}`);
+            if (!list) return;
+            const bd = window.bancoDeMaterias || [];
+            if (!query || query.length < 2) { list.innerHTML = ''; return; }
+            const lq = query.toLowerCase();
             const hits = bd.filter(t =>
-                t.tema.toLowerCase().includes(lq) ||
-                (t.subarea || '').toLowerCase().includes(lq)
+                t.tema.toLowerCase().includes(lq) || (t.subarea||'').toLowerCase().includes(lq)
             ).slice(0, 6);
-
-            if (!hits.length) {
-                res.innerHTML = '<div class="text-[10px] text-slate-400 italic px-2">Nenhum tema encontrado.</div>';
-                return;
-            }
-            res.innerHTML = hits.map((t, i) => `
-                <div class="flex items-center justify-between px-3 py-2 bg-white rounded-lg border border-amber-100 hover:border-amber-300 transition cursor-pointer"
-                    onclick="window._intAddTema('${t.tema.replace(/'/g,"\'")}','${(t.area||'').replace(/'/g,"\'")}')">
+            list.innerHTML = hits.map(t =>
+                `<div class="flex items-center justify-between px-3 py-2 bg-white rounded-lg border border-amber-100 hover:border-amber-300 transition cursor-pointer"
+                    onclick="window._intAddTema('${t.tema.replace(/'/g,"\'")}','${(t.area||'').replace(/'/g,"\'")}',${sIdx})">
                     <div>
                         <div class="text-xs font-bold text-slate-800">${t.tema}</div>
-                        <div class="text-[9px] text-amber-700 font-bold">${t.area}</div>
+                        <div class="text-[9px] font-bold" style="color:#d97706;">${t.area}</div>
                     </div>
                     <i class="fas fa-plus text-amber-500 text-xs ml-2 shrink-0"></i>
-                </div>`).join('');
+                </div>`
+            ).join('') || '<div class="text-[10px] text-slate-400 italic px-2">Nenhum tema encontrado.</div>';
         };
 
-        window._intAddTema = function(tema, area) {
+        window._intAddTema = function(tema, area, sIdx) {
             _intEnsureState();
-            const st      = window.state.intensivao;
-            const newId   = 'int_custom_' + Date.now();
+            const st    = window.state.intensivao;
+            const newId = 'int_custom_' + Date.now();
             if (!st.customTemas) st.customTemas = [];
-            st.customTemas.push({ id: newId, tema, area });
-            if (st.semanas[window._intAddTargetSem]) {
-                st.semanas[window._intAddTargetSem].temas.push(newId);
-            }
-            document.getElementById('int-add-panel').classList.add('hidden');
+            st.customTemas.push({id:newId, tema, area});
+            if (st.semanas[sIdx]) st.semanas[sIdx].temas.push(newId);
             window.triggerSave();
-            _intRenderAccordion();
-            _intUpdateHeader();
+            window.renderIntensivao();
         };
 
-        window._intRemoveTema = function(temaId, semIdx) {
+        window._intRemoveTema = function(id, sIdx) {
             _intEnsureState();
             const st = window.state.intensivao;
-            st.semanas[semIdx].temas = st.semanas[semIdx].temas.filter(id => id !== temaId);
-            if (st.customTemas) {
-                st.customTemas = st.customTemas.filter(t => t.id !== temaId);
-            }
+            st.semanas[sIdx].temas = st.semanas[sIdx].temas.filter(t => t !== id);
+            if (st.customTemas) st.customTemas = st.customTemas.filter(t => t.id !== id);
             window.triggerSave();
-            _intRenderAccordion();
-            _intUpdateHeader();
+            window.renderIntensivao();
         };
-
-        // Fecha o modal ao clicar fora
-        document.getElementById('modal-intensivao').addEventListener('click', function(e) {
-            if (e.target === this) window.closeIntensivao();
-        });
 
         // ──────────────────────────────────────────────
         // LOOP PRINCIPAL — Pomodoro + tempo de foco
